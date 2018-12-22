@@ -28,7 +28,7 @@ script:
 deploy:
   provider: releases
   api_key: $GH_TOKEN
-  file: $BUILDNAME
+  file: $BUILDNAME.node
   skip_cleanup: true
   on:
     tags: true
