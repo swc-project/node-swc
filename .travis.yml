@@ -1,0 +1,49 @@
+language: node_js
+sudo: false
+
+
+install:
+  - node -v
+  - which node
+  - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
+  - sh /tmp/rustup.sh -y
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - source "$HOME/.cargo/env"
+  - yarn --ignore-scripts
+
+# Need to cache the whole `.cargo` directory to keep .crates.toml for
+# cargo-update to work
+cache:
+  directories:
+    - /home/travis/.cargo
+# But don't cache the cargo registry
+before_cache:
+  - rm -rf /home/travis/.cargo/registry
+
+
+script:
+  - neon build --release
+
+matrix:
+  include:
+    - os: linux
+      node_js: 6
+
+    - os: osx
+      osx_image: xcode9.2
+      node_js: 6
+
+    - os: linux
+      node_js: 8
+
+    - os: osx
+      osx_image: xcode9.2
+      node_js: 8
+
+    - os: linux
+      node_js: 10
+
+    - os: osx
+      osx_image: xcode9.2
+      node_js: 10
+
