@@ -40,29 +40,38 @@ branches:
 matrix:
   include:
     - os: linux
-      env: BUILDNAME=node-48-linux-x86_64
+      env: BUILDNAME=node-v48-linux-x86_64
       node_js: 6
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=node-48-darwin-x64
+      env: BUILDNAME=node-v48-darwin-x64
       node_js: 6
 
     - os: linux
-      env: BUILDNAME=node-57-linux-x86_64
+      env: BUILDNAME=node-v57-linux-x86_64
       node_js: 8
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=node-57-darwin-x64
+      env: BUILDNAME=node-v57-darwin-x64
       node_js: 8
 
     - os: linux
-      env: BUILDNAME=node-x64-linux-x86_64
+      env: BUILDNAME=node-v64-linux-x86_64
       node_js: 10
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=node-64-darwin-x64
+      env: BUILDNAME=node-v64-darwin-x64
       node_js: 10
+
+    - os: linux
+      env: BUILDNAME=node-v67-linux-x86_64
+      node_js: 11
+
+    - os: osx
+      osx_image: xcode9.2
+      env: BUILDNAME=node-v67-darwin-x64
+      node_js: 11
 
