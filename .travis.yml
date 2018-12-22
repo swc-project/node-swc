@@ -23,27 +23,42 @@ before_cache:
 
 script:
   - neon build --release
+  - mv native/index.node $BUILDNAME.node
+
+deploy:
+  provider: releases
+  api_key: $GH_TOKEN
+  file: $BUILDNAME
+  skip_cleanup: true
+  on:
+    tags: true
 
 matrix:
   include:
     - os: linux
+      env: BUILDNAME=linux-6
       node_js: 6
 
     - os: osx
       osx_image: xcode9.2
+      env: BUILDNAME=darwin-6      
       node_js: 6
 
     - os: linux
+      env: BUILDNAME=linux-8
       node_js: 8
 
     - os: osx
       osx_image: xcode9.2
+      env: BUILDNAME=darwin-8
       node_js: 8
 
     - os: linux
+      env: BUILDNAME=linux-10
       node_js: 10
 
     - os: osx
       osx_image: xcode9.2
+      env: BUILDNAME=darwin-10
       node_js: 10
 
