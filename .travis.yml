@@ -33,6 +33,10 @@ deploy:
   on:
     tags: true
 
+branches:
+  except:
+  - master
+  
 matrix:
   include:
     - os: linux
