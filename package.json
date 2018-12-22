@@ -1,16 +1,18 @@
 {
   "name": "swc",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.6",
   "description": "Super-fast alternative for babel",
   "main": "lib/index.js",
   "author": "강동윤 <kdy1@outlook.kr>",
   "license": "MIT",
   "dependencies": {
-    "neon-cli": "^0.2.0"
+    "neon-cli": "^0.2.0",
+    "node-pre-gyp": "^0.12.0"
   },
   "types": "./lib/index.d.ts",
   "scripts": {
-    "install": "neon build --release"
+    "install": "node-pre-gyp install --fallback-to-build=false || neon build --release",
+    "build": "neon build --release"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
@@ -25,5 +27,12 @@
     "recast": "^0.16.1",
     "typescript": "^3.2.2",
     "typescript-eslint-parser": "^21.0.2"
+  },
+  "binary": {
+    "module_name": "index",
+    "host": "https://github.com",
+    "remote_path": "./swc-project/node-swc/releases/download/v{version}",
+    "package_name": "{node_abi}-{platform}-{arch}.node",
+    "module_path": "./native/"
   }
 }

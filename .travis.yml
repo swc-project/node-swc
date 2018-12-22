@@ -36,29 +36,29 @@ deploy:
 matrix:
   include:
     - os: linux
-      env: BUILDNAME=linux-6
+      env: BUILDNAME=node-48-linux-x86_64
       node_js: 6
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=darwin-6      
+      env: BUILDNAME=node-48-darwin-x64
       node_js: 6
 
     - os: linux
-      env: BUILDNAME=linux-8
+      env: BUILDNAME=node-57-linux-x86_64
       node_js: 8
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=darwin-8
+      env: BUILDNAME=node-57-darwin-x64
       node_js: 8
 
     - os: linux
-      env: BUILDNAME=linux-10
+      env: BUILDNAME=node-x64-linux-x86_64
       node_js: 10
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=darwin-10
+      env: BUILDNAME=node-64-darwin-x64
       node_js: 10
 
