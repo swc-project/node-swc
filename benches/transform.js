@@ -9,16 +9,20 @@ class Bar extends Foo {
   foo() {
     super.foo();
   }
-  bar() {}
+  async bar() {}
 }
 
-class Baz extends Foo {
+class Baz extends Bar {
   foo() {
     super.foo();
     this.baz()
   }
   baz() {
 
+  }
+  async other() {
+    this.baz()
+    await super.bar()
   }
 }
 
@@ -107,7 +111,10 @@ const PARSERS = [
     optimize: true,
   })],
   ['babel', '@babel/core', (module) => module.transformSync(SOURCE, {
-    presets: ["@babel/preset-env"]
+    presets: ["@babel/preset-env"],
+    // This does less work than swc's InlineGlobals pass, but it's ok.
+    // swc is faster than babel anyway.
+    plugins: ["transform-node-env-inline"],
   })],
 ];
 
