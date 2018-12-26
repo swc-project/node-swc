@@ -22,7 +22,7 @@ use swc::{
     ecmascript::{
         ast::{Expr, Module, ModuleItem, Stmt},
         codegen,
-        transforms::{compat, hygiene, simplifier, InlineGlobals,fixer},
+        transforms::{compat, fixer, hygiene, simplifier, InlineGlobals},
     },
     Compiler,
 };
@@ -204,12 +204,14 @@ fn transform_module(c: &Compiler, module: Module, options: TransformOption) -> M
 
     let module = module
         .fold_with(
-            &mut compat::es2017(&helpers)
+            &mut compat::es2018(&helpers)
+                .then(compat::es2017(&helpers))
                 .then(compat::es2016())
                 .then(compat::es2015(&helpers))
                 .then(compat::es3()),
         )
-        .fold_with(&mut hygiene()).fold_with(&mut fixer());
+        .fold_with(&mut hygiene())
+        .fold_with(&mut fixer());
 
     module.fold_with(&mut compat::helpers::InjectHelpers {
         cm: c.cm.clone(),
