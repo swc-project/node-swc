@@ -12,7 +12,7 @@
   },
   "types": "./lib/index.d.ts",
   "scripts": {
-    "install": "node scripts/install.js",
+    "install": "node scripts/install.js || neon build --release",
     "build": "neon build --release"
   },
   "devDependencies": {
