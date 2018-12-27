@@ -7,7 +7,7 @@ var eol = require('os').EOL,
     pkg = require('../package.json'),
     mkdir = require('mkdirp'),
     path = require('path'),
-    defaultBinaryDir = path.join(__dirname, '..', 'vendor'),
+    defaultBinaryDir = path.join(__dirname, '..', 'native'),
     trueCasePathSync = require('true-case-path');
 
 /**
@@ -304,7 +304,7 @@ function getBinaryPath() {
     } else if (pkg.nodeSassConfig && pkg.nodeSassConfig.binaryPath) {
         binaryPath = pkg.nodeSassConfig.binaryPath;
     } else {
-        binaryPath = path.join(getBinaryDir(), getBinaryName().replace(/_(?=binding\.node)/, '/'));
+        binaryPath = path.join(getBinaryDir(), 'index.node');
     }
 
     if (process.versions.modules < 46) {

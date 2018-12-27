@@ -27,7 +27,7 @@
     "esprima": "^4.0.1",
     "flow-parser": "^0.89.0",
     "recast": "^0.16.1",
-    "swc": "^1.0.0-alpha.9",
+    "swc": "^1.0.0-alpha.10",
     "typescript": "^3.2.2",
     "typescript-eslint-parser": "^21.0.2"
   }
