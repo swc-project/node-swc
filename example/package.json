@@ -1,0 +1,22 @@
+{
+  "name": "swc-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swc-project/node-swc.git"
+  },
+  "author": "강동윤 <kdy1@outlook.kr>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swc-project/node-swc/issues"
+  },
+  "homepage": "https://github.com/swc-project/node-swc#readme",
+  "devDependencies": {
+    "swc": "^1.0.0-alpha.12"
+  }
+}
