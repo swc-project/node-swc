@@ -14,6 +14,7 @@ extern crate swc;
 use fnv::FnvHashMap;
 use neon::prelude::*;
 use std::{collections::HashMap, env, path::Path, sync::Arc};
+use swc::ecmascript::parser::Syntax;
 use swc::{
     atoms::JsWord,
     common::{
@@ -22,31 +23,16 @@ use swc::{
     ecmascript::{
         ast::{Expr, Module, ModuleItem, Stmt},
         codegen,
-        transforms::{compat, fixer, hygiene, simplifier, InlineGlobals},
+        transforms::{compat, fixer, helpers, hygiene, react, simplifier, InlineGlobals},
     },
     Compiler,
 };
 
-fn parse(mut cx: FunctionContext) -> JsResult<JsObject> {
-    let source = cx.argument::<JsString>(0)?;
-
-    let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-
-    let handler = Handler::with_tty_emitter(
-        common::errors::ColorConfig::Always,
-        true,
-        false,
-        Some(cm.clone()),
-    );
-
-    let c = Compiler::new(cm.clone(), handler);
-    let _module = c.parse_js(FileName::Anon(0), &source.value()).unwrap();
-
-    Ok(cx.empty_object())
-}
-
 #[derive(Default, Deserialize)]
 struct TransformOption {
+    #[serde(default)]
+    syntax: Syntax,
+    react: react::Options,
     optimize: bool,
     globals: Option<GlobalPassOption>,
 }
@@ -72,7 +58,11 @@ impl GlobalPassOption {
                 };
 
                 let mut module = c
-                    .parse_js(FileName::Custom(format!("GLOBAL_{}", k)), &v)
+                    .parse_js(
+                        FileName::Custom(format!("GLOBAL_{}", k)),
+                        Default::default(),
+                        &v,
+                    )
                     .unwrap_or_else(|err| panic!("failed to parse globals.{}: {:?}", k, err));
                 let expr = match module.body.pop().unwrap() {
                     ModuleItem::Stmt(Stmt::Expr(box expr)) => expr,
@@ -94,7 +84,7 @@ impl GlobalPassOption {
 
 fn transform(mut cx: FunctionContext) -> JsResult<JsObject> {
     let source = cx.argument::<JsString>(0)?;
-    let options = match cx.argument_opt(1) {
+    let options: TransformOption = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
         None => Default::default(),
     };
@@ -110,7 +100,7 @@ fn transform(mut cx: FunctionContext) -> JsResult<JsObject> {
 
     let c = Compiler::new(cm.clone(), handler);
     let module = c
-        .parse_js(FileName::Anon(0), &source.value())
+        .parse_js(FileName::Anon(0), options.syntax, &source.value())
         .expect("failed to parse module");
     let module = c.run(|| transform_module(&c, module, options));
 
@@ -140,7 +130,7 @@ fn transform(mut cx: FunctionContext) -> JsResult<JsObject> {
 
 fn transform_file(mut cx: FunctionContext) -> JsResult<JsObject> {
     let path = cx.argument::<JsString>(0)?;
-    let options = match cx.argument_opt(1) {
+    let options: TransformOption = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
         None => Default::default(),
     };
@@ -156,7 +146,7 @@ fn transform_file(mut cx: FunctionContext) -> JsResult<JsObject> {
 
     let c = Compiler::new(cm.clone(), handler);
     let module = c
-        .parse_js_file(Path::new(&path.value()))
+        .parse_js_file(options.syntax, Path::new(&path.value()))
         .expect("failed to parse module");
     let module = c.run(|| transform_module(&c, module, options));
 
@@ -185,7 +175,7 @@ fn transform_file(mut cx: FunctionContext) -> JsResult<JsObject> {
 }
 
 fn transform_module(c: &Compiler, module: Module, options: TransformOption) -> Module {
-    let helpers = Arc::new(compat::helpers::Helpers::default());
+    let helpers = Arc::new(helpers::Helpers::default());
 
     let module = {
         let opts = if let Some(opts) = options.globals {
@@ -194,6 +184,12 @@ fn transform_module(c: &Compiler, module: Module, options: TransformOption) -> M
             Default::default()
         };
         module.fold_with(&mut opts.build(c))
+    };
+
+    let module = if options.syntax.jsx() {
+        module.fold_with(&mut react::react(c.cm.clone(), options.react, helpers.clone()))
+    } else {
+        module
     };
 
     let module = if options.optimize {
@@ -213,14 +209,13 @@ fn transform_module(c: &Compiler, module: Module, options: TransformOption) -> M
         .fold_with(&mut hygiene())
         .fold_with(&mut fixer());
 
-    module.fold_with(&mut compat::helpers::InjectHelpers {
+    module.fold_with(&mut helpers::InjectHelpers {
         cm: c.cm.clone(),
         helpers: helpers.clone(),
     })
 }
 
 register_module!(mut cx, {
-    cx.export_function("parse", parse)?;
     cx.export_function("transform", transform)?;
     cx.export_function("transformFileSync", transform_file)?;
     Ok(())
