@@ -9,7 +9,7 @@ install:
   - sh /tmp/rustup.sh --default-toolchain nightly -y
   - export PATH="$HOME/.cargo/bin:$PATH"
   - source "$HOME/.cargo/env"
-  - yarn --ignore-scripts
+  - npm install ignore-scripts
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
 # cargo-update to work
