@@ -32,6 +32,7 @@ use swc::{
 struct TransformOption {
     #[serde(default)]
     syntax: Syntax,
+    #[serde(default)]
     react: react::Options,
     optimize: bool,
     globals: Option<GlobalPassOption>,
