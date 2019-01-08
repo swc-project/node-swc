@@ -32,7 +32,7 @@ install:
 build: false
 
 test_script:
-  - neon build --release
+  - npx neon build --release
 
 cache:
   - target
