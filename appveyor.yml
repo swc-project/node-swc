@@ -27,12 +27,12 @@ install:
   - rustup show
   - rustc -V
   - cargo -V
-  - npm install neon-cli
+  - npm install -g neon-cli
 
 build: false
 
 test_script:
-  - npx neon build --release
+  - neon build --release
 
 cache:
   - target
