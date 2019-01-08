@@ -27,8 +27,10 @@ install:
   - rustc -V
   - cargo -V
 
-build:
- - neon build --release
+build: false
+
+test_script:
+  - neon build --release
 
 cache:
   - target
