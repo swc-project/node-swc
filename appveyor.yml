@@ -2,6 +2,7 @@ os: Visual Studio 2015
 
 environment:
   RUST_BACKTRACE: 1
+  RUSTFLAGS: "--cfg procmacro2_semver_exempt"
   matrix:
     - PLATFORM: x64
       NODEJS_VERSION: "11"
@@ -37,3 +38,15 @@ test_script:
 cache:
   - target
   - C:\Users\appveyor\.cargo\registry
+
+deploy:
+  release: myproduct-v$(appveyor_build_version)
+  description: 'Prebuilt binaries'
+  provider: GitHub
+  auth_token:
+    secure: <your encrypted token> # your encrypted token from GitHub
+  artifact: index.node
+  draft: false
+  prerelease: false
+  on:
+    APPVEYOR_REPO_TAG: true  
