@@ -1,30 +1,67 @@
 
 declare module "swc" {
-    /**
-     * Options for trasnform.
-     */
-    export interface TransformOption {
-        readonly syntax?: Syntax;
+
+    export class Compiler {
+        constructor();
+
+        transformSync(src: string, options?: Config): Output;
+        transformFileSync(path: string, options?: Config): Output;
+    }
+
+    export interface Config {
+        readonly jsc?: JscConfig;
+    }
+
+    export interface JscConfig {
         /**
-         * Effective only if `syntax` supports jsx.
+         * Defaults to EsParserConfig
          */
-        readonly react?: ReactOptions,
+        readonly parser?: ParserConfig;
+    }
+
+    export type ParserConfig = TsParserConfig | EsParserConfig;
+    export interface TsParserConfig {
+        readonly syntax: "typescript";
         /**
          * Defaults to false.
          */
-        readonly optimize?: boolean;
-
-        readonly globals?: GlobalPassOption;
+        readonly tsx?: boolean;
+        /**
+         * Defaults to false.
+         */
+        readonly decorators?: boolean;
     }
 
-    export enum Syntax {
-        Es2019 = 'Es2019',
-        Jsx = 'Jsx',
-        // Typescript = 'Typescript',
-        // Tsx = 'Tsx',
+    export interface EsParserConfig {
+        readonly syntax: "ecmascript";
+        /**
+         * Defaults to false.
+         */
+        readonly jsc?: boolean;
+        readonly numericSeparator?: boolean;
+        readonly classPrivateProperty?: boolean;
+        readonly privateMethod?: boolean;
+        readonly classProperty?: boolean;
+        readonly functionBind?: boolean;
+        readonly decorators?: boolean;
+        readonly decoratorsBeforeExport?: boolean;
     }
 
-    export interface ReactOptions {
+    /**
+     * Options for trasnform.
+     */
+    export interface TransformConfig {
+        /**
+         * Effective only if `syntax` supports jsx.
+         */
+        readonly react?: ReactConfig,
+        /**
+         * Defaults to null, which skips optimizer pass.
+         */
+        readonly optimizer?: OptimizerConfig;
+    }
+
+    export interface ReactConfig {
         /**
          * Replace the function used when compiling JSX expressions.
          * 
@@ -61,6 +98,10 @@ declare module "swc" {
 
     }
 
+    export interface OptimizerConfig {
+        readonly globals?: GlobalPassOption;
+    }
+
     /**
      * Options for inline-global pass.
      */
@@ -84,6 +125,6 @@ declare module "swc" {
         readonly map: string;
     }
 
-    export function transform(src: string, options?: TransformOption): Output;
-    export function transformFileSync(path: string, options?: TransformOption): Output;
+    export function transformSync(src: string, options?: Config): Output;
+    export function transformFileSync(path: string, options?: Config): Output;
 }
