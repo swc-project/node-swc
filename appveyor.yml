@@ -4,16 +4,16 @@ environment:
   RUST_BACKTRACE: 1
   matrix:
     - PLATFORM: x64
-      NODEJS_VERSION: "6"
-      RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
-    - PLATFORM: x64
-      NODEJS_VERSION: "8"
+      NODEJS_VERSION: "11"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
     - PLATFORM: x64
       NODEJS_VERSION: "10"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
     - PLATFORM: x64
-      NODEJS_VERSION: "11"
+      NODEJS_VERSION: "8"
+      RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
+    - PLATFORM: x64
+      NODEJS_VERSION: "6"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
 
 install:
@@ -26,6 +26,7 @@ install:
   - rustup show
   - rustc -V
   - cargo -V
+  - npm install neon-cli
 
 build: false
 
