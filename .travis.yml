@@ -39,8 +39,12 @@ branches:
   
 matrix:
   include:
+    - os: windows
+      env: BUILDNAME=win32-x64-67
+      node_js: 11
+
     - os: linux
-      env: BUILDNAME=linux-x86_64-67
+      env: BUILDNAME=linux-x64-67
       node_js: 11
 
     - os: osx
@@ -48,8 +52,12 @@ matrix:
       env: BUILDNAME=darwin-x64-67
       node_js: 11
 
+    - os: windows
+      env: BUILDNAME=win32-x64-64
+      node_js: 10
+
     - os: linux
-      env: BUILDNAME=linux-x86_64-64
+      env: BUILDNAME=linux-x64-64
       node_js: 10
 
     - os: osx
@@ -57,8 +65,12 @@ matrix:
       env: BUILDNAME=darwin-x64-64
       node_js: 10
 
+    - os: windows
+      env: BUILDNAME=win32-x64-57
+      node_js: 8
+
     - os: linux
-      env: BUILDNAME=linux-x86_64-57
+      env: BUILDNAME=linux-x64-57
       node_js: 8
 
     - os: osx
@@ -66,8 +78,12 @@ matrix:
       env: BUILDNAME=darwin-x64-57
       node_js: 8
 
+    - os: windows
+      env: BUILDNAME=win32-x64-48
+      node_js: 6
+
     - os: linux
-      env: BUILDNAME=linux-x86_64-48
+      env: BUILDNAME=linux-x64-48
       node_js: 6
 
     - os: osx
