@@ -10,6 +10,7 @@ declare module "swc" {
 
     export interface Config {
         readonly jsc?: JscConfig;
+        readonly transform?: TransformConfig;
     }
 
     export interface JscConfig {
