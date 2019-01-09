@@ -43,7 +43,8 @@ install:
 build: false
 
 test_script:
-  - RUSTFLAGS="--cfg procmacro2_semver_exempt" neon build --release
+  - echo %RUSTFLAGS%
+  - neon build --release
 
 cache:
   - target
