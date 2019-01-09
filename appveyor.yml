@@ -2,20 +2,23 @@ os: Visual Studio 2015
 
 environment:
   RUST_BACKTRACE: 1
-  RUSTFLAGS: "--cfg procmacro2_semver_exempt"
   matrix:
     - PLATFORM: x64
       NODEJS_VERSION: "11"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
+      RUSTFLAGS: "--cfg procmacro2_semver_exempt"
     - PLATFORM: x64
       NODEJS_VERSION: "10"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
+      RUSTFLAGS: "--cfg procmacro2_semver_exempt"
     - PLATFORM: x64
       NODEJS_VERSION: "8"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
+      RUSTFLAGS: "--cfg procmacro2_semver_exempt"
     - PLATFORM: x64
       NODEJS_VERSION: "6"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
+      RUSTFLAGS: "--cfg procmacro2_semver_exempt"
 
 install:
   - ps: Install-Product node $env:NODEJS_VERSION $env:PLATFORM
