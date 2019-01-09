@@ -1,6 +1,6 @@
 {
   "name": "swc",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "Super-fast alternative for babel",
   "main": "lib/index.js",
   "author": "강동윤 <kdy1@outlook.kr>",
