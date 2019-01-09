@@ -7,19 +7,26 @@ environment:
       NODEJS_VERSION: "11"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
+      BUILDNAME: windows-x86_64-48
+
     - PLATFORM: x64
       NODEJS_VERSION: "10"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
+      BUILDNAME: windows-x86_64-57
+
     - PLATFORM: x64
       NODEJS_VERSION: "8"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
+      BUILDNAME: windows-x86_64-64
+      
     - PLATFORM: x64
       NODEJS_VERSION: "6"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
-
+      BUILDNAME: windows-x86_64-67
+      
 install:
   - ps: Install-Product node $env:NODEJS_VERSION $env:PLATFORM
   - npm config set msvs_version 2015
@@ -36,7 +43,7 @@ install:
 build: false
 
 test_script:
-  - neon build --release
+  - RUSTFLAGS="--cfg procmacro2_semver_exempt" neon build --release
 
 cache:
   - target
