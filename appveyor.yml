@@ -7,25 +7,25 @@ environment:
       NODEJS_VERSION: "11"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
-      BUILDNAME: windows-x86_64-48
+      BUILDNAME: win32-x64-67
 
     - PLATFORM: x64
       NODEJS_VERSION: "10"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
-      BUILDNAME: windows-x86_64-57
+      BUILDNAME: win32-x64-64
 
     - PLATFORM: x64
       NODEJS_VERSION: "8"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
-      BUILDNAME: windows-x86_64-64
+      BUILDNAME: win32-x64-57
       
     - PLATFORM: x64
       NODEJS_VERSION: "6"
       RUST_TOOLCHAIN: nightly-x86_64-pc-windows-msvc
       RUSTFLAGS: "--cfg procmacro2_semver_exempt"
-      BUILDNAME: windows-x86_64-67
+      BUILDNAME: win32-x64-48
       
 install:
   - ps: Install-Product node $env:NODEJS_VERSION $env:PLATFORM

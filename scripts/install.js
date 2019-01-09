@@ -42,6 +42,7 @@ function download(url, dest, cb) {
             '      export HTTP_PROXY=http://example.com:1234', eol, eol,
             'or configure npm proxy via', eol, eol,
             '      npm config set proxy http://example.com:8080'].join(''));
+        process.exit(1);
     };
 
     var successful = function (response) {
