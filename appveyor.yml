@@ -46,6 +46,8 @@ test_script:
   - echo %RUSTFLAGS%
   - neon build --release
 
+# skip_non_tags: true
+
 cache:
   - target
   - C:\Users\appveyor\.cargo\registry

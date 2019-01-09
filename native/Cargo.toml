@@ -26,10 +26,10 @@ swc = { git = "https://github.com/swc-project/swc.git" }
 arc-swap = "0.3.7"
 
 [profile.bench]
-# lto = true
+lto = true
 
 [profile.release]
-# lto = true
+lto = true
 
 [patch.crates-io]
 # This reduces compile time
