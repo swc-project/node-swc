@@ -15,7 +15,7 @@ var proxy = require('./proxy'),
 module.exports = function () {
     var options = {
         rejectUnauthorized: false,
-        timeout: 60000,
+        timeout: 300000,
         headers: {
             'User-Agent': userAgent(),
         },
