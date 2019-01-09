@@ -32,10 +32,6 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-
-branches:
-  except:
-  - master
   
 matrix:
   include:
