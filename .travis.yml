@@ -4,9 +4,12 @@ sudo: false
 
 install:
   # Install lastest nvm
-  - rm -rf ~/.nvm 
-  - git clone https://github.com/creationix/nvm.git ~/.nvm
-  - source ~/.nvm/nvm.sh
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="$(pwd):$PATH" ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
   - nvm install 11
 
   # Install nightly rust
@@ -75,3 +78,6 @@ matrix:
     - os: osx
       osx_image: xcode9.2
       env: SWC_NAME=darwin-x64
+
+env:
+  - CARGO_INCREMENTAL=0
