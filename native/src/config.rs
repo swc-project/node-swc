@@ -13,7 +13,7 @@ use swc::{
 };
 
 /// `.swcrc` file
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default)]
     pub jsc: JscConfig,
@@ -21,7 +21,7 @@ pub struct Config {
 
 impl Config {}
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct JscConfig {
     #[serde(rename = "parser", default)]
     pub syntax: Syntax,
@@ -29,7 +29,7 @@ pub struct JscConfig {
     pub transform: TrnasformConfig,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct TrnasformConfig {
     #[serde(default)]
     pub react: react::Options,
@@ -37,13 +37,13 @@ pub struct TrnasformConfig {
     pub optimizer: Option<OptimizerConfig>,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct OptimizerConfig {
     #[serde(default)]
     pub globals: Option<GlobalPassOption>,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct GlobalPassOption {
     #[serde(default)]
     pub vars: FnvHashMap<String, String>,
