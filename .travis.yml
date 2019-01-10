@@ -44,14 +44,17 @@ script:
   - mv native/index.node $SWC_NAME-67.node
   # 10
   - nvm install 10
+  - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-64.node
   # 8
   - nvm install 8
+  - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-57.node
   # 6
   - nvm install 6
+  - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-48.node
 
