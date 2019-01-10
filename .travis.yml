@@ -4,7 +4,7 @@ sudo: false
 
 install:
   # Install lastest nvm
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="$(pwd):$PATH" ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
