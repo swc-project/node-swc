@@ -14,6 +14,7 @@ install:
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
 # cargo-update to work
 cache:
+  npm: true
   directories:
     - /home/travis/.cargo
 # But don't cache the cargo registry
