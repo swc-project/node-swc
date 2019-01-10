@@ -7,9 +7,11 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="$(pwd):$PATH" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then touch C:\\settings.txt ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
+  - nvm version
   - nvm install 11
 
   # Install nightly rust
