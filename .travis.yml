@@ -11,7 +11,8 @@ install:
 
   # Install nightly rust
   - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
-  - sh /tmp/rustup.sh --default-toolchain nightly -y
+  - sh /tmp/rustup.sh --default-toolchain none -y
+  - rustup toolchain install nightly-2019-01-09
   - export PATH="$HOME/.cargo/bin:$PATH"
   - source "$HOME/.cargo/env"
 
