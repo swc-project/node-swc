@@ -4,8 +4,8 @@ sudo: false
 
 install:
   # Install lastest nvm
-  - rm -rf ~/.nvm 
-  - git clone https://github.com/creationix/nvm.git ~/.nvm
+  # - rm -rf ~/.nvm 
+  # - git clone https://github.com/creationix/nvm.git ~/.nvm
   - source ~/.nvm/nvm.sh
   - nvm install 11
 
