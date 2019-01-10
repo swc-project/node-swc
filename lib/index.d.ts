@@ -10,7 +10,6 @@ declare module "swc" {
 
     export interface Config {
         readonly jsc?: JscConfig;
-        readonly transform?: TransformConfig;
     }
 
     export interface JscConfig {
@@ -18,6 +17,7 @@ declare module "swc" {
          * Defaults to EsParserConfig
          */
         readonly parser?: ParserConfig;
+        readonly transform?: TransformConfig;
     }
 
     export type ParserConfig = TsParserConfig | EsParserConfig;
