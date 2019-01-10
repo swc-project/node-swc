@@ -1,14 +1,21 @@
-language: node_js
+language: shell
 sudo: false
 
 
 install:
-  - node -v
-  - which node
+  # Install lastest nvm
+  - rm -rf ~/.nvm 
+  - git clone https://github.com/creationix/nvm.git ~/.nvm
+  - source ~/.nvm/nvm.sh
+  - nvm install 11
+
+  # Install nightly rust
   - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
   - sh /tmp/rustup.sh --default-toolchain nightly -y
   - export PATH="$HOME/.cargo/bin:$PATH"
   - source "$HOME/.cargo/env"
+
+  # Install other dependencies
   - npm install --ignore-scripts
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
@@ -21,15 +28,35 @@ cache:
 before_cache:
   - rm -rf /home/travis/.cargo/registry
 
+branches:	
+  except:	
+  - master
 
 script:
+  # 11
   - neon build --release
-  - mv native/index.node $BUILDNAME.node
+  - mv native/index.node $SWC_NAME-67.node
+  # 10
+  - nvm install 10
+  - neon build --release
+  - mv native/index.node $SWC_NAME-64.node
+  # 8
+  - nvm install 8
+  - neon build --release
+  - mv native/index.node $SWC_NAME-57.node
+  # 6
+  - nvm install 6
+  - neon build --release
+  - mv native/index.node $SWC_NAME-48.node
 
 deploy:
   provider: releases
   api_key: $GH_TOKEN
-  file: $BUILDNAME.node
+  file:
+    - $SWC_NAME-48.node
+    - $SWC_NAME-57.node
+    - $SWC_NAME-64.node
+    - $SWC_NAME-67.node
   skip_cleanup: true
   on:
     tags: true
@@ -37,57 +64,11 @@ deploy:
 matrix:
   include:
     - os: windows
-      env: BUILDNAME=win32-x64-67
-      node_js: 11
+      env: SWC_NAME=win32-x64
 
     - os: linux
-      env: BUILDNAME=linux-x64-67
-      node_js: 11
+      env: SWC_NAME=linux-x64
 
     - os: osx
       osx_image: xcode9.2
-      env: BUILDNAME=darwin-x64-67
-      node_js: 11
-
-    - os: windows
-      env: BUILDNAME=win32-x64-64
-      node_js: 10
-
-    - os: linux
-      env: BUILDNAME=linux-x64-64
-      node_js: 10
-
-    - os: osx
-      osx_image: xcode9.2
-      env: BUILDNAME=darwin-x64-64
-      node_js: 10
-
-    - os: windows
-      env: BUILDNAME=win32-x64-57
-      node_js: 8
-
-    - os: linux
-      env: BUILDNAME=linux-x64-57
-      node_js: 8
-
-    - os: osx
-      osx_image: xcode9.2
-      env: BUILDNAME=darwin-x64-57
-      node_js: 8
-
-    - os: windows
-      env: BUILDNAME=win32-x64-48
-      node_js: 6
-
-    - os: linux
-      env: BUILDNAME=linux-x64-48
-      node_js: 6
-
-    - os: osx
-      osx_image: xcode9.2
-      env: BUILDNAME=darwin-x64-48
-      node_js: 6
-
-env:
-  global:
-    secure: XdeatOosEItjdAZXQWOJDPGI8Q65ytt8jsV28zJjdC4N7YaZZOrg/QJzWcteZzjFvAUeLDi2KffcKIoZUTAhIUc/wLOeyGny3Z3i6Z9QA7+R2XDpGo8ZPxL7sdRPgXHoLbKXm4RfNgjv/NXDvcZoAGPtqynt4fFQ6XzpZ9DLtU5jO5ukU1N4trcy8KuDOmhUVRMeT/9zDaItnm/AQwa7B63iJt3pi6bzcNdx5o5mepvLjTeeBrcSPt5NmTPKlsq77u1OYD2euykmPyJsd3ZH7BnG3RjXmFhV7IfpOr0v7xf13AYfyVZTKdL5xAcGrm0Sz1quLQfpiKraaJPNVtLbpjjP9iR8sqz82iQBMe6PLPvX4v9GhKVcIceIxIGA5HXedPAGY/XpxWCUXr1VmEHbstvR7nvOT74sE+KDJ4JVxIPmlZfjnjya3TQDyxEd24O3SRXz6jC6XvsqTy7JhCAcFH2oT90wiehB+P9aiSqct1P8fCv4qgaoNBLhlolUCf6o8vxqXBRFGwTngytERyqJpyFfasIQXcqQiB8VLGVAuu78xXIDkJSLcPZOtR3as1KENcfNdcOA0NLuppwyKxGZkAgmt9/Wz64OIUt9S8mKPmbbWWtvMJ3wwNAtlHx7118RDqwaiAZWsBTO2bDizZvUi7gOW2rmLF3qNjfZe/QLP+A=
+      env: SWC_NAME=darwin-x64
