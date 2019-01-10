@@ -18,6 +18,7 @@ install:
   
   # Install other dependencies
   - npm install --ignore-scripts
+  - npm install -g neon-cli
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
 # cargo-update to work
