@@ -15,6 +15,7 @@ install:
   - export PATH="$HOME/.cargo/bin:$PATH"
   - source "$HOME/.cargo/env"
   - rustup toolchain install nightly-2019-01-09
+  - rustup default nightly-2019-01-09
   
   # Install other dependencies
   - npm install --ignore-scripts
