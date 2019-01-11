@@ -1,5 +1,5 @@
 /*!
- * node-sass: lib/extensions.js
+ * node-swc: lib/extensions.js
  */
 
 var eol = require('os').EOL,
@@ -82,7 +82,7 @@ function getHumanNodeVersion(abi) {
 }
 
 /**
- * Get a human readable description of where node-sass is running to support
+ * Get a human readable description of where node-swc is running to support
  * user error reporting when something goes wrong
  *
  * @param  {string} env - The name of the native bindings that is to be parsed
@@ -122,7 +122,7 @@ function getHumanEnvironment(env) {
 /**
  * Get the value of the binaries under the default path
  *
- * @return {Array} The currently installed node-sass bindings
+ * @return {Array} The currently installed node-swc bindings
  *
  * @api public
  */
@@ -137,7 +137,7 @@ function getInstalledBinaries() {
  * @param  {string} platform - The name of the OS platform(darwin, win32, etc...)
  * @param  {string} arch - The instruction set architecture of the Node environment
  * @param  {string} abi - The Node Application Binary Interface
- * @return {Boolean} True, if node-sass supports the current platform, false otherwise
+ * @return {Boolean} True, if node-swc supports the current platform, false otherwise
  *
  * @api public
  */
@@ -170,8 +170,8 @@ function getArgument(name, args) {
 
 /**
  * Get binary name.
- * If environment variable SASS_BINARY_NAME,
- * .npmrc variable sass_binary_name or
+ * If environment variable SWC_BINARY_NAME,
+ * .npmrc variable swc_binary_name or
  * process argument --binary-name is provided,
  * return it as is, otherwise make default binary
  * name: {platform}-{arch}-{v8 version}.node
@@ -191,7 +191,7 @@ function getBinaryName() {
     } else if (process.env.npm_config_swc_binary_name) {
         binaryName = process.env.npm_config_swc_binary_name;
     } else if (pkg.nodeSwcConfig && pkg.nodeSwcConfig.binaryName) {
-        binaryName = pkg.nodeSassConfig.binaryName;
+        binaryName = pkg.nodeSwcConfig.binaryName;
     } else {
         variant = getPlatformVariant();
         if (variant) {
@@ -210,20 +210,20 @@ function getBinaryName() {
 
 /**
  * Determine the URL to fetch binary file from.
- * By default fetch from the node-sass distribution
+ * By default fetch from the node-swc distribution
  * site on GitHub.
  *
  * The default URL can be overriden using
- * the environment variable SASS_BINARY_SITE,
- * .npmrc variable sass_binary_site or
- * or a command line option --sass-binary-site:
+ * the environment variable SWC_BINARY_SITE,
+ * .npmrc variable swc_binary_site or
+ * or a command line option --swc-binary-site:
  *
- *   node scripts/install.js --sass-binary-site http://example.com/
+ *   node scripts/install.js --swc-binary-site http://example.com/
  *
  * The URL should to the mirror of the repository
  * laid out as follows:
  *
- * SASS_BINARY_SITE/
+ * SWC_BINARY_SITE/
  *
  *  v3.0.0
  *  v3.0.0/freebsd-x64-14_binding.node
@@ -237,10 +237,10 @@ function getBinaryName() {
  */
 
 function getBinaryUrl() {
-    var site = getArgument('--sass-binary-site') ||
-        process.env.SASS_BINARY_SITE ||
-        process.env.npm_config_sass_binary_site ||
-        (pkg.nodeSassConfig && pkg.nodeSassConfig.binarySite) ||
+    var site = getArgument('--swc-binary-site') ||
+        process.env.SWC_BINARY_SITE ||
+        process.env.npm_config_swc_binary_site ||
+        (pkg.nodeSwcConfig && pkg.nodeSwcConfig.binarySite) ||
         'https://github.com/swc-project/node-swc/releases/download';
 
     return [site, 'v' + pkg.version, getBinaryName()].join('/');
@@ -248,9 +248,9 @@ function getBinaryUrl() {
 
 /**
  * Get binary dir.
- * If environment variable SASS_BINARY_DIR,
- * .npmrc variable sass_binary_dir or
- * process argument --sass-binary-dir is provided,
+ * If environment variable SWC_BINARY_DIR,
+ * .npmrc variable SWC_BINARY_DIR or
+ * process argument --swc-binary-dir is provided,
  * select it by appending binary name, otherwise
  * use default binary dir.
  * Once the primary selection is made, check if
@@ -263,14 +263,14 @@ function getBinaryUrl() {
 function getBinaryDir() {
     var binaryDir;
 
-    if (getArgument('--sass-binary-dir')) {
-        binaryDir = getArgument('--sass-binary-dir');
-    } else if (process.env.SASS_BINARY_DIR) {
-        binaryDir = process.env.SASS_BINARY_DIR;
-    } else if (process.env.npm_config_sass_binary_dir) {
-        binaryDir = process.env.npm_config_sass_binary_dir;
-    } else if (pkg.nodeSassConfig && pkg.nodeSassConfig.binaryDir) {
-        binaryDir = pkg.nodeSassConfig.binaryDir;
+    if (getArgument('--swc-binary-dir')) {
+        binaryDir = getArgument('--swc-binary-dir');
+    } else if (process.env.SWC_BINARY_DIR) {
+        binaryDir = process.env.SWC_BINARY_DIR;
+    } else if (process.env.npm_config_SWC_BINARY_DIR) {
+        binaryDir = process.env.npm_config_SWC_BINARY_DIR;
+    } else if (pkg.nodeSwcConfig && pkg.nodeSwcConfig.binaryDir) {
+        binaryDir = pkg.nodeSwcConfig.binaryDir;
     } else {
         binaryDir = defaultBinaryDir;
     }
@@ -280,9 +280,9 @@ function getBinaryDir() {
 
 /**
  * Get binary path.
- * If environment variable SASS_BINARY_PATH,
- * .npmrc variable sass_binary_path or
- * process argument --sass-binary-path is provided,
+ * If environment variable SWC_BINARY_PATH,
+ * .npmrc variable SWC_BINARY_PATH or
+ * process argument --swc-binary-path is provided,
  * select it by appending binary name, otherwise
  * make default binary path using binary name.
  * Once the primary selection is made, check if
@@ -295,14 +295,14 @@ function getBinaryDir() {
 function getBinaryPath() {
     var binaryPath;
 
-    if (getArgument('--sass-binary-path')) {
-        binaryPath = getArgument('--sass-binary-path');
-    } else if (process.env.SASS_BINARY_PATH) {
-        binaryPath = process.env.SASS_BINARY_PATH;
-    } else if (process.env.npm_config_sass_binary_path) {
-        binaryPath = process.env.npm_config_sass_binary_path;
-    } else if (pkg.nodeSassConfig && pkg.nodeSassConfig.binaryPath) {
-        binaryPath = pkg.nodeSassConfig.binaryPath;
+    if (getArgument('--swc-binary-path')) {
+        binaryPath = getArgument('--swc-binary-path');
+    } else if (process.env.SWC_BINARY_PATH) {
+        binaryPath = process.env.SWC_BINARY_PATH;
+    } else if (process.env.npm_config_SWC_BINARY_PATH) {
+        binaryPath = process.env.npm_config_SWC_BINARY_PATH;
+    } else if (pkg.nodeSwcConfig && pkg.nodeSwcConfig.binaryPath) {
+        binaryPath = pkg.nodeSwcConfig.binaryPath;
     } else {
         binaryPath = path.join(getBinaryDir(), 'index.node');
     }
@@ -326,7 +326,7 @@ function getBinaryPath() {
  */
 function getCachePathCandidates() {
     return [
-        process.env.npm_config_sass_binary_cache,
+        process.env.npm_config_swc_binary_cache,
         process.env.npm_config_cache,
     ].filter(function (_) { return _; });
 }
@@ -403,7 +403,7 @@ function hasBinary(binaryPath) {
 }
 
 /**
- * Get Sass version information
+ * Get Swc version information
  *
  * @api public
  */
@@ -411,7 +411,7 @@ function hasBinary(binaryPath) {
 function getVersionInfo(binding) {
     return [
         ['node-swc', pkg.version, '(Wrapper)', '[JavaScript]'].join('\t'),
-        // ['libsass  ', binding.libsassVersion(), '(Sass Compiler)', '[C/C++]'].join('\t'),
+        // ['libswc  ', binding.libswcVersion(), '(Swc Compiler)', '[C/C++]'].join('\t'),
     ].join(eol);
 }
 
