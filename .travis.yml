@@ -7,10 +7,13 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="$(pwd):$PATH" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then mkdir C:\\nvm-root ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then touch C:\\settings.txt ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm root C:\\nvm-root ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
+  # Install nodejs 11
   - nvm version
   - nvm install 11
 
@@ -18,7 +21,6 @@ install:
   - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
   - sh /tmp/rustup.sh --default-toolchain none -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - source "$HOME/.cargo/env"
   - rustup toolchain install nightly-2019-01-09
   - rustup default nightly-2019-01-09
   
@@ -46,16 +48,19 @@ script:
   - mv native/index.node $SWC_NAME-67.node
   # 10
   - nvm install 10
+  - nvm use 10
   - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-64.node
   # 8
   - nvm install 8
+  - nvm use 8
   - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-57.node
   # 6
   - nvm install 6
+  - nvm use 6
   - npm install -g neon-cli
   - neon build --release
   - mv native/index.node $SWC_NAME-48.node
