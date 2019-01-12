@@ -11,7 +11,6 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cp ./scripts/ci/settings.txt C:\\nvm-root\\ ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="/c/nvm-root:/c/Program Files/nodejs:$PATH" ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm root C:\\nvm-root ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cmd '/C nvm on' ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
@@ -20,6 +19,7 @@ install:
   - nvm install 10
   - nvm install 8
   - nvm install 6
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm on ; fi
   
 
   # Install nightly rust
