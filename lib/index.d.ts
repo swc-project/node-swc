@@ -129,11 +129,5 @@ declare module "swc" {
     export function transformSync(src: string, options?: Config): Output;
     export function transformFileSync(path: string, options?: Config): Output;
 
-    export const DEFAULT_EXTENSIONS = Object.freeze([
-        ".js",
-        ".jsx",
-        ".es6",
-        ".es",
-        ".mjs",
-    ]);
+    export const DEFAULT_EXTENSIONS: string[];
 }
