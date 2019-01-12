@@ -54,7 +54,7 @@ impl Compiler {
     }
 
     pub fn config_for_file(&self, path: &Path) -> Result<Option<Arc<Config>>, io::Error> {
-        assert!(!path.is_file());
+        assert!(path.is_file());
 
         let mut parent = path.parent();
         while let Some(dir) = parent {
