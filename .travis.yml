@@ -23,6 +23,10 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm on ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
+  - which node
+  - node --version
+  - which npm
+  - npm --version
   
 
   # Install nightly rust
