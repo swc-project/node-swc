@@ -38,7 +38,7 @@ echo 'Installing deps...'
 npm install --ignore-scripts
 echo 'Installing neon...'
 npm install -g neon-cli
-
+export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries'
 # Build it
 echo 'Building...'
 neon build --release
