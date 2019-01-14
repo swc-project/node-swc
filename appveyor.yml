@@ -15,10 +15,10 @@ install:
   - rustc -V
   - cargo -V
   # Install nvm4w
-  - curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip
+  - curl -o C:\\nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip
   - cp ./scripts/ci/settings.txt C:\\
   - mkdir C:\\nvm-root
-  - unzip /tmp/nvm.zip -d C:\\nvm-root
+  - unzip C:\\nvm.zip -d C:\\nvm-root
   - cp ./scripts/ci/settings.txt C:\\nvm-root\\
   - export NVM_SYMLINK='C:\\nodejs'
   - nvm root C:\\nvm-root
