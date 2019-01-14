@@ -22,7 +22,7 @@ echo 'Removed old files'
 export PATH="/c/nvm-root:/c/nodejs:$PATH"
 
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]] || [[ "$TRAVIS_OS_NAME" != "linux" ]]; then source ~/.nvm/nvm.sh ; fi
+if [[ "$TRAVIS_OS_NAME" == "osx" ]] || [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source ~/.nvm/nvm.sh ; fi
 
 
 echo "Switching to node v$1 ($2)"
