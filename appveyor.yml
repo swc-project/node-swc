@@ -3,7 +3,7 @@ os: Visual Studio 2015
 environment:
   matrix:
     - PLATFORM: x64
-    - SWC_NAME: win32-x64
+      SWC_NAME: win32-x64
 
 install:
   - curl -sSf -o rustup-init.exe https://win.rustup.rs
