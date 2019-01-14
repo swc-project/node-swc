@@ -2,7 +2,7 @@ os: Visual Studio 2015
 
 environment:
   matrix:
-    - PLATFORM: x64
+    - platform: x64
       SWC_NAME: win32-x64
 
 install:
