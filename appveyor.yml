@@ -1,6 +1,6 @@
 os: Visual Studio 2015
 environment:
-  RUSTFLAGS: --cfg procmacro2_semver_exempt
+  RUSTFLAGS: --cfg procmacro2_semver_exempt --cfg parallel_queries
   matrix:
     - platform: x64
       SWC_NAME: win32-x64
