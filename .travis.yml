@@ -16,10 +16,10 @@ install:
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
   - nvm version
-  - nvm install 11
-  - nvm install 10
-  - nvm install 8
-  - nvm install 6
+  - nvm install 11.6.0
+  - nvm install 10.15.0
+  - nvm install 8.15.0
+  - nvm install 6.16.0
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm on ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
@@ -52,10 +52,10 @@ branches:
   - master
 
 script:
-  - bash ./scripts/ci/build.sh 11 67
-  - bash ./scripts/ci/build.sh 10 64
-  - bash ./scripts/ci/build.sh 8 57
-  - bash ./scripts/ci/build.sh 6 48
+  - bash ./scripts/ci/build.sh 11.6.0 67
+  - bash ./scripts/ci/build.sh 10.15.0 64
+  - bash ./scripts/ci/build.sh 8.15.0 57
+  - bash ./scripts/ci/build.sh 6.16.0 48
 
 deploy:
   provider: releases
