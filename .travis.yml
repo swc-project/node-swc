@@ -26,7 +26,7 @@ install:
   - which node
   - node --version
   - which npm
-  - npm --version
+  # - npm --version
   
 
   # Install nightly rust
