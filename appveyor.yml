@@ -1,9 +1,9 @@
 os: Visual Studio 2015
 
 environment:
-  RUST_BACKTRACE: 1
   matrix:
     - PLATFORM: x64
+    - SWC_NAME: win32-x64
 
 install:
   - curl -sSf -o rustup-init.exe https://win.rustup.rs
@@ -20,7 +20,7 @@ install:
   - mkdir C:\\nvm-root
   - unzip C:\\nvm.zip -d C:\\nvm-root
   - cp ./scripts/ci/settings.txt C:\\nvm-root\\
-  - set NVM_SYMLINK='C:\\nodejs'
+  - set NVM_SYMLINK=C:\\nodejs
   - nvm root C:\\nvm-root
   - nvm version
   - nvm install 11.6.0

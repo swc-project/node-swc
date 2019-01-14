@@ -7,7 +7,7 @@
 #
 # e.g. build.sh 11 67
 ####################
-set -eu
+set -e
 
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
