@@ -20,7 +20,8 @@ rm -rf ./native/index.node \
 echo 'Removed old files'
 
 
-if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="/c/nvm-root:/c/nodejs:$PATH" ; fi
+export PATH="/c/nvm-root:/c/nodejs:$PATH"
+
 if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
 
 
