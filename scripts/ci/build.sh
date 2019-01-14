@@ -19,14 +19,19 @@ rm -rf ./native/index.node \
     ./native/target/release/deps/libneon-*
 echo 'Removed old files'
 
-
 export PATH="/c/nvm-root:/c/nodejs:$PATH"
+
 
 if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
 
 
 echo "Switching to node v$1 ($2)"
 nvm use $1
+
+if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
+if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
+which node && node --version
+which npm
 
 
 echo 'Installing deps...'
