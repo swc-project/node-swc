@@ -20,7 +20,7 @@ install:
   - mkdir C:\\nvm-root
   - unzip C:\\nvm.zip -d C:\\nvm-root
   - cp ./scripts/ci/settings.txt C:\\nvm-root\\
-  - export NVM_SYMLINK='C:\\nodejs'
+  - set NVM_SYMLINK='C:\\nodejs'
   - nvm root C:\\nvm-root
   - nvm version
   - nvm install 11.6.0
