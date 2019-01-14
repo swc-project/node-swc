@@ -50,6 +50,7 @@ before_cache:
 branches:	
   except:	
   - master
+  - windows
 
 script:
   - bash ./scripts/ci/build.sh 11.6.0 67

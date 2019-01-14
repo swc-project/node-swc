@@ -1,6 +1,6 @@
 os: Visual Studio 2015
-
 environment:
+  RUSTFLAGS: --cfg procmacro2_semver_exempt
   matrix:
     - platform: x64
       SWC_NAME: win32-x64
@@ -40,3 +40,15 @@ test_script:
 cache:
   - target
   - C:\Users\appveyor\.cargo\registry
+
+deploy:
+  # release: myproduct-v$(appveyor_build_version)
+  description: 'Automated release'
+  provider: GitHub
+  auth_token:
+    secure: EiuGSWjzYgvu70zRDHNQiO/aOdL23on7Et4CBUIP+Bw2nlcVe+Cp1ZOvAcaPaKGg
+  artifact: native/.*\.node/            # upload all NuGet packages to release assets
+  draft: false
+  prerelease: false
+  on:
+    APPVEYOR_REPO_TAG: true    
