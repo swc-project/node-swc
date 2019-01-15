@@ -51,4 +51,4 @@ jest
 
 
 mv native/index.node $SWC_NAME-$2.node
-
+ls -al .
