@@ -48,8 +48,9 @@ deploy:
   provider: GitHub
   auth_token:
     secure: EiuGSWjzYgvu70zRDHNQiO/aOdL23on7Et4CBUIP+Bw2nlcVe+Cp1ZOvAcaPaKGg
-  artifact: native/.*\.node/            # upload all NuGet packages to release assets
+  # Upload all binding files
+  artifact: /.*\.node/
   draft: false
   prerelease: false
   on:
-    APPVEYOR_REPO_TAG: true    
+    APPVEYOR_REPO_TAG: true
