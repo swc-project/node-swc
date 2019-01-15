@@ -30,6 +30,7 @@ install:
   - nvm install 6.16.0
 
 build: false
+skip_non_tags: true
 
 test_script:
   - bash ./scripts/ci/build.sh 11.6.0 67
