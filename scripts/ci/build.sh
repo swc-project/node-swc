@@ -33,6 +33,7 @@ if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
 which node && node --version
 which npm
 
+export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries' 
 (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
@@ -41,7 +42,7 @@ npm install -g neon-cli
 
 # Build it
 echo 'Building...'
-RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries' neon build --release
+neon build --release
 
 # Verify abi
 echo 'Verifying binding with jest...'
