@@ -55,7 +55,7 @@ deploy:
   auth_token:
     secure: EiuGSWjzYgvu70zRDHNQiO/aOdL23on7Et4CBUIP+Bw2nlcVe+Cp1ZOvAcaPaKGg
   # Upload all binding files
-  artifact: '*.node'
+  artifact: /.*\.node/
   draft: false
   prerelease: false
   on:
