@@ -140,6 +140,43 @@ declare module "swc" {
          */
         readonly swcrcRoots?: boolean | MatchPattern | MatchPattern[];
 
+        /**
+         * `true` will attempt to load an input sourcemap from the file itself, if it
+         * contains a //# sourceMappingURL=... comment. If no map is found, or the
+         * map fails to load and parse, it will be silently discarded.
+         *
+         *  If an object is provided, it will be treated as the source map object itself.
+         * 
+         * Defaults to `true`.
+         */
+        readonly inputSourceMap?: boolean | string;
+
+        /**
+         * - true to generate a sourcemap for the code and include it in the result object.
+         * - "inline" to generate a sourcemap and append it as a data URL to the end of the code, but not include it in the result object.
+         * - "both" is the same as inline, but will include the map in the result object.
+         * 
+         * `swc-cli` overloads some of these to also affect how maps are written to disk:
+         *
+         * - true will write the map to a .map file on disk
+         * - "inline" will write the file directly, so it will have a data: containing the map
+         * - "both" will write the file with a data: URL and also a .map.
+         * - Note: These options are bit weird, so it may make the most sense to just use true
+         *  and handle the rest in your own code, depending on your use case.
+         */
+        readonly sourceMaps?: boolean | "inline" | "both";
+
+        /**
+         * The name to use for the file inside the source map object.
+         * 
+         * Defaults to `path.basename(opts.filenameRelative)` when available, or `"unknown"`.
+         */
+        readonly sourceFileName?: string;
+
+        /**
+         * The sourceRoot fields to set in the generated source map, if one is desired.
+         */
+        readonly sourceRoot?: string;
     }
 
     export interface CallerOptions {

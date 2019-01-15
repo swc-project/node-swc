@@ -47,6 +47,42 @@ pub(crate) struct Options {
 
     #[serde(default = "default_env_name")]
     pub env_name: String,
+
+    #[serde(default)]
+    pub input_source_map: Option<InputSourceMap>,
+
+    #[serde(default)]
+    pub source_maps: Option<SourceMapsConfig>,
+
+    #[serde(default)]
+    pub source_file_name: Option<String>,
+
+    #[serde(default)]
+    pub source_root: Option<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) enum SourceMapsConfig {
+    Bool(bool),
+    Str(String),
+}
+
+impl Default for SourceMapsConfig {
+    fn default() -> Self {
+        SourceMapsConfig::Bool(true)
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) enum InputSourceMap {
+    Bool(bool),
+    Str(String),
+}
+
+impl Default for InputSourceMap {
+    fn default() -> Self {
+        InputSourceMap::Bool(true)
+    }
 }
 
 impl Options {
