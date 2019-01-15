@@ -94,11 +94,6 @@ impl Options {
 
         let helpers = Arc::new(helpers::Helpers::default());
         let JscConfig { transform, syntax } = config.jsc;
-        match syntax {
-            Some(Syntax::Typescript(..)) => println!("Typescript",),
-            Some(Syntax::Es(..)) => println!("Ecmascript",),
-            _ => println!("Default",),
-        }
 
         let syntax = syntax.unwrap_or_default();
         let transform = transform.unwrap_or_default();
