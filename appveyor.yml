@@ -43,13 +43,14 @@ cache:
   - C:\Users\appveyor\.cargo\registry
 
 deploy:
+  tag: $(APPVEYOR_REPO_TAG_NAME)
   # release: myproduct-v$(appveyor_build_version)
   description: 'Automated release'
   provider: GitHub
   auth_token:
     secure: EiuGSWjzYgvu70zRDHNQiO/aOdL23on7Et4CBUIP+Bw2nlcVe+Cp1ZOvAcaPaKGg
   # Upload all binding files
-  artifact: /.*\.node/
+  artifact: '**\\*.node'
   draft: false
   prerelease: false
   on:
