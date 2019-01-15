@@ -34,7 +34,7 @@ which node && node --version
 which npm
 
 export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries' 
-(cd native && cargo build --release --verbose)
+# (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
 echo 'Installing neon...'
