@@ -9,17 +9,24 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then mkdir C:\\nvm-root ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip -d C:\\nvm-root ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cp ./scripts/ci/settings.txt C:\\nvm-root\\ ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="/c/nvm-root:/c/Program Files/nodejs:$PATH" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="/c/nvm-root:/c/nodejs:$PATH" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export NVM_SYMLINK='C:\\nodejs' ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm root C:\\nvm-root ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
   - nvm version
-  - nvm install 11
-  - nvm install 10
-  - nvm install 8
-  - nvm install 6
+  - nvm install 11.6.0
+  - nvm install 10.15.0
+  - nvm install 8.15.0
+  - nvm install 6.16.0
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm on ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
+  - which node
+  - node --version
+  - which npm
+  # - npm --version
   
 
   # Install nightly rust
@@ -43,12 +50,13 @@ before_cache:
 branches:	
   except:	
   - master
+  - windows
 
 script:
-  - bash ./scripts/ci/build.sh 11 67
-  - bash ./scripts/ci/build.sh 10 64
-  - bash ./scripts/ci/build.sh 8 57
-  - bash ./scripts/ci/build.sh 6 48
+  - bash ./scripts/ci/build.sh 11.6.0 67
+  - bash ./scripts/ci/build.sh 10.15.0 64
+  - bash ./scripts/ci/build.sh 8.15.0 57
+  - bash ./scripts/ci/build.sh 6.16.0 48
 
 deploy:
   provider: releases
@@ -68,8 +76,8 @@ matrix:
       osx_image: xcode9.2
       env: SWC_NAME=darwin-x64
       
-    - os: windows
-      env: SWC_NAME=win32-x64
+    # - os: windows
+    #   env: SWC_NAME=win32-x64
 
     - os: linux
       env: SWC_NAME=linux-x64

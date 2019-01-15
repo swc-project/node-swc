@@ -6,14 +6,16 @@ extern crate fnv;
 extern crate neon;
 extern crate arc_swap;
 extern crate neon_serde;
+extern crate objekt;
 extern crate serde;
 extern crate sourcemap;
 extern crate swc;
 
 mod config;
 
-use self::config::{Config, TrnasformConfig};
+use crate::config::{BuiltConfig, Config, Options, RootMode};
 use neon::prelude::*;
+use objekt::clone_box;
 use sourcemap::SourceMapBuilder;
 use std::{
     cell::RefCell,
@@ -25,14 +27,12 @@ use std::{
 };
 use swc::{
     common::{
-        self, errors::Handler, sync::Lrc, FileName, FilePathMapping, Fold, FoldWith, Globals,
+        self, errors::Handler, sync::Lrc, FileName, FilePathMapping, FoldWith, Globals, SourceFile,
         SourceMap, GLOBALS,
     },
     ecmascript::{
-        ast::Module,
         codegen::{self, Emitter},
-        parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
-        transforms::{compat, fixer, helpers, hygiene, react, simplifier, typescript},
+        parser::{Parser, Session as ParseSess, SourceFileInput},
     },
 };
 
@@ -40,11 +40,12 @@ pub struct Compiler {
     pub globals: Globals,
     pub cm: Lrc<SourceMap>,
     handler: Handler,
-    config_caches: RefCell<HashMap<PathBuf, Arc<Config>>>,
+    /// (env, dir) -> BuiltConfig
+    config_caches: RefCell<HashMap<(String, Option<PathBuf>), Arc<BuiltConfig>>>,
 }
 
 impl Compiler {
-    pub fn new(cm: Lrc<SourceMap>, handler: Handler) -> Self {
+    pub(crate) fn new(cm: Lrc<SourceMap>, handler: Handler) -> Self {
         Compiler {
             cm,
             handler,
@@ -53,90 +54,109 @@ impl Compiler {
         }
     }
 
-    pub fn config_for_file(&self, path: &Path) -> Result<Option<Arc<Config>>, io::Error> {
-        assert!(!path.is_file());
+    /// Handles config merging.
+    pub(crate) fn config_for_file(
+        &self,
+        opts: &Options,
+        fm: &SourceFile,
+    ) -> Result<Arc<BuiltConfig>, io::Error> {
+        let Options {
+            ref root,
+            root_mode,
+            swcrc,
+            // ref swcrc_roots,
+            ref env_name,
+            ..
+        } = opts;
+        let root = root
+            .clone()
+            .unwrap_or_else(|| ::std::env::current_dir().unwrap());
 
-        let mut parent = path.parent();
-        while let Some(dir) = parent {
-            let swcrc = dir.join(".swcrc");
-            if let Some(c) = self.config_caches.borrow().get(&swcrc) {
-                return Ok(Some(c.clone()));
+        if *swcrc {
+            match fm.name {
+                FileName::Real(ref path) => {
+                    let mut parent = path.parent();
+                    while let Some(dir) = parent {
+                        if let Some(c) = self
+                            .config_caches
+                            .borrow()
+                            .get(&(env_name.clone(), Some(dir.to_path_buf())))
+                        {
+                            return Ok(c.clone());
+                        }
+
+                        let swcrc = dir.join(".swcrc");
+
+                        if swcrc.exists() {
+                            let mut r = File::open(&swcrc)?;
+                            let config: Config = serde_json::from_reader(r)?;
+                            let built = opts.build(self, Some(config));
+                            let arc = Arc::new(built);
+                            self.config_caches
+                                .borrow_mut()
+                                .insert((env_name.clone(), Some(dir.to_path_buf())), arc.clone());
+                            return Ok(arc);
+                        }
+
+                        parent = dir.parent();
+                        if parent == Some(&*root) && *root_mode == RootMode::Root {
+                            break;
+                        }
+                    }
+                }
+                _ => {}
             }
-
-            if swcrc.exists() {
-                let mut r = File::open(&swcrc)?;
-                let config: Config = serde_json::from_reader(r)?;
-                let arc = Arc::new(config);
-                self.config_caches.borrow_mut().insert(swcrc, arc.clone());
-                return Ok(Some(arc));
-            }
-
-            parent = dir.parent();
         }
 
-        Ok(None)
+        if let Some(ref cached) = self.config_caches.borrow().get(&(env_name.clone(), None)) {
+            return Ok((**cached).clone());
+        }
+        let built = opts.build(self, None);
+        let arc = Arc::new(built);
+        self.config_caches
+            .borrow_mut()
+            .insert((env_name.clone(), None), arc.clone());
+        Ok(arc)
     }
 
-    pub fn run<F, T>(&self, op: F) -> T
+    pub(crate) fn run<F, T>(&self, op: F) -> T
     where
         F: FnOnce() -> T,
     {
         GLOBALS.set(&self.globals, op)
     }
 
-    pub fn parse_js(&self, name: FileName, syntax: Syntax, src: &str) -> Result<Module, ()> {
-        self.run(|| {
-            let fm = self.cm.new_source_file(name, src.into());
-
-            let session = ParseSess {
-                handler: &self.handler,
-            };
-            Parser::new(session, syntax, SourceFileInput::from(&*fm))
-                .parse_module()
-                .map_err(|e| {
-                    e.emit();
-                    ()
-                })
-        })
-    }
-
-    /// TODO
-    pub fn parse_js_file(&self, syntax: Option<Syntax>, path: &Path) -> Result<Module, ()> {
-        self.run(|| {
-            let syntax = syntax.unwrap_or_else(|| {
-                self.config_for_file(path)
-                    .map(|c| c.unwrap_or_else(|| Default::default()).jsc.syntax)
-                    .expect("failed to load config")
-            });
-
-            let fm = self.cm.load_file(path).expect("failed to load file");
-
-            let session = ParseSess {
-                handler: &self.handler,
-            };
-            Parser::new(session, syntax, SourceFileInput::from(&*fm))
-                .parse_module()
-                .map_err(|e| {
-                    e.emit();
-                    ()
-                })
-        })
-    }
-
-    /// Returns code, sourcemap
-    pub fn emit_module(
+    pub(crate) fn process_js_file(
         &self,
-        module: &Module,
-        cfg: codegen::Config,
-    ) -> io::Result<(String, sourcemap::SourceMap)> {
+        fm: Lrc<SourceFile>,
+        opts: Options,
+    ) -> Result<(String, sourcemap::SourceMap), io::Error> {
         self.run(|| {
+            let config = self.config_for_file(&opts, &*fm)?;
+
+            let session = ParseSess {
+                handler: &self.handler,
+            };
+            let module = Parser::new(session, config.syntax, SourceFileInput::from(&*fm))
+                .parse_module()
+                .map_err(|e| {
+                    e.emit();
+                    ()
+                })
+                .expect("failed to parse module");
+
+            let mut pass = clone_box(&*config.pass);
+            let module = module.fold_with(&mut pass);
+
             let mut src_map_builder = SourceMapBuilder::new(None);
             let src = {
                 let mut buf = vec![];
                 {
                     let handlers = box MyHandlers;
                     let mut emitter = Emitter {
-                        cfg,
+                        cfg: codegen::Config {
+                            enable_comments: false,
+                        },
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
@@ -161,53 +181,6 @@ struct MyHandlers;
 
 impl swc::ecmascript::codegen::Handlers for MyHandlers {}
 
-fn transform_module(c: &Compiler, module: Module, options: TrnasformConfig) -> Module {
-    let helpers = Arc::new(helpers::Helpers::default());
-
-    let optimizer = options.optimizer;
-    let enable_optimizer = optimizer.is_some();
-    let module = {
-        let opts = if let Some(opts) =
-            optimizer.map(|o| o.globals.unwrap_or_else(|| Default::default()))
-        {
-            opts
-        } else {
-            Default::default()
-        };
-        module.fold_with(&mut opts.build(c))
-    };
-
-    // handle jsx
-    let module = module.fold_with(&mut react::react(
-        c.cm.clone(),
-        options.react,
-        helpers.clone(),
-    ));
-
-    let module = if enable_optimizer {
-        module.fold_with(&mut simplifier())
-    } else {
-        module
-    };
-
-    let module = module
-        .fold_with(
-            &mut typescript::strip()
-                .then(compat::es2018(&helpers))
-                .then(compat::es2017(&helpers))
-                .then(compat::es2016())
-                .then(compat::es2015(&helpers))
-                .then(compat::es3()),
-        )
-        .fold_with(&mut hygiene())
-        .fold_with(&mut fixer());
-
-    module.fold_with(&mut helpers::InjectHelpers {
-        cm: c.cm.clone(),
-        helpers: helpers.clone(),
-    })
-}
-
 fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<Compiler> {
     let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
 
@@ -225,7 +198,7 @@ fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<Compiler> {
 
 fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let source = cx.argument::<JsString>(0)?;
-    let options: Config = match cx.argument_opt(1) {
+    let options: Options = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
         None => Default::default(),
     };
@@ -234,18 +207,18 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     let (code, map) = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let module = c
-            .parse_js(FileName::Anon(0), options.jsc.syntax, &source.value())
-            .expect("failed to parse module");
-        let module = c.run(|| transform_module(&c, module, options.jsc.transform));
-
-        c.emit_module(
-            &module,
-            codegen::Config {
-                enable_comments: false,
+        let fm = c.cm.new_source_file(
+            if options.filename.is_empty() {
+                // TODO: Increment
+                FileName::Anon(0)
+            } else {
+                FileName::Real(options.filename.clone().into())
             },
-        )
-        .expect("failed to emit module")
+            source.value(),
+        );
+
+        c.process_js_file(fm, options)
+            .expect("failed to process js file")
     };
 
     let code = cx.string(&code);
@@ -265,41 +238,22 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
 
 fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
-    let config: Option<Config> = match cx.argument_opt(1) {
-        Some(v) => Some(neon_serde::from_value(&mut cx, v)?),
-        None => None,
+    let opts: Options = match cx.argument_opt(1) {
+        Some(v) => neon_serde::from_value(&mut cx, v)?,
+        None => Default::default(),
     };
 
     let path_value = path.value();
     let path = Path::new(&path_value);
-    let syntax = config.as_ref().map(|c| c.jsc.syntax);
 
     let this = cx.this();
     let (code, map) = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
 
-        let mut config = config.unwrap_or_else(|| Default::default());
-        let config =
-            if let Some(overrides) = c.config_for_file(path).expect("failed to load .swcrc file") {
-                // config.merge_from(overrides)
-                overrides
-            } else {
-                Arc::new(config)
-            };
-
-        let module = c
-            .parse_js_file(syntax, path)
-            .expect("failed to parse module");
-        let module = c.run(|| transform_module(&c, module, config.jsc.transform.clone()));
-
-        c.emit_module(
-            &module,
-            codegen::Config {
-                enable_comments: false,
-            },
-        )
-        .expect("failed to emit module")
+        let fm = c.cm.load_file(path).expect("failed to load file");
+        c.process_js_file(fm, opts)
+            .expect("failed to process js file")
     };
 
     let code = cx.string(&code);

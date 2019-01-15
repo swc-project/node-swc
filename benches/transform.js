@@ -105,7 +105,13 @@ module.exports = {
 
 const PARSERS = [
   ['swc', '../', (module) => module.transformSync(SOURCE, {})],
-  ['swc-optimize', '../', (module) => module.transformSync(SOURCE, {})],
+  ['swc-optimize', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      transform: {
+        optimizer: {}
+      }
+    }
+  })],
   ['babel', '@babel/core', (module) => module.transformSync(SOURCE, {
     presets: ["@babel/preset-env"],
     // This does less work than swc's InlineGlobals pass, but it's ok.
