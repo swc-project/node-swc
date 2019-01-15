@@ -33,7 +33,7 @@ if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
 which node && node --version
 which npm
 
-(cd native && cargo build --release --no-run --verbose)
+(cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
 echo 'Installing neon...'
