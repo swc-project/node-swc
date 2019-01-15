@@ -91,8 +91,8 @@ impl Options {
         let mut config = config.unwrap_or_else(|| Default::default());
 
         if let Some(ref c) = self.config {
-            if let Some(ref s) = c.jsc.transform {
-                config.jsc.transform = Some(s.clone());
+            if let Some(ref s) = c.jsc.syntax {
+                config.jsc.syntax = Some(s.clone());
             }
             if let Some(ref t) = c.jsc.transform {
                 config.jsc.transform = Some(t.clone());
