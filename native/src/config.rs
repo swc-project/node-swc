@@ -16,7 +16,7 @@ use swc::{
 };
 
 #[derive(Default, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct Options {
     #[serde(flatten, default)]
     pub config: Option<Config>,
@@ -87,20 +87,19 @@ impl Default for InputSourceMap {
 
 impl Options {
     pub fn build(&self, c: &Compiler, config: Option<Config>) -> BuiltConfig {
-        // let config = config.unwrap_or_else(|| Default::default());
         let mut config = config.unwrap_or_else(|| Default::default());
-
         if let Some(ref c) = self.config {
-            if let Some(ref s) = c.jsc.syntax {
-                config.jsc.syntax = Some(s.clone());
-            }
-            if let Some(ref t) = c.jsc.transform {
-                config.jsc.transform = Some(t.clone());
-            }
+            config.merge(c)
         }
 
         let helpers = Arc::new(helpers::Helpers::default());
         let JscConfig { transform, syntax } = config.jsc;
+        match syntax {
+            Some(Syntax::Typescript(..)) => println!("Typescript",),
+            Some(Syntax::Es(..)) => println!("Ecmascript",),
+            _ => println!("Default",),
+        }
+
         let syntax = syntax.unwrap_or_default();
         let transform = transform.unwrap_or_default();
 
@@ -184,6 +183,7 @@ fn default_cwd() -> PathBuf {
 
 /// `.swcrc` file
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct Config {
     #[serde(default)]
     pub jsc: JscConfig,
@@ -196,6 +196,7 @@ pub(crate) struct BuiltConfig {
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct JscConfig {
     #[serde(rename = "parser", default)]
     pub syntax: Option<Syntax>,
@@ -204,6 +205,7 @@ pub(crate) struct JscConfig {
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct TrnasformConfig {
     #[serde(default)]
     pub react: react::Options,
@@ -212,12 +214,14 @@ pub(crate) struct TrnasformConfig {
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct OptimizerConfig {
     #[serde(default)]
     pub globals: Option<GlobalPassOption>,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct GlobalPassOption {
     #[serde(default)]
     pub vars: FnvHashMap<String, String>,
@@ -291,38 +295,67 @@ fn default_env_name() -> String {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use ecmascript::parser::TsConfig;
+pub(crate) trait Merge {
+    /// Apply overrides from `from`
+    fn merge(&mut self, from: &Self);
+}
 
-    #[test]
-    fn test() {
-        println!(
-            "{}",
-            serde_json::to_string_pretty(&Config {
-                jsc: JscConfig {
-                    syntax: Syntax::Typescript(TsConfig {
-                        ..Default::default()
-                    }),
-                    transform: TrnasformConfig {
-                        react: react::Options {
-                            ..Default::default()
-                        },
-                        optimizer: Some(OptimizerConfig {
-                            globals: Some(GlobalPassOption {
-                                vars: {
-                                    let mut map = FnvHashMap::default();
-                                    map.insert("__DEBUG__".into(), "true".into());
-                                    map
-                                }
-                            }),
-                        })
-                    }
-                },
-            })
-            .unwrap()
-        );
+impl<T: Clone> Merge for Option<T>
+where
+    T: Merge,
+{
+    fn merge(&mut self, from: &Option<T>) {
+        match *from {
+            Some(ref from) => match *self {
+                Some(ref mut v) => v.merge(from),
+                None => *self = Some(from.clone()),
+            },
+            // no-op
+            None => {}
+        }
     }
+}
 
+impl Merge for Config {
+    fn merge(&mut self, from: &Self) {
+        self.jsc.merge(&from.jsc);
+    }
+}
+
+impl Merge for JscConfig {
+    fn merge(&mut self, from: &Self) {
+        self.syntax.merge(&from.syntax);
+        self.transform.merge(&from.transform);
+    }
+}
+
+impl Merge for Syntax {
+    fn merge(&mut self, from: &Self) {
+        *self = *from;
+    }
+}
+
+impl Merge for TrnasformConfig {
+    fn merge(&mut self, from: &Self) {
+        self.optimizer.merge(&from.optimizer);
+        self.react.merge(&from.react);
+    }
+}
+
+impl Merge for OptimizerConfig {
+    fn merge(&mut self, from: &Self) {
+        self.globals.merge(&from.globals)
+    }
+}
+
+impl Merge for GlobalPassOption {
+    fn merge(&mut self, from: &Self) {
+        *self = from.clone();
+    }
+}
+
+impl Merge for react::Options {
+    fn merge(&mut self, from: &Self) {
+        *self = from.clone();
+    }
 }
