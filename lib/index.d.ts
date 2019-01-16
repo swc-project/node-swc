@@ -86,7 +86,7 @@ declare module "swc" {
          * and is also available inside configuration functions, plugins,
          * and presets, via the api.env() function.
          * 
-         * Defaults to `process.env.SWCL_ENV || process.env.NODE_ENV || "development"`
+         * Defaults to `process.env.SWC_ENV || process.env.NODE_ENV || "development"`
          */
         readonly envName?: string;
 
