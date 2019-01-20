@@ -139,7 +139,7 @@ impl Compiler {
             };
             let module = Parser::new(session, config.syntax, SourceFileInput::from(&*fm))
                 .parse_module()
-                .map_err(|e| {
+                .map_err(|mut e| {
                     e.emit();
                     ()
                 })

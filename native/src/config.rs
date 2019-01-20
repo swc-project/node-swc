@@ -62,6 +62,7 @@ pub(crate) struct Options {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub(crate) enum SourceMapsConfig {
     Bool(bool),
     Str(String),
@@ -74,6 +75,7 @@ impl Default for SourceMapsConfig {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub(crate) enum InputSourceMap {
     Bool(bool),
     Str(String),
@@ -249,7 +251,7 @@ impl GlobalPassOption {
                     SourceFileInput::from(&*fm),
                 )
                 .parse_module()
-                .map_err(|e| {
+                .map_err(|mut e| {
                     e.emit();
                     ()
                 })
@@ -352,5 +354,14 @@ impl Merge for GlobalPassOption {
 impl Merge for react::Options {
     fn merge(&mut self, from: &Self) {
         *self = from.clone();
+    }
+}
+
+#[cfg(test)]
+mod tests{
+    use serde_json;
+    #[test]
+    fn test(){
+let optionds:Options=        serde_json::from_str(r#"{"jsc":{"transform":{"react":{"pragma":"React.createElement","pragmaFrag":"React.Fragment","throwIfNamespace":true,"development":false,"useBuiltins":false}}},"filename":"/Users/kdy1/projects/swc-loader/example/index.js","sourceMaps":false,"sourceFileName":"/Users/kdy1/projects/swc-loader/example/index.js"}"#);
     }
 }
