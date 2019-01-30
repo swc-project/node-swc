@@ -1,5 +1,5 @@
 use crate::Compiler;
-use fnv::FnvHashMap;
+use fnv::{FnvHashMap, FnvHashSet};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env, path::PathBuf, sync::Arc};
 use swc::{
@@ -226,6 +226,15 @@ pub(crate) struct OptimizerConfig {
 pub(crate) struct GlobalPassOption {
     #[serde(default)]
     pub vars: FnvHashMap<String, String>,
+    #[serde(default = "default_envs")]
+    pub envs: FnvHashSet<String>,
+}
+
+fn default_envs() -> FnvHashSet<String> {
+    let mut v = FnvHashSet::default();
+    v.insert(String::from("NODE_ENV"));
+    v.insert(String::from("SWC_ENV"));
+    v
 }
 
 impl GlobalPassOption {
@@ -277,9 +286,10 @@ impl GlobalPassOption {
             m
         }
 
+        let envs = self.envs;
         InlineGlobals {
             globals: mk_map(c, self.vars.into_iter(), false),
-            envs: mk_map(c, env::vars(), true),
+            envs: mk_map(c, env::vars().filter(|(k, _)| envs.contains(&*k)), true),
         }
     }
 }

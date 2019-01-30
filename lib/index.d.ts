@@ -292,6 +292,13 @@ declare module "swc" {
          * e.g. `{ __DEBUG__: true }`
          */
         readonly vars?: { [key: string]: string };
+
+        /**
+         * Name of environment variables to inline.
+         * 
+         * Defaults to `["NODE_ENV", "SWC_ENV"]`
+         */
+        readonly envs?: { [key: string]: string };
     }
 
     export interface Output {
