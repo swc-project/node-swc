@@ -9,8 +9,10 @@ use swc::{
         ast::{Expr, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
-            compat, fixer, helpers, hygiene, pass::Pass, react, simplifier, typescript,
-            InlineGlobals,
+            compat, fixer, helpers, hygiene,
+            pass::Pass,
+            proposals::{class_properties, decorators},
+            react, simplifier, typescript, InlineGlobals,
         },
     },
 };
@@ -114,8 +116,9 @@ impl Options {
             pass,
             // handle jsx
             react::react(c.cm.clone(), transform.react, helpers.clone(),),
+            decorators(helpers.clone()),
+            class_properties(helpers.clone()),
             simplifier(enable_optimizer),
-            typescript::strip(),
             compat::es2018(&helpers),
             compat::es2017(&helpers),
             compat::es2016(),
@@ -126,7 +129,8 @@ impl Options {
             helpers::InjectHelpers {
                 cm: c.cm.clone(),
                 helpers: helpers.clone(),
-            }
+            },
+            typescript::strip(),
         );
 
         BuiltConfig {
@@ -354,14 +358,5 @@ impl Merge for GlobalPassOption {
 impl Merge for react::Options {
     fn merge(&mut self, from: &Self) {
         *self = from.clone();
-    }
-}
-
-#[cfg(test)]
-mod tests{
-    use serde_json;
-    #[test]
-    fn test(){
-let optionds:Options=        serde_json::from_str(r#"{"jsc":{"transform":{"react":{"pragma":"React.createElement","pragmaFrag":"React.Fragment","throwIfNamespace":true,"development":false,"useBuiltins":false}}},"filename":"/Users/kdy1/projects/swc-loader/example/index.js","sourceMaps":false,"sourceFileName":"/Users/kdy1/projects/swc-loader/example/index.js"}"#);
     }
 }
