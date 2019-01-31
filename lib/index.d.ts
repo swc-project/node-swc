@@ -298,7 +298,7 @@ declare module "swc" {
          * 
          * Defaults to `["NODE_ENV", "SWC_ENV"]`
          */
-        readonly envs?: { [key: string]: string };
+        readonly envs?: string[];
     }
 
     export interface Output {
