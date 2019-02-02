@@ -1,5 +1,5 @@
 use crate::Compiler;
-use fnv::{FnvHashMap, FnvHashSet};
+use fxhash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env, path::PathBuf, sync::Arc};
 use swc::{
@@ -9,7 +9,9 @@ use swc::{
         ast::{Expr, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
-            compat, fixer, helpers, hygiene,
+            compat, fixer,
+            helpers::{self, HelperResetter},
+            hygiene,
             pass::Pass,
             proposals::{class_properties, decorators},
             react, simplifier, typescript, InlineGlobals,
@@ -114,6 +116,9 @@ impl Options {
 
         let pass = chain!(
             pass,
+            HelperResetter {
+                helpers: helpers.clone()
+            },
             // handle jsx
             react::react(c.cm.clone(), transform.react, helpers.clone(),),
             decorators(helpers.clone()),
@@ -225,13 +230,13 @@ pub(crate) struct OptimizerConfig {
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct GlobalPassOption {
     #[serde(default)]
-    pub vars: FnvHashMap<String, String>,
+    pub vars: FxHashMap<String, String>,
     #[serde(default = "default_envs")]
-    pub envs: FnvHashSet<String>,
+    pub envs: FxHashSet<String>,
 }
 
-fn default_envs() -> FnvHashSet<String> {
-    let mut v = FnvHashSet::default();
+fn default_envs() -> FxHashSet<String> {
+    let mut v = FxHashSet::default();
     v.insert(String::from("NODE_ENV"));
     v.insert(String::from("SWC_ENV"));
     v

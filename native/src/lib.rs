@@ -1,7 +1,7 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
 
-extern crate fnv;
+extern crate fxhash;
 #[macro_use]
 extern crate neon;
 extern crate arc_swap;
