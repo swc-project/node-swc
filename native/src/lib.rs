@@ -1,5 +1,6 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
+#![recursion_limit = "2048"]
 
 extern crate fxhash;
 #[macro_use]

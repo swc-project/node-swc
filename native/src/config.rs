@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env, path::PathBuf};
 use swc::{
     atoms::JsWord,
-    common::{chain, FileName},
+    common::{chain, sync::Lrc, FileName, SourceMap},
     ecmascript::{
-        ast::{Expr, ModuleItem, Stmt},
+        ast::{Expr, Module, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
-            compat, fixer, helpers, hygiene,
-            pass::Pass,
+            chain_at, compat, fixer, helpers, hygiene, modules,
+            pass::{noop, Pass},
             proposals::{class_properties, decorators},
             react, simplifier, typescript, InlineGlobals,
         },
@@ -111,7 +111,8 @@ impl Options {
             GlobalPassOption::default().build(c)
         };
 
-        let pass = chain!(
+        let pass = chain_at!(
+            Module,
             pass,
             // handle jsx
             react::react(c.cm.clone(), transform.react),
@@ -127,6 +128,7 @@ impl Options {
             fixer(),
             helpers::InjectHelpers { cm: c.cm.clone() },
             typescript::strip(),
+            ModuleConfig::build(c.cm.clone(), config.module),
         );
 
         BuiltConfig {
@@ -184,6 +186,8 @@ fn default_cwd() -> PathBuf {
 pub(crate) struct Config {
     #[serde(default)]
     pub jsc: JscConfig,
+    #[serde(default)]
+    pub module: Option<ModuleConfig>,
 }
 
 /// One `BuiltConfig` per a directory with swcrc
@@ -199,6 +203,28 @@ pub(crate) struct JscConfig {
     pub syntax: Option<Syntax>,
     #[serde(default)]
     pub transform: Option<TrnasformConfig>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+#[serde(tag = "type")]
+pub(crate) enum ModuleConfig {
+    #[serde(rename = "commonjs")]
+    CommonJs(modules::common_js::Config),
+    #[serde(rename = "umd")]
+    Umd(modules::umd::Config),
+}
+
+impl ModuleConfig {
+    pub fn build(cm: Lrc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass> {
+        match config {
+            None => box noop() as Box<Pass>,
+            Some(ModuleConfig::CommonJs(config)) => {
+                box modules::common_js::common_js(config) as Box<Pass>
+            }
+            Some(ModuleConfig::Umd(config)) => box modules::umd::umd(cm, config) as Box<Pass>,
+        }
+    }
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]

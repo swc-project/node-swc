@@ -189,6 +189,7 @@ declare module "swc" {
      */
     export interface Config {
         readonly jsc?: JscConfig;
+        readonly module?: ModuleConfig;
     }
 
     export interface JscConfig {
@@ -299,6 +300,83 @@ declare module "swc" {
          * Defaults to `["NODE_ENV", "SWC_ENV"]`
          */
         readonly envs?: string[];
+    }
+
+    export type ModuleConfig = CommonJsConfig | UmdConfig;
+
+    export interface CommonJsConfig {
+        readonly type: 'commonjs';
+
+        /**
+         * By default, when using exports with babel a non-enumerable `__esModule` 
+         * property is exported. In some cases this property is used to determine
+         * if the import is the default export or if it contains the default export.
+         * 
+         * In order to prevent the __esModule property from being exported, you
+         *  can set the strict option to true.
+         * 
+         * Defaults to `false`.
+         */
+        readonly strict?: boolean;
+
+        /**
+         * Emits 'use strict' directive.
+         * 
+         * Defaults to `true`.
+         */
+        readonly strict_mode?: boolean;
+
+        /**
+         * Changes Babel's compiled import statements to be lazily evaluated when their imported bindings are used for the first time.
+         *
+         * This can improve initial load time of your module because evaluating dependencies up
+         *  front is sometimes entirely un-necessary. This is especially the case when implementing
+         *  a library module.
+         * 
+         * 
+         * The value of `lazy` has a few possible effects:
+         *
+         *  - `false` - No lazy initialization of any imported module.
+         *  - `true` - Do not lazy-initialize local `./foo` imports, but lazy-init `foo` dependencies.
+         *
+         * Local paths are much more likely to have circular dependencies, which may break if loaded lazily,
+         * so they are not lazy by default, whereas dependencies between independent modules are rarely cyclical.
+         *
+         *  - `Array<string>` - Lazy-initialize all imports with source matching one of the given strings.
+         *
+         * -----
+         * 
+         * The two cases where imports can never be lazy are:
+         *
+         *  - `import "foo";`
+         *
+         * Side-effect imports are automatically non-lazy since their very existence means
+         *  that there is no binding to later kick off initialization.
+         *
+         *  - `export * from "foo"`
+         *
+         * Re-exporting all names requires up-front execution because otherwise there is no
+         * way to know what names need to be exported.
+         * 
+         * Defaults to `false`.
+         */
+        readonly lazy?: boolean | string[];
+        /**
+         * By default, when using exports with swc a non-enumerable __esModule property is exported.
+         * This property is then used to determine if the import is the default export or if
+         *  it contains the default export.
+         * 
+         * In cases where the auto-unwrapping of default is not needed, you can set the noInterop option
+         *  to true to avoid the usage of the interopRequireDefault helper (shown in inline form above).
+         * 
+         * Defaults to `false`.
+         */
+        readonly noInterop?: boolean;
+    }
+
+    export interface UmdConfig {
+        readonly type: 'umd';
+        readonly globals?: { [key: string]: string };
     }
 
     export interface Output {
