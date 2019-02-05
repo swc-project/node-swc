@@ -151,6 +151,15 @@ impl Compiler {
             let module = helpers::HELPERS.set(&Default::default(), || module.fold_with(&mut pass));
 
             let mut src_map_builder = SourceMapBuilder::new(None);
+
+            match fm.name {
+                FileName::Real(ref p) => {
+                    let id = src_map_builder.add_source(&p.display().to_string());
+                    src_map_builder.set_source_contents(id, Some(&fm.src));
+                }
+                _ => {}
+            }
+
             let src = {
                 let mut buf = vec![];
                 {
