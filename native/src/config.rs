@@ -1,7 +1,7 @@
 use crate::Compiler;
 use fxhash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, env, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, env, path::PathBuf};
 use swc::{
     atoms::JsWord,
     common::{chain, FileName},
@@ -9,9 +9,7 @@ use swc::{
         ast::{Expr, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
-            compat, fixer,
-            helpers::{self, HelperResetter},
-            hygiene,
+            compat, fixer, helpers, hygiene,
             pass::Pass,
             proposals::{class_properties, decorators},
             react, simplifier, typescript, InlineGlobals,
@@ -98,7 +96,6 @@ impl Options {
             config.merge(c)
         }
 
-        let helpers = Arc::new(helpers::Helpers::default());
         let JscConfig { transform, syntax } = config.jsc;
 
         let syntax = syntax.unwrap_or_default();
@@ -116,25 +113,19 @@ impl Options {
 
         let pass = chain!(
             pass,
-            HelperResetter {
-                helpers: helpers.clone()
-            },
             // handle jsx
-            react::react(c.cm.clone(), transform.react, helpers.clone(),),
-            decorators(helpers.clone()),
-            class_properties(helpers.clone()),
+            react::react(c.cm.clone(), transform.react),
+            decorators(),
+            class_properties(),
             simplifier(enable_optimizer),
-            compat::es2018(&helpers),
-            compat::es2017(&helpers),
+            compat::es2018(),
+            compat::es2017(),
             compat::es2016(),
-            compat::es2015(&helpers),
+            compat::es2015(),
             compat::es3(),
             hygiene(),
             fixer(),
-            helpers::InjectHelpers {
-                cm: c.cm.clone(),
-                helpers: helpers.clone(),
-            },
+            helpers::InjectHelpers { cm: c.cm.clone() },
             typescript::strip(),
         );
 

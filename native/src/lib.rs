@@ -33,6 +33,7 @@ use swc::{
     ecmascript::{
         codegen::{self, Emitter},
         parser::{Parser, Session as ParseSess, SourceFileInput},
+        transforms::helpers,
     },
 };
 
@@ -146,7 +147,7 @@ impl Compiler {
                 .expect("failed to parse module");
 
             let mut pass = clone_box(&*config.pass);
-            let module = module.fold_with(&mut pass);
+            let module = helpers::HELPERS.set(&Default::default(), || module.fold_with(&mut pass));
 
             let mut src_map_builder = SourceMapBuilder::new(None);
             let src = {
