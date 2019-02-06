@@ -1,30 +1,35 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
+#![feature(never_type)]
 #![recursion_limit = "2048"]
 
 extern crate fxhash;
 #[macro_use]
 extern crate neon;
 extern crate arc_swap;
+extern crate failure;
 extern crate neon_serde;
 extern crate objekt;
 extern crate serde;
+extern crate serde_json;
 extern crate sourcemap;
 extern crate swc;
 
 mod config;
+mod error;
 
-use crate::config::{BuiltConfig, Config, Options, RootMode};
+use crate::{
+    config::{BuiltConfig, Config, Options, RootMode},
+    error::Error,
+};
 use neon::prelude::*;
 use objekt::clone_box;
 use sourcemap::SourceMapBuilder;
 use std::{
-    cell::RefCell,
     collections::HashMap,
     fs::File,
-    io,
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{Arc, RwLock},
 };
 use swc::{
     common::{
@@ -38,12 +43,14 @@ use swc::{
     },
 };
 
+pub type SourceMapString = String;
+
 pub struct Compiler {
     pub globals: Globals,
     pub cm: Lrc<SourceMap>,
     handler: Handler,
     /// (env, dir) -> BuiltConfig
-    config_caches: RefCell<HashMap<(String, Option<PathBuf>), Arc<BuiltConfig>>>,
+    config_caches: RwLock<HashMap<(String, Option<PathBuf>), Arc<BuiltConfig>>>,
 }
 
 impl Compiler {
@@ -61,7 +68,7 @@ impl Compiler {
         &self,
         opts: &Options,
         fm: &SourceFile,
-    ) -> Result<Arc<BuiltConfig>, io::Error> {
+    ) -> Result<Arc<BuiltConfig>, Error> {
         let Options {
             ref root,
             root_mode,
@@ -81,7 +88,8 @@ impl Compiler {
                     while let Some(dir) = parent {
                         if let Some(c) = self
                             .config_caches
-                            .borrow()
+                            .read()
+                            .unwrap()
                             .get(&(env_name.clone(), Some(dir.to_path_buf())))
                         {
                             return Ok(c.clone());
@@ -90,12 +98,15 @@ impl Compiler {
                         let swcrc = dir.join(".swcrc");
 
                         if swcrc.exists() {
-                            let mut r = File::open(&swcrc)?;
-                            let config: Config = serde_json::from_reader(r)?;
+                            let mut r = File::open(&swcrc)
+                                .map_err(|err| Error::FailedToReadConfigFile { err })?;
+                            let config: Config = serde_json::from_reader(r)
+                                .map_err(|err| Error::FailedToParseConfigFile { err })?;
                             let built = opts.build(self, Some(config));
                             let arc = Arc::new(built);
                             self.config_caches
-                                .borrow_mut()
+                                .write()
+                                .unwrap()
                                 .insert((env_name.clone(), Some(dir.to_path_buf())), arc.clone());
                             return Ok(arc);
                         }
@@ -110,13 +121,19 @@ impl Compiler {
             }
         }
 
-        if let Some(ref cached) = self.config_caches.borrow().get(&(env_name.clone(), None)) {
+        if let Some(ref cached) = self
+            .config_caches
+            .write()
+            .unwrap()
+            .get(&(env_name.clone(), None))
+        {
             return Ok((**cached).clone());
         }
         let built = opts.build(self, None);
         let arc = Arc::new(built);
         self.config_caches
-            .borrow_mut()
+            .write()
+            .unwrap()
             .insert((env_name.clone(), None), arc.clone());
         Ok(arc)
     }
@@ -132,7 +149,7 @@ impl Compiler {
         &self,
         fm: Lrc<SourceFile>,
         opts: Options,
-    ) -> Result<(String, sourcemap::SourceMap), io::Error> {
+    ) -> Result<(String, sourcemap::SourceMap), Error> {
         self.run(|| {
             let config = self.config_for_file(&opts, &*fm)?;
 
@@ -179,7 +196,9 @@ impl Compiler {
                         pos_of_leading_comments: Default::default(),
                     };
 
-                    emitter.emit_module(&module)?;
+                    emitter
+                        .emit_module(&module)
+                        .map_err(|err| Error::FailedToEmitModule { err })?;
                 }
                 String::from_utf8(buf).unwrap()
             };
@@ -192,7 +211,7 @@ struct MyHandlers;
 
 impl swc::ecmascript::codegen::Handlers for MyHandlers {}
 
-fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<Compiler> {
+fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
     let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
 
     let handler = Handler::with_tty_emitter(
@@ -204,7 +223,82 @@ fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<Compiler> {
 
     let c = Compiler::new(cm.clone(), handler);
 
-    Ok(c)
+    Ok(Arc::new(c))
+}
+
+struct TransformAsync {
+    c: Arc<Compiler>,
+    fm: Lrc<SourceFile>,
+    options: Options,
+}
+impl Task for TransformAsync {
+    type Output = (String, SourceMapString);
+    type Error = Error;
+    type JsEvent = JsObject;
+
+    fn perform(&self) -> Result<Self::Output, Self::Error> {
+        self.c
+            .process_js_file(self.fm.clone(), self.options.clone())
+            .and_then(|(code, map)| {
+                let mut buf = vec![];
+                map.to_writer(&mut buf)
+                    .map_err(|err| Error::FailedToWriteSourceMap { err });
+                let map = String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
+
+                Ok((code, map))
+            })
+    }
+
+    fn complete(
+        self,
+        mut cx: TaskContext,
+        result: Result<Self::Output, Self::Error>,
+    ) -> JsResult<Self::JsEvent> {
+        match result {
+            Ok((code, map)) => {
+                let code = cx.string(&code);
+                let map = cx.string(&map);
+
+                let obj = cx.empty_object();
+                obj.set(&mut cx, "code", code)?;
+                obj.set(&mut cx, "map", map)?;
+
+                Ok(obj.upcast())
+            }
+            Err(err) => cx.throw_error(err.to_string()),
+        }
+    }
+}
+
+fn compiler_transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let source = cx.argument::<JsString>(0)?;
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
+    let callback = cx.argument::<JsFunction>(2)?;
+
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+        let fm = c.cm.new_source_file(
+            if options.filename.is_empty() {
+                // TODO: Increment
+                FileName::Anon(0)
+            } else {
+                FileName::Real(options.filename.clone().into())
+            },
+            source.value(),
+        );
+
+        TransformAsync {
+            c: c.clone(),
+            fm,
+            options,
+        }
+        .schedule(callback);
+    };
+
+    Ok(cx.undefined().upcast())
 }
 
 fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -247,6 +341,32 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     Ok(obj.upcast())
 }
 
+fn compiler_transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let path = cx.argument::<JsString>(0)?;
+    let path_value = path.value();
+    let path = Path::new(&path_value);
+
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
+    let callback = cx.argument::<JsFunction>(2)?;
+
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+        let fm = c.cm.load_file(path).expect("failed to load file");;
+
+        TransformAsync {
+            c: c.clone(),
+            fm,
+            options,
+        }
+        .schedule(callback);
+    };
+
+    Ok(cx.undefined().upcast())
+}
+
 fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
     let opts: Options = match cx.argument_opt(1) {
@@ -282,14 +402,24 @@ fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<J
     Ok(obj.upcast())
 }
 
+pub type ArcCompiler = Arc<Compiler>;
+
 declare_types! {
-    pub class JsCompiler for Compiler {
+    pub class JsCompiler for ArcCompiler {
         init(cx) {
             compiler_init(cx)
         }
 
+        method transform(cx) {
+            compiler_transform_async(cx)
+        }
+
         method transformSync(cx) {
             compiler_transform_sync(cx)
+        }
+
+        method transformFile(cx) {
+            compiler_transform_async(cx)
         }
 
         method transformFileSync(cx) {

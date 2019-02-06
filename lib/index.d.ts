@@ -4,7 +4,9 @@ declare module "swc" {
     export class Compiler {
         constructor();
 
+        transform(src: string, options?: Options): Promise<Output>;
         transformSync(src: string, options?: Options): Output;
+        transformFile(path: string, options?: Options): Promise<Output>;
         transformFileSync(path: string, options?: Options): Output;
     }
 

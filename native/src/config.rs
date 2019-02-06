@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env, path::PathBuf};
 use swc::{
     atoms::JsWord,
-    common::{chain, sync::Lrc, FileName, SourceMap},
+    common::{sync::Lrc, FileName, SourceMap},
     ecmascript::{
         ast::{Expr, Module, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
@@ -192,7 +192,7 @@ pub(crate) struct Config {
 
 /// One `BuiltConfig` per a directory with swcrc
 pub(crate) struct BuiltConfig {
-    pub pass: Box<dyn Pass>,
+    pub pass: Box<dyn Pass + Send + Sync>,
     pub syntax: Syntax,
 }
 
@@ -216,13 +216,11 @@ pub(crate) enum ModuleConfig {
 }
 
 impl ModuleConfig {
-    pub fn build(cm: Lrc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass> {
+    pub fn build(cm: Lrc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass + Send + Sync> {
         match config {
-            None => box noop() as Box<Pass>,
-            Some(ModuleConfig::CommonJs(config)) => {
-                box modules::common_js::common_js(config) as Box<Pass>
-            }
-            Some(ModuleConfig::Umd(config)) => box modules::umd::umd(cm, config) as Box<Pass>,
+            None => box noop(),
+            Some(ModuleConfig::CommonJs(config)) => box modules::common_js::common_js(config),
+            Some(ModuleConfig::Umd(config)) => box modules::umd::umd(cm, config),
         }
     }
 }
