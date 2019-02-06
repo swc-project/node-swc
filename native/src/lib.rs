@@ -419,7 +419,7 @@ declare_types! {
         }
 
         method transformFile(cx) {
-            compiler_transform_async(cx)
+            compiler_transform_file_async(cx)
         }
 
         method transformFileSync(cx) {
