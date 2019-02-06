@@ -392,7 +392,9 @@ declare module "swc" {
         map: string;
     }
 
+    export function transform(src: string, options?: Options): Promise<Output>;
     export function transformSync(src: string, options?: Options): Output;
+    export function transformFile(path: string, options?: Options): Promise<Output>;
     export function transformFileSync(path: string, options?: Options): Output;
 
     export const DEFAULT_EXTENSIONS: string[];
