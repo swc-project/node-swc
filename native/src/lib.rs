@@ -111,10 +111,10 @@ impl Compiler {
                             return Ok(arc);
                         }
 
-                        parent = dir.parent();
-                        if parent == Some(&*root) && *root_mode == RootMode::Root {
+                        if dir == root && *root_mode == RootMode::Root {
                             break;
                         }
+                        parent = dir.parent();
                     }
                 }
                 _ => {}
