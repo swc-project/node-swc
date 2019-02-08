@@ -156,7 +156,13 @@ impl Compiler {
             let session = ParseSess {
                 handler: &self.handler,
             };
-            let module = Parser::new(session, config.syntax, SourceFileInput::from(&*fm))
+            let mut parser = Parser::new(
+                session,
+                config.syntax,
+                SourceFileInput::from(&*fm),
+                Some(Default::default()),
+            );
+            let module = parser
                 .parse_module()
                 .map_err(|mut e| {
                     e.emit();
@@ -182,9 +188,8 @@ impl Compiler {
                 {
                     let handlers = box MyHandlers;
                     let mut emitter = Emitter {
-                        cfg: codegen::Config {
-                            enable_comments: false,
-                        },
+                        cfg: codegen::Config { minify: false },
+                        comments: parser.take_comments(),
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
@@ -242,7 +247,7 @@ impl Task for TransformAsync {
             .and_then(|(code, map)| {
                 let mut buf = vec![];
                 map.to_writer(&mut buf)
-                    .map_err(|err| Error::FailedToWriteSourceMap { err });
+                    .map_err(|err| Error::FailedToWriteSourceMap { err })?;
                 let map = String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
 
                 Ok((code, map))

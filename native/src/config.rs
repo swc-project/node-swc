@@ -282,6 +282,7 @@ impl GlobalPassOption {
                     session,
                     Syntax::Es(Default::default()),
                     SourceFileInput::from(&*fm),
+                    None,
                 )
                 .parse_module()
                 .map_err(|mut e| {
