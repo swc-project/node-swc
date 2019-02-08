@@ -113,6 +113,7 @@ impl Options {
 
         let pass = chain_at!(
             Module,
+            typescript::strip(),
             pass,
             // handle jsx
             react::react(c.cm.clone(), transform.react),
@@ -127,7 +128,6 @@ impl Options {
             hygiene(),
             fixer(),
             helpers::InjectHelpers { cm: c.cm.clone() },
-            typescript::strip(),
             ModuleConfig::build(c.cm.clone(), config.module),
         );
 
