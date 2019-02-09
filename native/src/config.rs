@@ -127,8 +127,8 @@ impl Options {
             compat::es3(),
             hygiene(),
             fixer(),
-            helpers::InjectHelpers { cm: c.cm.clone() },
             ModuleConfig::build(c.cm.clone(), config.module),
+            helpers::InjectHelpers { cm: c.cm.clone() },
         );
 
         BuiltConfig {

@@ -287,8 +287,7 @@ fn compiler_transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsVal
         let c = this.borrow(&guard);
         let fm = c.cm.new_source_file(
             if options.filename.is_empty() {
-                // TODO: Increment
-                FileName::Anon(0)
+                FileName::Anon
             } else {
                 FileName::Real(options.filename.clone().into())
             },
@@ -319,8 +318,7 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
         let c = this.borrow(&guard);
         let fm = c.cm.new_source_file(
             if options.filename.is_empty() {
-                // TODO: Increment
-                FileName::Anon(0)
+                FileName::Anon
             } else {
                 FileName::Real(options.filename.clone().into())
             },
