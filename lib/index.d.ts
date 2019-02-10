@@ -207,13 +207,17 @@ declare module "swc" {
     export interface TsParserConfig {
         readonly syntax: "typescript";
         /**
-         * Defaults to false.
+         * Defaults to `false`.
          */
         readonly tsx?: boolean;
         /**
-         * Defaults to false.
+         * Defaults to `false`.
          */
         readonly decorators?: boolean;
+        /**
+         * Defaults to `false`
+         */
+        readonly dynamicImport?: boolean;
     }
 
     export interface EsParserConfig {
@@ -222,13 +226,38 @@ declare module "swc" {
          * Defaults to false.
          */
         readonly jsc?: boolean;
+        /**
+         * Defaults to `false`. This is not implemented yet.
+         */
         readonly numericSeparator?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly classPrivateProperty?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly privateMethod?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly classProperty?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly functionBind?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly decorators?: boolean;
+        /**
+         * Defaults to `false`
+         */
         readonly decoratorsBeforeExport?: boolean;
+        /**
+         * Defaults to `false`
+         */
+        readonly dynamicImport?: boolean;
     }
 
     /**
