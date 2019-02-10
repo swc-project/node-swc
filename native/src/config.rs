@@ -132,6 +132,7 @@ impl Options {
         );
 
         BuiltConfig {
+            minify: config.minify,
             pass: box pass,
             syntax,
         }
@@ -188,12 +189,15 @@ pub(crate) struct Config {
     pub jsc: JscConfig,
     #[serde(default)]
     pub module: Option<ModuleConfig>,
+    #[serde(default)]
+    pub minify: bool,
 }
 
 /// One `BuiltConfig` per a directory with swcrc
 pub(crate) struct BuiltConfig {
     pub pass: Box<dyn Pass + Send + Sync>,
     pub syntax: Syntax,
+    pub minify: bool,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]

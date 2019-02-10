@@ -192,6 +192,7 @@ declare module "swc" {
     export interface Config {
         readonly jsc?: JscConfig;
         readonly module?: ModuleConfig;
+        readonly minify?: boolean;
     }
 
     export interface JscConfig {

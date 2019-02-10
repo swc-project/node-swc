@@ -188,7 +188,9 @@ impl Compiler {
                 {
                     let handlers = box MyHandlers;
                     let mut emitter = Emitter {
-                        cfg: codegen::Config { minify: false },
+                        cfg: codegen::Config {
+                            minify: config.minify,
+                        },
                         comments: parser.take_comments(),
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
