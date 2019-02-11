@@ -32,6 +32,7 @@ lto = true
 
 [profile.release]
 lto = true
+codegen-units = 1
 
 [patch.crates-io]
 # This reduces compile time
