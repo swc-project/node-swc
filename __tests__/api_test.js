@@ -19,5 +19,5 @@ it('should handle minify', () => {
 
     expect(swc.transformSync(src, {
         minify: true,
-    }).code).toBe("import foo,{bar}from'foo'");
+    }).code.trim()).toBe("import foo,{bar}from'foo';");
 });
