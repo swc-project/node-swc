@@ -209,7 +209,7 @@ pub(crate) struct JscConfig {
     pub transform: Option<TrnasformConfig>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub(crate) enum ModuleConfig {
