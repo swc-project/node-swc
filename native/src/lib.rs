@@ -33,8 +33,8 @@ use std::{
 };
 use swc::{
     common::{
-        self, errors::Handler, sync::Lrc, FileName, FilePathMapping, FoldWith, Globals, SourceFile,
-        SourceMap, GLOBALS,
+        self, errors::Handler, FileName, FilePathMapping, FoldWith, Globals, SourceFile, SourceMap,
+        GLOBALS,
     },
     ecmascript::{
         codegen::{self, Emitter},
@@ -47,14 +47,14 @@ pub type SourceMapString = String;
 
 pub struct Compiler {
     pub globals: Globals,
-    pub cm: Lrc<SourceMap>,
+    pub cm: Arc<SourceMap>,
     handler: Handler,
     /// (env, dir) -> BuiltConfig
     config_caches: RwLock<HashMap<(String, Option<PathBuf>), Arc<BuiltConfig>>>,
 }
 
 impl Compiler {
-    pub(crate) fn new(cm: Lrc<SourceMap>, handler: Handler) -> Self {
+    pub(crate) fn new(cm: Arc<SourceMap>, handler: Handler) -> Self {
         Compiler {
             cm,
             handler,
@@ -121,14 +121,14 @@ impl Compiler {
             }
         }
 
-        if let Some(ref cached) = self
-            .config_caches
-            .write()
-            .unwrap()
-            .get(&(env_name.clone(), None))
-        {
-            return Ok((**cached).clone());
-        }
+        // if let Some(ref cached) = self
+        //     .config_caches
+        //     .write()
+        //     .unwrap()
+        //     .get(&(env_name.clone(), None))
+        // {
+        //     return Ok((**cached).clone());
+        // }
         let built = opts.build(self, None);
         let arc = Arc::new(built);
         self.config_caches
@@ -147,7 +147,7 @@ impl Compiler {
 
     pub(crate) fn process_js_file(
         &self,
-        fm: Lrc<SourceFile>,
+        fm: Arc<SourceFile>,
         opts: Options,
     ) -> Result<(String, sourcemap::SourceMap), Error> {
         self.run(|| {
@@ -191,7 +191,11 @@ impl Compiler {
                         cfg: codegen::Config {
                             minify: config.minify,
                         },
-                        comments: parser.take_comments(),
+                        comments: if config.minify {
+                            None
+                        } else {
+                            parser.take_comments()
+                        },
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
@@ -219,7 +223,7 @@ struct MyHandlers;
 impl swc::ecmascript::codegen::Handlers for MyHandlers {}
 
 fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
-    let cm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
+    let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
 
     let handler = Handler::with_tty_emitter(
         common::errors::ColorConfig::Always,
@@ -235,7 +239,7 @@ fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
 
 struct TransformAsync {
     c: Arc<Compiler>,
-    fm: Lrc<SourceFile>,
+    fm: Arc<SourceFile>,
     options: Options,
 }
 impl Task for TransformAsync {

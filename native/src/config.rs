@@ -1,10 +1,10 @@
 use crate::Compiler;
 use fxhash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, env, path::PathBuf};
+use std::{collections::HashMap, env, path::PathBuf, sync::Arc};
 use swc::{
     atoms::JsWord,
-    common::{sync::Lrc, FileName, SourceMap},
+    common::{FileName, SourceMap},
     ecmascript::{
         ast::{Expr, Module, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
@@ -132,7 +132,7 @@ impl Options {
         );
 
         BuiltConfig {
-            minify: config.minify,
+            minify: config.minify.unwrap_or(false),
             pass: box pass,
             syntax,
         }
@@ -190,7 +190,7 @@ pub(crate) struct Config {
     #[serde(default)]
     pub module: Option<ModuleConfig>,
     #[serde(default)]
-    pub minify: bool,
+    pub minify: Option<bool>,
 }
 
 /// One `BuiltConfig` per a directory with swcrc
@@ -209,7 +209,7 @@ pub(crate) struct JscConfig {
     pub transform: Option<TrnasformConfig>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub(crate) enum ModuleConfig {
@@ -220,7 +220,7 @@ pub(crate) enum ModuleConfig {
 }
 
 impl ModuleConfig {
-    pub fn build(cm: Lrc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass + Send + Sync> {
+    pub fn build(cm: Arc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass + Send + Sync> {
         match config {
             None => box noop(),
             Some(ModuleConfig::CommonJs(config)) => box modules::common_js::common_js(config),
@@ -355,6 +355,8 @@ where
 impl Merge for Config {
     fn merge(&mut self, from: &Self) {
         self.jsc.merge(&from.jsc);
+        self.module.merge(&from.module);
+        self.minify.merge(&from.minify)
     }
 }
 
@@ -362,6 +364,27 @@ impl Merge for JscConfig {
     fn merge(&mut self, from: &Self) {
         self.syntax.merge(&from.syntax);
         self.transform.merge(&from.transform);
+    }
+}
+
+impl Merge for Option<ModuleConfig> {
+    fn merge(&mut self, from: &Self) {
+        match *from {
+            Some(ref c2) => *self = Some(c2.clone()),
+            None => {}
+        }
+    }
+}
+
+impl Merge for Option<bool> {
+    fn merge(&mut self, from: &Self) {
+        match from {
+            Some(v) => match self {
+                Some(ref mut s) => *s |= *v,
+                _ => *self = Some(*v),
+            },
+            None => {}
+        }
     }
 }
 
