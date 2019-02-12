@@ -11,7 +11,7 @@ use swc::{
         transforms::{
             chain_at, compat, fixer, helpers, hygiene, modules,
             pass::{noop, Pass},
-            proposals::{class_properties, decorators},
+            proposals::{class_properties, decorators, export_default_from},
             react, simplifier, typescript, InlineGlobals,
         },
     },
@@ -119,6 +119,7 @@ impl Options {
             react::react(c.cm.clone(), transform.react),
             decorators(),
             class_properties(),
+            export_default_from(),
             simplifier(enable_optimizer),
             compat::es2018(),
             compat::es2017(),
