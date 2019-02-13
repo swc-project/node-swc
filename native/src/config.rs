@@ -126,10 +126,10 @@ impl Options {
             compat::es2016(),
             compat::es2015(),
             compat::es3(),
-            hygiene(),
-            fixer(),
             ModuleConfig::build(c.cm.clone(), config.module),
             helpers::InjectHelpers { cm: c.cm.clone() },
+            hygiene(),
+            fixer(),
         );
 
         BuiltConfig {
