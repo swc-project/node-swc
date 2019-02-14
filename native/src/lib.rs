@@ -86,14 +86,14 @@ impl Compiler {
                 FileName::Real(ref path) => {
                     let mut parent = path.parent();
                     while let Some(dir) = parent {
-                        if let Some(c) = self
-                            .config_caches
-                            .read()
-                            .unwrap()
-                            .get(&(env_name.clone(), Some(dir.to_path_buf())))
-                        {
-                            return Ok(c.clone());
-                        }
+                        // if let Some(c) = self
+                        //     .config_caches
+                        //     .read()
+                        //     .unwrap()
+                        //     .get(&(env_name.clone(), Some(dir.to_path_buf())))
+                        // {
+                        //     return Ok(c.clone());
+                        // }
 
                         let swcrc = dir.join(".swcrc");
 
