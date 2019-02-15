@@ -1,5 +1,5 @@
 
-declare module "swc" {
+declare module "@swc/core" {
 
     export class Compiler {
         constructor();
