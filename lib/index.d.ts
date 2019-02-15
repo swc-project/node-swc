@@ -429,5 +429,10 @@ declare module "@swc/core" {
 
     export const DEFAULT_EXTENSIONS: string[];
 
+    /**
+     * Version of the swc binding.
+     */
+    export const version: string;
+
     export interface MatchPattern { }
 }
