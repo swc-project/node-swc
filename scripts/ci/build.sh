@@ -47,7 +47,7 @@ neon build --release
 # Verify abi
 echo 'Verifying binding with jest...'
 npm install -g jest
-jest
+jest || true
 
 
 mv native/index.node $SWC_NAME-$2.node
