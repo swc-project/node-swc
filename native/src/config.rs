@@ -111,6 +111,8 @@ impl Options {
             GlobalPassOption::default().build(c)
         };
 
+        let is_module_enabled = config.module.is_some();
+
         let pass = chain_at!(
             Module,
             typescript::strip(),
@@ -126,8 +128,9 @@ impl Options {
             compat::es2016(),
             compat::es2015(),
             compat::es3(),
-            ModuleConfig::build(c.cm.clone(), config.module),
+            modules::import_analysis::import_analyzer(is_module_enabled),
             helpers::InjectHelpers { cm: c.cm.clone() },
+            ModuleConfig::build(c.cm.clone(), config.module),
             hygiene(),
             fixer(),
         );
@@ -218,6 +221,8 @@ pub(crate) enum ModuleConfig {
     CommonJs(modules::common_js::Config),
     #[serde(rename = "umd")]
     Umd(modules::umd::Config),
+    #[serde(rename = "amd")]
+    Amd(modules::amd::Config),
 }
 
 impl ModuleConfig {
@@ -226,6 +231,7 @@ impl ModuleConfig {
             None => box noop(),
             Some(ModuleConfig::CommonJs(config)) => box modules::common_js::common_js(config),
             Some(ModuleConfig::Umd(config)) => box modules::umd::umd(cm, config),
+            Some(ModuleConfig::Amd(config)) => box modules::amd::amd(config),
         }
     }
 }

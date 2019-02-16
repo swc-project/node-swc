@@ -334,7 +334,7 @@ declare module "@swc/core" {
         readonly envs?: string[];
     }
 
-    export type ModuleConfig = CommonJsConfig | UmdConfig;
+    export type ModuleConfig = CommonJsConfig | UmdConfig | AmdConfig;
 
     export interface CommonJsConfig {
         readonly type: 'commonjs';
@@ -409,6 +409,11 @@ declare module "@swc/core" {
     export interface UmdConfig {
         readonly type: 'umd';
         readonly globals?: { [key: string]: string };
+    }
+
+    export interface AmdConfig {
+        readonly type: 'amd';
+        readonly moduleId: string;
     }
 
     export interface Output {
