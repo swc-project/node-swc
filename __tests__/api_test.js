@@ -9,6 +9,7 @@ it('should handle modules config', () => {
         }
     });
 
+    expect(out.code).toContain(`function _interopRequireDefault`)
     expect(out.code).toContain(`var _foo = _interopRequireDefault(require('foo'))`);
 });
 
