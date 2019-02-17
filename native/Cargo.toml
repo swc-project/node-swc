@@ -24,8 +24,6 @@ neon-serde = "0.1.1"
 sourcemap = "2"
 failure = "0.1"
 swc = { git = "https://github.com/swc-project/swc.git" }
-arc-swap = "0.3.7"
-objekt = "0.1"
 
 [profile.bench]
 lto = true

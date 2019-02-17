@@ -6,10 +6,8 @@
 extern crate fxhash;
 #[macro_use]
 extern crate neon;
-extern crate arc_swap;
 extern crate failure;
 extern crate neon_serde;
-extern crate objekt;
 extern crate serde;
 extern crate serde_json;
 extern crate sourcemap;
@@ -23,14 +21,8 @@ use crate::{
     error::Error,
 };
 use neon::prelude::*;
-use objekt::clone_box;
 use sourcemap::SourceMapBuilder;
-use std::{
-    collections::HashMap,
-    fs::File,
-    path::{Path, PathBuf},
-    sync::{Arc, RwLock},
-};
+use std::{fs::File, path::Path, sync::Arc};
 use swc::{
     common::{
         self, errors::Handler, FileName, FilePathMapping, FoldWith, Globals, SourceFile, SourceMap,
@@ -49,8 +41,6 @@ pub struct Compiler {
     pub globals: Globals,
     pub cm: Arc<SourceMap>,
     handler: Handler,
-    /// (env, dir) -> BuiltConfig
-    config_caches: RwLock<HashMap<(String, Option<PathBuf>), Arc<BuiltConfig>>>,
 }
 
 impl Compiler {
@@ -59,7 +49,6 @@ impl Compiler {
             cm,
             handler,
             globals: Globals::new(),
-            config_caches: Default::default(),
         }
     }
 
@@ -68,13 +57,13 @@ impl Compiler {
         &self,
         opts: &Options,
         fm: &SourceFile,
-    ) -> Result<Arc<BuiltConfig>, Error> {
+    ) -> Result<BuiltConfig, Error> {
         let Options {
             ref root,
             root_mode,
             swcrc,
             // ref swcrc_roots,
-            ref env_name,
+            // ref env_name,
             ..
         } = opts;
         let root = root
@@ -86,15 +75,6 @@ impl Compiler {
                 FileName::Real(ref path) => {
                     let mut parent = path.parent();
                     while let Some(dir) = parent {
-                        // if let Some(c) = self
-                        //     .config_caches
-                        //     .read()
-                        //     .unwrap()
-                        //     .get(&(env_name.clone(), Some(dir.to_path_buf())))
-                        // {
-                        //     return Ok(c.clone());
-                        // }
-
                         let swcrc = dir.join(".swcrc");
 
                         if swcrc.exists() {
@@ -103,12 +83,7 @@ impl Compiler {
                             let config: Config = serde_json::from_reader(r)
                                 .map_err(|err| Error::FailedToParseConfigFile { err })?;
                             let built = opts.build(self, Some(config));
-                            let arc = Arc::new(built);
-                            self.config_caches
-                                .write()
-                                .unwrap()
-                                .insert((env_name.clone(), Some(dir.to_path_buf())), arc.clone());
-                            return Ok(arc);
+                            return Ok(built);
                         }
 
                         if dir == root && *root_mode == RootMode::Root {
@@ -121,21 +96,8 @@ impl Compiler {
             }
         }
 
-        // if let Some(ref cached) = self
-        //     .config_caches
-        //     .write()
-        //     .unwrap()
-        //     .get(&(env_name.clone(), None))
-        // {
-        //     return Ok((**cached).clone());
-        // }
         let built = opts.build(self, None);
-        let arc = Arc::new(built);
-        self.config_caches
-            .write()
-            .unwrap()
-            .insert((env_name.clone(), None), arc.clone());
-        Ok(arc)
+        Ok(built)
     }
 
     pub(crate) fn run<F, T>(&self, op: F) -> T
@@ -170,7 +132,7 @@ impl Compiler {
                 })
                 .expect("failed to parse module");
 
-            let mut pass = clone_box(&*config.pass);
+            let mut pass = config.pass;
             let module = helpers::HELPERS.set(&Helpers::new(config.external_helpers), || {
                 module.fold_with(&mut pass)
             });
