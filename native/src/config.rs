@@ -10,7 +10,7 @@ use swc::{
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
             chain_at, compat, fixer, helpers, hygiene, modules,
-            pass::{noop, Pass},
+            pass::{noop, Optional, Pass},
             proposals::{class_properties, decorators, export_default_from},
             react, simplifier, typescript, InlineGlobals,
         },
@@ -123,20 +123,23 @@ impl Options {
 
         let pass = chain_at!(
             Module,
-            typescript::strip(),
+            Optional::new(typescript::strip(), syntax.typescript()),
             pass,
             // handle jsx
-            react::react(c.cm.clone(), transform.react),
-            decorators(),
-            class_properties(),
-            export_default_from(),
-            simplifier(enable_optimizer),
+            Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
+            Optional::new(decorators(), syntax.decorators()),
+            Optional::new(class_properties(), syntax.class_props()),
+            Optional::new(export_default_from(), syntax.export_default_from()),
+            Optional::new(simplifier(), enable_optimizer),
             compat::es2018(),
             compat::es2017(),
             compat::es2016(),
             compat::es2015(),
             compat::es3(),
-            modules::import_analysis::import_analyzer(need_interop_analysis),
+            Optional::new(
+                modules::import_analysis::import_analyzer(),
+                need_interop_analysis
+            ),
             helpers::InjectHelpers,
             ModuleConfig::build(c.cm.clone(), config.module),
             hygiene(),
