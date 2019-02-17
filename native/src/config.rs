@@ -96,7 +96,11 @@ impl Options {
             config.merge(c)
         }
 
-        let JscConfig { transform, syntax } = config.jsc;
+        let JscConfig {
+            transform,
+            syntax,
+            external_helpers,
+        } = config.jsc;
 
         let syntax = syntax.unwrap_or_default();
         let transform = transform.unwrap_or_default();
@@ -111,7 +115,11 @@ impl Options {
             GlobalPassOption::default().build(c)
         };
 
-        let is_module_enabled = config.module.is_some();
+        let need_interop_analysis = match config.module {
+            Some(ModuleConfig::CommonJs(ref c)) => !c.no_interop,
+            Some(..) => true,
+            None => false,
+        };
 
         let pass = chain_at!(
             Module,
@@ -128,7 +136,7 @@ impl Options {
             compat::es2016(),
             compat::es2015(),
             compat::es3(),
-            modules::import_analysis::import_analyzer(is_module_enabled),
+            modules::import_analysis::import_analyzer(need_interop_analysis),
             helpers::InjectHelpers { cm: c.cm.clone() },
             ModuleConfig::build(c.cm.clone(), config.module),
             hygiene(),
@@ -138,6 +146,7 @@ impl Options {
         BuiltConfig {
             minify: config.minify.unwrap_or(false),
             pass: box pass,
+            external_helpers,
             syntax,
         }
     }
@@ -202,6 +211,7 @@ pub(crate) struct BuiltConfig {
     pub pass: Box<dyn Pass + Send + Sync>,
     pub syntax: Syntax,
     pub minify: bool,
+    pub external_helpers: bool,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
@@ -211,6 +221,8 @@ pub(crate) struct JscConfig {
     pub syntax: Option<Syntax>,
     #[serde(default)]
     pub transform: Option<TrnasformConfig>,
+    #[serde(default)]
+    pub external_helpers: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -371,6 +383,7 @@ impl Merge for JscConfig {
     fn merge(&mut self, from: &Self) {
         self.syntax.merge(&from.syntax);
         self.transform.merge(&from.transform);
+        self.external_helpers.merge(&from.external_helpers);
     }
 }
 
@@ -383,15 +396,9 @@ impl Merge for Option<ModuleConfig> {
     }
 }
 
-impl Merge for Option<bool> {
+impl Merge for bool {
     fn merge(&mut self, from: &Self) {
-        match from {
-            Some(v) => match self {
-                Some(ref mut s) => *s |= *v,
-                _ => *self = Some(*v),
-            },
-            None => {}
-        }
+        *self |= *from
     }
 }
 
