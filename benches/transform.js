@@ -113,10 +113,15 @@ const PARSERS = [
     }
   })],
   ['babel', '@babel/core', (module) => module.transformSync(SOURCE, {
-    presets: ["@babel/preset-env"],
+    presets: ["@babel/preset-env", "@babel/preset-react"],
     // This does less work than swc's InlineGlobals pass, but it's ok.
     // swc is faster than babel anyway.
-    plugins: ["transform-node-env-inline"],
+    plugins: [
+      "transform-node-env-inline",
+      "@babel/plugin-proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      ["@babel/plugin-proposal-decorators", { decoratorsBeforeExport: true }],
+    ],
   })],
 ];
 

@@ -130,7 +130,8 @@ const PARSERS = [
     plugins: [
       "transform-node-env-inline",
       "@babel/proposal-class-properties",
-      "@babel/proposal-object-rest-spread"
+      "@babel/proposal-object-rest-spread",
+      ["@babel/plugin-proposal-decorators", { decoratorsBeforeExport: true }],
     ],
     filename: 'foo.ts',
   })],

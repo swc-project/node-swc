@@ -62,8 +62,6 @@ impl Compiler {
             ref root,
             root_mode,
             swcrc,
-            // ref swcrc_roots,
-            // ref env_name,
             ..
         } = opts;
         let root = root

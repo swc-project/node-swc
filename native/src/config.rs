@@ -137,7 +137,7 @@ impl Options {
             compat::es2015(),
             compat::es3(),
             modules::import_analysis::import_analyzer(need_interop_analysis),
-            helpers::InjectHelpers { cm: c.cm.clone() },
+            helpers::InjectHelpers,
             ModuleConfig::build(c.cm.clone(), config.module),
             hygiene(),
             fixer(),
