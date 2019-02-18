@@ -109,7 +109,7 @@ impl Compiler {
         &self,
         fm: Arc<SourceFile>,
         opts: Options,
-    ) -> Result<(String, sourcemap::SourceMap), Error> {
+    ) -> Result<(String, Option<sourcemap::SourceMap>), Error> {
         self.run(|| {
             let config = self.config_for_file(&opts, &*fm)?;
 
@@ -120,7 +120,11 @@ impl Compiler {
                 session,
                 config.syntax,
                 SourceFileInput::from(&*fm),
-                Some(Default::default()),
+                if config.minify {
+                    None
+                } else {
+                    Some(Default::default())
+                },
             );
             let module = parser
                 .parse_module()
@@ -153,17 +157,17 @@ impl Compiler {
                         cfg: codegen::Config {
                             minify: config.minify,
                         },
-                        comments: if config.minify {
-                            None
-                        } else {
-                            parser.take_comments()
-                        },
+                        comments: parser.take_comments(),
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
                             "\n",
                             &mut buf,
-                            &mut src_map_builder,
+                            if config.source_maps {
+                                Some(&mut src_map_builder)
+                            } else {
+                                None
+                            },
                         ),
                         handlers,
                         pos_of_leading_comments: Default::default(),
@@ -175,7 +179,14 @@ impl Compiler {
                 }
                 String::from_utf8(buf).unwrap()
             };
-            Ok((src, src_map_builder.into_sourcemap()))
+            Ok((
+                src,
+                if config.source_maps {
+                    Some(src_map_builder.into_sourcemap())
+                } else {
+                    None
+                },
+            ))
         })
     }
 }
@@ -205,7 +216,7 @@ struct TransformAsync {
     options: Options,
 }
 impl Task for TransformAsync {
-    type Output = (String, SourceMapString);
+    type Output = (String, Option<SourceMapString>);
     type Error = Error;
     type JsEvent = JsObject;
 
@@ -213,12 +224,16 @@ impl Task for TransformAsync {
         self.c
             .process_js_file(self.fm.clone(), self.options.clone())
             .and_then(|(code, map)| {
-                let mut buf = vec![];
-                map.to_writer(&mut buf)
-                    .map_err(|err| Error::FailedToWriteSourceMap { err })?;
-                let map = String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
-
-                Ok((code, map))
+                if let Some(map) = map {
+                    let mut buf = vec![];
+                    map.to_writer(&mut buf)
+                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
+                    let map =
+                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
+                    Ok((code, Some(map)))
+                } else {
+                    Ok((code, None))
+                }
             })
     }
 
@@ -230,12 +245,13 @@ impl Task for TransformAsync {
         match result {
             Ok((code, map)) => {
                 let code = cx.string(&code);
-                let map = cx.string(&map);
+                let map = map.map(|map| cx.string(&map));
 
                 let obj = cx.empty_object();
                 obj.set(&mut cx, "code", code)?;
-                obj.set(&mut cx, "map", map)?;
-
+                if let Some(map) = map {
+                    obj.set(&mut cx, "map", map)?;
+                }
                 Ok(obj.upcast())
             }
             Err(err) => cx.throw_error(err.to_string()),
@@ -301,7 +317,7 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
 
     let obj = cx.empty_object();
     obj.set(&mut cx, "code", code)?;
-    {
+    if let Some(map) = map {
         let mut buf = vec![];
         map.to_writer(&mut buf).expect("failed to write sourcemap");
         let map =
@@ -362,7 +378,7 @@ fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<J
 
     let obj = cx.empty_object();
     obj.set(&mut cx, "code", code)?;
-    {
+    if let Some(map) = map {
         let mut buf = vec![];
         map.to_writer(&mut buf).expect("failed to write sourcemap");
         let map =

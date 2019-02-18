@@ -151,6 +151,7 @@ impl Options {
             pass: box pass,
             external_helpers,
             syntax,
+            source_maps: self.source_maps.is_some(),
         }
     }
 }
@@ -215,6 +216,7 @@ pub(crate) struct BuiltConfig {
     pub syntax: Syntax,
     pub minify: bool,
     pub external_helpers: bool,
+    pub source_maps: bool,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
