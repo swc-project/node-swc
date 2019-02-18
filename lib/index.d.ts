@@ -424,7 +424,7 @@ declare module "@swc/core" {
         /**
          * Sourcemap (**not** base64 encoded)
          */
-        map: string;
+        map?: string;
     }
 
     export function transform(src: string, options?: Options): Promise<Output>;
