@@ -23,7 +23,7 @@ it('should emit _interopRequireWildcard', () => {
     expect(out.map).toBeUndefined();
 
     expect(out.code).toContain(`function _interopRequireWildcard`);
-    expect(out.code).toContain(`var _foo = _interopRequireDefault(require('foo'))`);
+    expect(out.code).toContain(`var _foo = _interopRequireWildcard(require('foo'))`);
 });
 
 it('should respect modules config in .swcrc', () => {
