@@ -23,3 +23,10 @@ it('should handle exportNamespaceFrom', () => {
     expect(out.code).toContain("import * as _Foo from 'bar';");
     expect(out.code).toContain("export { _Foo as Foo }");
 });
+
+it('should handle exportNamespaceFrom configured by .swcrc', () => {
+    const out = swc.transformFileSync(__dirname + '/../issue-226/input.js');
+
+    expect(out.code).toContain("import * as _Foo from 'bar';");
+    expect(out.code).toContain("export { _Foo as Foo }");
+});
