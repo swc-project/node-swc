@@ -23,6 +23,7 @@ neon = "0.2.0"
 neon-serde = "0.1.1"
 sourcemap = "2"
 failure = "0.1"
+path-clean = "0.1"
 swc = { git = "https://github.com/swc-project/swc.git" }
 
 [profile.bench]

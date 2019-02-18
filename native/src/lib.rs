@@ -8,6 +8,7 @@ extern crate fxhash;
 extern crate neon;
 extern crate failure;
 extern crate neon_serde;
+extern crate path_clean;
 extern crate serde;
 extern crate serde_json;
 extern crate sourcemap;
@@ -21,6 +22,7 @@ use crate::{
     error::Error,
 };
 use neon::prelude::*;
+use path_clean::clean;
 use sourcemap::SourceMapBuilder;
 use std::{fs::File, path::Path, sync::Arc};
 use swc::{
@@ -293,7 +295,10 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     let source = cx.argument::<JsString>(0)?;
     let options: Options = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
-        None => Default::default(),
+        None => {
+            let obj = cx.empty_object().upcast();
+            neon_serde::from_value(&mut cx, obj)?
+        }
     };
 
     let this = cx.this();
@@ -358,17 +363,20 @@ fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<J
     let path = cx.argument::<JsString>(0)?;
     let opts: Options = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
-        None => Default::default(),
+        None => {
+            let obj = cx.empty_object().upcast();
+            neon_serde::from_value(&mut cx, obj)?
+        }
     };
 
     let path_value = path.value();
+    let path_value = clean(&path_value);
     let path = Path::new(&path_value);
 
     let this = cx.this();
     let (code, map) = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-
         let fm = c.cm.load_file(path).expect("failed to load file");
         c.process_js_file(fm, opts)
             .expect("failed to process js file")

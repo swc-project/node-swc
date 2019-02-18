@@ -230,7 +230,7 @@ pub(crate) struct JscConfig {
     pub external_helpers: bool,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub(crate) enum ModuleConfig {
@@ -253,7 +253,7 @@ impl ModuleConfig {
     }
 }
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct TrnasformConfig {
     #[serde(default)]
@@ -262,14 +262,14 @@ pub(crate) struct TrnasformConfig {
     pub optimizer: Option<OptimizerConfig>,
 }
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct OptimizerConfig {
     #[serde(default)]
     pub globals: Option<GlobalPassOption>,
 }
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct GlobalPassOption {
     #[serde(default)]
