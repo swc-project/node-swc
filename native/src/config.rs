@@ -11,7 +11,7 @@ use swc::{
         transforms::{
             chain_at, compat, fixer, helpers, hygiene, modules,
             pass::{noop, Optional, Pass},
-            proposals::{class_properties, decorators, export_default_from},
+            proposals::{class_properties, decorators, export},
             react, simplifier, typescript, InlineGlobals,
         },
     },
@@ -129,7 +129,7 @@ impl Options {
             Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
             Optional::new(decorators(), syntax.decorators()),
             Optional::new(class_properties(), syntax.class_props()),
-            Optional::new(export_default_from(), syntax.export_default_from()),
+            Optional::new(export(), syntax.export_default_from()||syntax.export_namespace_from()),
             Optional::new(simplifier(), enable_optimizer),
             compat::es2018(),
             compat::es2017(),
