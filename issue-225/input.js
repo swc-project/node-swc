@@ -1,1 +1,1 @@
-import * as bar from './bar';
+import foo from "foo"
