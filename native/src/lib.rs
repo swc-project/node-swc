@@ -128,13 +128,10 @@ impl Compiler {
                     Some(Default::default())
                 },
             );
-            let module = parser
-                .parse_module()
-                .map_err(|mut e| {
-                    e.emit();
-                    ()
-                })
-                .expect("failed to parse module");
+            let module = parser.parse_module().map_err(|mut e| {
+                e.emit();
+                Error::FailedToParseModule {}
+            })?;
 
             let mut pass = config.pass;
             let module = helpers::HELPERS.set(&Helpers::new(config.external_helpers), || {
@@ -179,7 +176,7 @@ impl Compiler {
                         .emit_module(&module)
                         .map_err(|err| Error::FailedToEmitModule { err })?;
                 }
-                String::from_utf8(buf).unwrap()
+                String::from_utf8(buf).map_err(|err| Error::CodeNotUtf8 { err })?
             };
             Ok((
                 src,
@@ -324,9 +321,14 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     obj.set(&mut cx, "code", code)?;
     if let Some(map) = map {
         let mut buf = vec![];
-        map.to_writer(&mut buf).expect("failed to write sourcemap");
-        let map =
-            cx.string(&String::from_utf8(buf).expect("failed to write sourcemap: invalid utf8"));
+        map.to_writer(&mut buf)
+            .map_err(|err| Error::FailedToWriteSourceMap { err })
+            .unwrap();
+        let map = cx.string(
+            &String::from_utf8(buf)
+                .map_err(|err| Error::SourceMapNotUtf8 { err })
+                .unwrap(),
+        );
         obj.set(&mut cx, "map", map)?;
     }
 
@@ -346,7 +348,10 @@ fn compiler_transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<
     {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let fm = c.cm.load_file(path).expect("failed to load file");;
+        let fm =
+            c.cm.load_file(path)
+                .map_err(|err| Error::FailedToReadModule { err })
+                .expect("failed to load file");;
 
         TransformAsync {
             c: c.clone(),

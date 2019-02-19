@@ -129,7 +129,10 @@ impl Options {
             Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
             Optional::new(decorators(), syntax.decorators()),
             Optional::new(class_properties(), syntax.class_props()),
-            Optional::new(export(), syntax.export_default_from()||syntax.export_namespace_from()),
+            Optional::new(
+                export(),
+                syntax.export_default_from() || syntax.export_namespace_from()
+            ),
             Optional::new(simplifier(), enable_optimizer),
             compat::es2018(),
             compat::es2017(),
