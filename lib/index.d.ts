@@ -201,6 +201,10 @@ declare module "@swc/core" {
          */
         readonly parser?: ParserConfig;
         readonly transform?: TransformConfig;
+        /**
+         * Use `@swc/helpers` instead of inline helpers.
+         */
+        readonly externalHelpers?: boolean;
     }
 
     export type ParserConfig = TsParserConfig | EsParserConfig;
