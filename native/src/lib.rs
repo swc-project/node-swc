@@ -7,6 +7,7 @@ extern crate fxhash;
 #[macro_use]
 extern crate neon;
 extern crate failure;
+extern crate lazy_static;
 extern crate neon_serde;
 extern crate path_clean;
 extern crate serde;
@@ -113,6 +114,10 @@ impl Compiler {
         opts: Options,
     ) -> Result<(String, Option<sourcemap::SourceMap>), Error> {
         self.run(|| {
+            if error::debug() {
+                eprintln!("processing js file: {:?}", fm)
+            }
+
             let config = self.config_for_file(&opts, &*fm)?;
 
             let session = ParseSess {

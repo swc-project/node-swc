@@ -1,4 +1,5 @@
 use failure::Fail;
+use lazy_static::lazy_static;
 use serde_json;
 use sourcemap;
 use std::{io, string::FromUtf8Error};
@@ -28,4 +29,18 @@ pub(crate) enum Error {
 
     #[fail(display = "code is not utf8: {}", err)]
     CodeNotUtf8 { err: FromUtf8Error },
+}
+
+/// Returns true if `SWC_DEBUG` environment is set to `1` or `true`.
+pub(crate) fn debug() -> bool {
+    lazy_static! {
+        static ref DEBUG: bool = {
+            match ::std::env::var("SWC_DEBUG") {
+                Ok(ref v) if v == "1" || v.eq_ignore_ascii_case("true") => true,
+                _ => false,
+            }
+        };
+    };
+
+    *DEBUG
 }
