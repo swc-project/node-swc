@@ -34,3 +34,24 @@ it('should respect modules config in .swcrc', () => {
     expect(out.code).toContain(`function _interopRequireDefault`);
     expect(out.code).toContain(`var _foo = _interopRequireDefault(require('foo'))`);
 });
+
+it('should work with amd and expternal helpers', () => {
+    const out = swc.transformSync(`class Foo {}
+    class Bar extends Foo {}`, {
+            jsc: {
+                externalHelpers: true,
+            },
+            module: {
+                type: "amd",
+                moduleId: 'a',
+            }
+        }
+    );
+
+
+    expect(out.map).toBeUndefined();
+
+    expect(out.code).toContain(`define('a', ['@swc/helpers'], function(swcHelpers) {`)
+    expect(out.code).toContain(`swcHelpers.classCallCheck(this, Foo);`);
+    expect(out.code).toContain(`swcHelpers.inherits(Bar, _Foo);`);
+});
