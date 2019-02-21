@@ -340,9 +340,8 @@ declare module "@swc/core" {
 
     export type ModuleConfig = CommonJsConfig | UmdConfig | AmdConfig;
 
-    export interface CommonJsConfig {
-        readonly type: 'commonjs';
 
+    export interface BaseModuleConfig {
         /**
          * By default, when using exports with babel a non-enumerable `__esModule` 
          * property is exported. In some cases this property is used to determine
@@ -410,12 +409,16 @@ declare module "@swc/core" {
         readonly noInterop?: boolean;
     }
 
-    export interface UmdConfig {
+    export interface CommonJsConfig extends BaseModuleConfig {
+        readonly type: 'commonjs';
+    }
+
+    export interface UmdConfig extends BaseModuleConfig {
         readonly type: 'umd';
         readonly globals?: { [key: string]: string };
     }
 
-    export interface AmdConfig {
+    export interface AmdConfig extends BaseModuleConfig {
         readonly type: 'amd';
         readonly moduleId: string;
     }

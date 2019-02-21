@@ -117,7 +117,8 @@ impl Options {
 
         let need_interop_analysis = match config.module {
             Some(ModuleConfig::CommonJs(ref c)) => !c.no_interop,
-            Some(..) => true,
+            Some(ModuleConfig::Amd(ref c)) => !c.config.no_interop,
+            Some(ModuleConfig::Umd(ref c)) => !c.config.no_interop,
             None => false,
         };
 
