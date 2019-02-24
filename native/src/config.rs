@@ -1,7 +1,7 @@
 use crate::Compiler;
 use fxhash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, env, path::PathBuf, sync::Arc};
+use std::{env, path::PathBuf, sync::Arc};
 use swc::{
     atoms::JsWord,
     common::{FileName, SourceMap},
@@ -295,8 +295,8 @@ impl GlobalPassOption {
             c: &Compiler,
             values: impl Iterator<Item = (String, String)>,
             is_env: bool,
-        ) -> HashMap<JsWord, Expr> {
-            let mut m = HashMap::new();
+        ) -> FxHashMap<JsWord, Expr> {
+            let mut m = FxHashMap::default();
 
             for (k, v) in values {
                 let v = if is_env {
