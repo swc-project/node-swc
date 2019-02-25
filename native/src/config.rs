@@ -9,7 +9,7 @@ use swc::{
         ast::{Expr, Module, ModuleItem, Stmt},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::{
-            chain_at, compat, fixer, helpers, hygiene, modules,
+            chain_at, compat, const_modules, fixer, helpers, hygiene, modules,
             pass::{noop, Optional, Pass},
             proposals::{class_properties, decorators, export},
             react, simplifier, typescript, InlineGlobals,
@@ -105,6 +105,15 @@ impl Options {
         let syntax = syntax.unwrap_or_default();
         let transform = transform.unwrap_or_default();
 
+        let const_modules = {
+            let enabled = transform.const_modules.is_some();
+            let config = transform.const_modules.unwrap_or_default();
+
+            let globals = config.globals;
+
+            Optional::new(const_modules(globals), enabled)
+        };
+
         let optimizer = transform.optimizer;
         let enable_optimizer = optimizer.is_some();
         let pass = if let Some(opts) =
@@ -125,6 +134,7 @@ impl Options {
         let pass = chain_at!(
             Module,
             Optional::new(typescript::strip(), syntax.typescript()),
+            const_modules,
             pass,
             // handle jsx
             Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
@@ -208,8 +218,10 @@ fn default_cwd() -> PathBuf {
 pub(crate) struct Config {
     #[serde(default)]
     pub jsc: JscConfig,
+
     #[serde(default)]
     pub module: Option<ModuleConfig>,
+
     #[serde(default)]
     pub minify: Option<bool>,
 }
@@ -228,8 +240,10 @@ pub(crate) struct BuiltConfig {
 pub(crate) struct JscConfig {
     #[serde(rename = "parser", default)]
     pub syntax: Option<Syntax>,
+
     #[serde(default)]
-    pub transform: Option<TrnasformConfig>,
+    pub transform: Option<TransformConfig>,
+
     #[serde(default)]
     pub external_helpers: bool,
 }
@@ -259,11 +273,22 @@ impl ModuleConfig {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
-pub(crate) struct TrnasformConfig {
+pub(crate) struct TransformConfig {
     #[serde(default)]
     pub react: react::Options,
+
+    #[serde(default)]
+    pub const_modules: Option<ConstModulesConfig>,
+
     #[serde(default)]
     pub optimizer: Option<OptimizerConfig>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub(crate) struct ConstModulesConfig {
+    #[serde(default)]
+    pub globals: FxHashMap<JsWord, FxHashMap<JsWord, String>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -417,9 +442,10 @@ impl Merge for Syntax {
     }
 }
 
-impl Merge for TrnasformConfig {
+impl Merge for TransformConfig {
     fn merge(&mut self, from: &Self) {
         self.optimizer.merge(&from.optimizer);
+        self.const_modules.merge(&from.const_modules);
         self.react.merge(&from.react);
     }
 }
@@ -439,5 +465,11 @@ impl Merge for GlobalPassOption {
 impl Merge for react::Options {
     fn merge(&mut self, from: &Self) {
         *self = from.clone();
+    }
+}
+
+impl Merge for ConstModulesConfig {
+    fn merge(&mut self, from: &Self) {
+        *self = from.clone()
     }
 }

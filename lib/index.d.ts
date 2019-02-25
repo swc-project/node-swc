@@ -272,6 +272,9 @@ declare module "@swc/core" {
          * Effective only if `syntax` supports jsx.
          */
         readonly react?: ReactConfig,
+
+        readonly constModules?: ConstModulesConfig;
+
         /**
          * Defaults to null, which skips optimizer pass.
          */
@@ -313,6 +316,19 @@ declare module "@swc/core" {
          */
         readonly useBuiltins: boolean,
 
+    }
+    /**
+     *  - `import { DEBUG } from '@ember/env-flags';`
+     *  - `import { FEATURE_A, FEATURE_B } from '@ember/features';`
+     * 
+     * See: https://github.com/swc-project/swc/issues/18#issuecomment-466272558
+     */
+    export interface ConstModulesConfig {
+        readonly globals?: {
+            readonly [module: string]: {
+                readonly [name: string]: string
+            }
+        };
     }
 
     export interface OptimizerConfig {
