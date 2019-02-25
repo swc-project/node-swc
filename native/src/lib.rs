@@ -117,7 +117,7 @@ impl Compiler {
         &self,
         fm: Arc<SourceFile>,
         opts: Options,
-    ) -> Result<(String, Option<sourcemap::SourceMap>), Error> {
+    ) -> Result<TransformOutput, Error> {
         self.run(|| {
             if error::debug() {
                 eprintln!("processing js file: {:?}", fm)
@@ -188,14 +188,21 @@ impl Compiler {
                 }
                 String::from_utf8(buf).map_err(|err| Error::CodeNotUtf8 { err })?
             };
-            Ok((
-                src,
-                if config.source_maps {
-                    Some(src_map_builder.into_sourcemap())
+            Ok(TransformOutput {
+                code: src,
+                map: if config.source_maps {
+                    let mut buf = vec![];
+                    src_map_builder
+                        .into_sourcemap()
+                        .to_writer(&mut buf)
+                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
+                    let map =
+                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
+                    Some(map)
                 } else {
                     None
                 },
-            ))
+            })
         })
     }
 }
@@ -204,7 +211,7 @@ struct MyHandlers;
 
 impl swc::ecmascript::codegen::Handlers for MyHandlers {}
 
-fn compiler_init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
+fn init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
     let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
 
     let handler = Handler::with_tty_emitter(
@@ -237,20 +244,22 @@ struct TransformOutput {
     map: Option<String>,
 }
 
-fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsObject> {
-    match result {
-        Ok(TransformOutput { code, map }) => {
-            let code = cx.string(&code);
-            let map = map.map(|map| cx.string(&map));
+impl TransformOutput {
+    fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsObject> {
+        match result {
+            Ok(TransformOutput { code, map }) => {
+                let code = cx.string(&code);
+                let map = map.map(|map| cx.string(&map));
 
-            let obj = cx.empty_object();
-            obj.set(&mut cx, "code", code)?;
-            if let Some(map) = map {
-                obj.set(&mut cx, "map", map)?;
+                let obj = cx.empty_object();
+                obj.set(&mut cx, "code", code)?;
+                if let Some(map) = map {
+                    obj.set(&mut cx, "map", map)?;
+                }
+                Ok(obj.upcast())
             }
-            Ok(obj.upcast())
+            Err(err) => cx.throw_error(err.to_string()),
         }
-        Err(err) => cx.throw_error(err.to_string()),
     }
 }
 
@@ -262,20 +271,6 @@ impl Task for TransformAsync {
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         self.c
             .process_js_file(self.fm.clone(), self.options.clone())
-            .and_then(|(code, map)| {
-                let map = if let Some(map) = map {
-                    let mut buf = vec![];
-                    map.to_writer(&mut buf)
-                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
-                    let map =
-                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
-                    Some(map)
-                } else {
-                    None
-                };
-
-                Ok(TransformOutput { code, map })
-            })
     }
 
     fn complete(
@@ -283,7 +278,7 @@ impl Task for TransformAsync {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete(cx, result)
+        TransformOutput::complete(cx, result)
     }
 }
 
@@ -298,23 +293,8 @@ impl Task for TransformFileAsync {
             .cm
             .load_file(&self.path)
             .map_err(|err| Error::FailedToReadModule { err })?;
-        
-        self.c
-            .process_js_file(fm, self.options.clone())
-            .and_then(|(code, map)| {
-                let map = if let Some(map) = map {
-                    let mut buf = vec![];
-                    map.to_writer(&mut buf)
-                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
-                    let map =
-                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
-                    Some(map)
-                } else {
-                    None
-                };
 
-                Ok(TransformOutput { code, map })
-            })
+        self.c.process_js_file(fm, self.options.clone())
     }
 
     fn complete(
@@ -322,11 +302,11 @@ impl Task for TransformFileAsync {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete(cx, result)
+        TransformOutput::complete(cx, result)
     }
 }
 
-fn compiler_transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let source = cx.argument::<JsString>(0)?;
     let options_arg = cx.argument::<JsValue>(1)?;
     let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
@@ -356,7 +336,7 @@ fn compiler_transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsVal
     Ok(cx.undefined().upcast())
 }
 
-fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let source = cx.argument::<JsString>(0)?;
     let options: Options = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
@@ -367,7 +347,7 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     };
 
     let this = cx.this();
-    let (code, map) = {
+    let output = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
         let fm = c.cm.new_source_file(
@@ -383,30 +363,10 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
             .expect("failed to process js file")
     };
 
-    let code = cx.string(&code);
-
-    let obj = cx.empty_object();
-    obj.set(&mut cx, "code", code)?;
-    if let Some(map) = map {
-        let mut buf = vec![];
-        match map
-            .to_writer(&mut buf)
-            .map_err(|err| Error::FailedToWriteSourceMap { err })
-        {
-            Ok(()) => {}
-            Err(err) => return cx.throw_error(err.to_string()),
-        };
-        let map = match String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err }) {
-            Ok(v) => cx.string(&v),
-            Err(err) => return cx.throw_error(&err.to_string()),
-        };
-        obj.set(&mut cx, "map", map)?;
-    }
-
-    Ok(obj.upcast())
+    Ok(neon_serde::to_value(&mut cx, &output)?)
 }
 
-fn compiler_transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
     let path_value = path.value();
     let path = Path::new(&path_value);
@@ -431,7 +391,7 @@ fn compiler_transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<
     Ok(cx.undefined().upcast())
 }
 
-fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
     let opts: Options = match cx.argument_opt(1) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
@@ -446,7 +406,7 @@ fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<J
     let path = Path::new(&path_value);
 
     let this = cx.this();
-    let (code, map) = {
+    let output = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
         let fm = c.cm.load_file(path).expect("failed to load file");
@@ -454,19 +414,7 @@ fn compiler_transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<J
             .expect("failed to process js file")
     };
 
-    let code = cx.string(&code);
-
-    let obj = cx.empty_object();
-    obj.set(&mut cx, "code", code)?;
-    if let Some(map) = map {
-        let mut buf = vec![];
-        map.to_writer(&mut buf).expect("failed to write sourcemap");
-        let map =
-            cx.string(&String::from_utf8(buf).expect("failed to write sourcemap: invalid utf8"));
-        obj.set(&mut cx, "map", map)?;
-    }
-
-    Ok(obj.upcast())
+    Ok(neon_serde::to_value(&mut cx, &output)?)
 }
 
 pub type ArcCompiler = Arc<Compiler>;
@@ -474,30 +422,28 @@ pub type ArcCompiler = Arc<Compiler>;
 declare_types! {
     pub class JsCompiler for ArcCompiler {
         init(cx) {
-            compiler_init(cx)
+            init(cx)
         }
 
         method transform(cx) {
-            compiler_transform_async(cx)
+            transform_async(cx)
         }
 
         method transformSync(cx) {
-            compiler_transform_sync(cx)
+            transform_sync(cx)
         }
 
         method transformFile(cx) {
-            compiler_transform_file_async(cx)
+            transform_file_async(cx)
         }
 
         method transformFileSync(cx) {
-            compiler_transform_file_sync(cx)
+            transform_file_sync(cx)
         }
     }
 }
 
 register_module!(mut cx, {
-    // cx.export_function("transform", transform)?;
-    // cx.export_function("transformFileSync", transform_file)?;
     cx.export_class::<JsCompiler>("Compiler")?;
     Ok(())
 });
