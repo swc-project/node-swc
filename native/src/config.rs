@@ -100,6 +100,7 @@ impl Options {
             transform,
             syntax,
             external_helpers,
+            target,
         } = config.jsc;
 
         let syntax = syntax.unwrap_or_default();
@@ -145,11 +146,11 @@ impl Options {
                 syntax.export_default_from() || syntax.export_namespace_from()
             ),
             Optional::new(simplifier(), enable_optimizer),
-            compat::es2018(),
-            compat::es2017(),
-            compat::es2016(),
-            compat::es2015(),
-            compat::es3(),
+            Optional::new(compat::es2018(), target <= JscTarget::Es2018),
+            Optional::new(compat::es2017(), target <= JscTarget::Es2017),
+            Optional::new(compat::es2016(), target <= JscTarget::Es2016),
+            Optional::new(compat::es2015(), target <= JscTarget::Es2015),
+            Optional::new(compat::es3(), target <= JscTarget::Es3),
             Optional::new(
                 modules::import_analysis::import_analyzer(),
                 need_interop_analysis
@@ -246,6 +247,33 @@ pub(crate) struct JscConfig {
 
     #[serde(default)]
     pub external_helpers: bool,
+
+    #[serde(default)]
+    pub target: JscTarget,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq)]
+pub(crate) enum JscTarget {
+    #[serde(rename = "es3")]
+    Es3,
+    #[serde(rename = "es5")]
+    Es5,
+    #[serde(rename = "es2015")]
+    Es2015,
+    #[serde(rename = "es2016")]
+    Es2016,
+    #[serde(rename = "es2017")]
+    Es2017,
+    #[serde(rename = "es2018")]
+    Es2018,
+    #[serde(rename = "es2019")]
+    Es2019,
+}
+
+impl Default for JscTarget {
+    fn default() -> Self {
+        JscTarget::Es3
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -417,7 +445,16 @@ impl Merge for JscConfig {
     fn merge(&mut self, from: &Self) {
         self.syntax.merge(&from.syntax);
         self.transform.merge(&from.transform);
+        self.target.merge(&from.target);
         self.external_helpers.merge(&from.external_helpers);
+    }
+}
+
+impl Merge for JscTarget {
+    fn merge(&mut self, from: &Self) {
+        if *self < *from {
+            *self = *from
+        }
     }
 }
 

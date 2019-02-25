@@ -17,7 +17,7 @@ it('should perform dce', () => {
             }
         }
     );
-    expect(out.map).toBeUndefined();
+    expect(out.map).toBeFalsy();
 
     expect(out.code.trim()).toBe(`console.log('Foo');`);
 });

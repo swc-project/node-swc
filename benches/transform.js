@@ -104,8 +104,22 @@ module.exports = {
 `;
 
 const PARSERS = [
-  ['swc', '../', (module) => module.transformSync(SOURCE, {})],
-  ['swc-optimize', '../', (module) => module.transformSync(SOURCE, {
+  ['swc (es3)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: { target: 'es3' },
+  })],
+  ['swc (es2015)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: { target: 'es2015' },
+  })],
+  ['swc (es2016)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: { target: 'es2016' },
+  })],
+  ['swc (es2017)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: { target: 'es2017' },
+  })],
+  ['swc (es2018)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: { target: 'es2018' },
+  })],
+  ['swc-optimize (es3)', '../', (module) => module.transformSync(SOURCE, {
     jsc: {
       transform: {
         optimizer: {}

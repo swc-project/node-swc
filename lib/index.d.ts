@@ -205,7 +205,20 @@ declare module "@swc/core" {
          * Use `@swc/helpers` instead of inline helpers.
          */
         readonly externalHelpers?: boolean;
+
+        /**
+         * Defaults to `es3` (which enableds **all** pass).
+         */
+        readonly target?: JscTarget;
     }
+
+    export type JscTarget = 'es3'
+        | 'es5'
+        | 'es2015'
+        | 'es2016'
+        | 'es2017'
+        | 'es2018'
+        | 'es2019';
 
     export type ParserConfig = TsParserConfig | EsParserConfig;
     export interface TsParserConfig {
@@ -269,7 +282,7 @@ declare module "@swc/core" {
      */
     export interface TransformConfig {
         /**
-         * Effective only if `syntax` supports jsx.
+         * Effective only if `syntax` supports ƒ.
          */
         readonly react?: ReactConfig,
 

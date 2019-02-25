@@ -8,7 +8,7 @@ it('should emit _interopRequireDefault', () => {
             type: "commonjs"
         }
     });
-    expect(out.map).toBeUndefined();
+    expect(out.map).toBeFalsy();
 
     expect(out.code).toContain(`function _interopRequireDefault`);
     expect(out.code).toContain(`var _foo = _interopRequireDefault(require('foo'))`);
@@ -20,7 +20,7 @@ it('should emit _interopRequireWildcard', () => {
             type: "commonjs"
         }
     });
-    expect(out.map).toBeUndefined();
+    expect(out.map).toBeFalsy();
 
     expect(out.code).toContain(`function _interopRequireWildcard`);
     expect(out.code).toContain(`var foo = _interopRequireWildcard(require('foo'))`);
@@ -29,7 +29,7 @@ it('should emit _interopRequireWildcard', () => {
 it('should respect modules config in .swcrc', () => {
     const out = swc.transformFileSync(__dirname + '/../issue-225/input.js');
 
-    expect(out.map).toBeUndefined();
+    expect(out.map).toBeFalsy();
 
     expect(out.code).toContain(`function _interopRequireDefault`);
     expect(out.code).toContain(`var _foo = _interopRequireDefault(require('foo'))`);
@@ -49,7 +49,7 @@ it('should work with amd and expternal helpers', () => {
     );
 
 
-    expect(out.map).toBeUndefined();
+    expect(out.map).toBeFalsy();
 
     expect(out.code).toContain(`define('a', ['@swc/helpers'], function(swcHelpers) {`)
     expect(out.code).toContain(`swcHelpers.classCallCheck(this, Foo);`);

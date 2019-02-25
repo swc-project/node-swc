@@ -30,3 +30,21 @@ it('should handle exportNamespaceFrom configured by .swcrc', () => {
     expect(out.code).toContain("import * as _Foo from 'bar';");
     expect(out.code).toContain("export { _Foo as Foo }");
 });
+
+it('should handle jsc.target = es3', () => {
+    const out = swc.transformSync(`foo.default`, {
+        jsc: {
+            target: 'es3'
+        }
+    });
+    expect(out.code.trim()).toBe(`foo['default'];`)
+});
+
+it('should handle jsc.target = es5', () => {
+    const out = swc.transformSync(`foo.default`, {
+        jsc: {
+            target: 'es5'
+        }
+    });
+    expect(out.code.trim()).toBe(`foo.default;`)
+});
