@@ -484,7 +484,11 @@ declare module "@swc/core" {
     // ---------- Ast nodes ----------
     // -------------------------------
 
-    export interface Span { }
+    export interface Span {
+        start: number;
+        end: number;
+        ctxt: number;
+    }
 
     export interface Node {
         readonly type: string;
