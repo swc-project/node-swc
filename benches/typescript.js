@@ -106,14 +106,55 @@ module.exports = {
 
 
 const PARSERS = [
-  ['swc', '../', (module) => module.transformSync(SOURCE, {
+  ['swc (es3)', '../', (module) => module.transformSync(SOURCE, {
     jsc: {
+      target: 'es3',
       parser: {
         syntax: "typescript",
       },
     }
   })],
-  ['swc-optimize', '../', (module) => module.transformSync(SOURCE, {
+  ['swc (es5)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      target: 'es5',
+      parser: {
+        syntax: "typescript",
+      },
+    }
+  })],
+  ['swc (es2015)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      target: 'es2015',
+      parser: {
+        syntax: "typescript",
+      },
+    }
+  })],
+  ['swc (es2016)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      target: 'es2016',
+      parser: {
+        syntax: "typescript",
+      },
+    }
+  })],
+  ['swc (es2017)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      target: 'es2017',
+      parser: {
+        syntax: "typescript",
+      },
+    }
+  })],
+  ['swc (es2018)', '../', (module) => module.transformSync(SOURCE, {
+    jsc: {
+      target: 'es2018',
+      parser: {
+        syntax: "typescript",
+      },
+    }
+  })],
+  ['swc-optimize (es3)', '../', (module) => module.transformSync(SOURCE, {
     jsc: {
       parser: {
         syntax: "typescript",
@@ -123,7 +164,7 @@ const PARSERS = [
       }
     }
   })],
-  ['babel', '@babel/core', (module) => module.transformSync(SOURCE, {
+  ['babel (es5)', '@babel/core', (module) => module.transformSync(SOURCE, {
     presets: ["@babel/preset-typescript", "@babel/preset-env"],
     // This does less work than swc's InlineGlobals pass, but it's ok.
     // swc is faster than babel anyway.
