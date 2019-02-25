@@ -353,8 +353,8 @@ impl GlobalPassOption {
                     )
                 });
 
-                let expr = match module.body.pop().unwrap() {
-                    ModuleItem::Stmt(Stmt::Expr(box expr)) => expr,
+                let expr = match module.body.pop() {
+                    Some(ModuleItem::Stmt(Stmt::Expr(box expr))) => expr,
                     _ => panic!("{} is not a valid expression", v_str),
                 };
 

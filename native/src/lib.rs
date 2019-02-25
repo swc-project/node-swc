@@ -24,8 +24,13 @@ use crate::{
 };
 use neon::prelude::*;
 use path_clean::clean;
+use serde::Serialize;
 use sourcemap::SourceMapBuilder;
-use std::{fs::File, path::Path, sync::Arc};
+use std::{
+    fs::File,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 use swc::{
     common::{
         self, errors::Handler, FileName, FilePathMapping, FoldWith, Globals, SourceFile, SourceMap,
@@ -219,8 +224,38 @@ struct TransformAsync {
     fm: Arc<SourceFile>,
     options: Options,
 }
+
+struct TransformFileAsync {
+    c: Arc<Compiler>,
+    path: PathBuf,
+    options: Options,
+}
+
+#[derive(Serialize)]
+struct TransformOutput {
+    code: String,
+    map: Option<String>,
+}
+
+fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsObject> {
+    match result {
+        Ok(TransformOutput { code, map }) => {
+            let code = cx.string(&code);
+            let map = map.map(|map| cx.string(&map));
+
+            let obj = cx.empty_object();
+            obj.set(&mut cx, "code", code)?;
+            if let Some(map) = map {
+                obj.set(&mut cx, "map", map)?;
+            }
+            Ok(obj.upcast())
+        }
+        Err(err) => cx.throw_error(err.to_string()),
+    }
+}
+
 impl Task for TransformAsync {
-    type Output = (String, Option<SourceMapString>);
+    type Output = TransformOutput;
     type Error = Error;
     type JsEvent = JsObject;
 
@@ -228,38 +263,66 @@ impl Task for TransformAsync {
         self.c
             .process_js_file(self.fm.clone(), self.options.clone())
             .and_then(|(code, map)| {
-                if let Some(map) = map {
+                let map = if let Some(map) = map {
                     let mut buf = vec![];
                     map.to_writer(&mut buf)
                         .map_err(|err| Error::FailedToWriteSourceMap { err })?;
                     let map =
                         String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
-                    Ok((code, Some(map)))
+                    Some(map)
                 } else {
-                    Ok((code, None))
-                }
+                    None
+                };
+
+                Ok(TransformOutput { code, map })
             })
     }
 
     fn complete(
         self,
-        mut cx: TaskContext,
+        cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        match result {
-            Ok((code, map)) => {
-                let code = cx.string(&code);
-                let map = map.map(|map| cx.string(&map));
+        complete(cx, result)
+    }
+}
 
-                let obj = cx.empty_object();
-                obj.set(&mut cx, "code", code)?;
-                if let Some(map) = map {
-                    obj.set(&mut cx, "map", map)?;
-                }
-                Ok(obj.upcast())
-            }
-            Err(err) => cx.throw_error(err.to_string()),
-        }
+impl Task for TransformFileAsync {
+    type Output = TransformOutput;
+    type Error = Error;
+    type JsEvent = JsObject;
+
+    fn perform(&self) -> Result<Self::Output, Self::Error> {
+        let fm = self
+            .c
+            .cm
+            .load_file(&self.path)
+            .map_err(|err| Error::FailedToReadModule { err })?;
+        
+        self.c
+            .process_js_file(fm, self.options.clone())
+            .and_then(|(code, map)| {
+                let map = if let Some(map) = map {
+                    let mut buf = vec![];
+                    map.to_writer(&mut buf)
+                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
+                    let map =
+                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
+                    Some(map)
+                } else {
+                    None
+                };
+
+                Ok(TransformOutput { code, map })
+            })
+    }
+
+    fn complete(
+        self,
+        cx: TaskContext,
+        result: Result<Self::Output, Self::Error>,
+    ) -> JsResult<Self::JsEvent> {
+        complete(cx, result)
     }
 }
 
@@ -326,14 +389,17 @@ fn compiler_transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValu
     obj.set(&mut cx, "code", code)?;
     if let Some(map) = map {
         let mut buf = vec![];
-        map.to_writer(&mut buf)
+        match map
+            .to_writer(&mut buf)
             .map_err(|err| Error::FailedToWriteSourceMap { err })
-            .unwrap();
-        let map = cx.string(
-            &String::from_utf8(buf)
-                .map_err(|err| Error::SourceMapNotUtf8 { err })
-                .unwrap(),
-        );
+        {
+            Ok(()) => {}
+            Err(err) => return cx.throw_error(err.to_string()),
+        };
+        let map = match String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err }) {
+            Ok(v) => cx.string(&v),
+            Err(err) => return cx.throw_error(&err.to_string()),
+        };
         obj.set(&mut cx, "map", map)?;
     }
 
@@ -353,14 +419,10 @@ fn compiler_transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<
     {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let fm =
-            c.cm.load_file(path)
-                .map_err(|err| Error::FailedToReadModule { err })
-                .expect("failed to load file");;
 
-        TransformAsync {
+        TransformFileAsync {
             c: c.clone(),
-            fm,
+            path: path.into(),
             options,
         }
         .schedule(callback);
