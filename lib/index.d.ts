@@ -9,6 +9,9 @@ declare module "@swc/core" {
         parseFile(path: string, options?: ParseOptions): Promise<Module>;
         parseFileSync(path: string, options?: ParseOptions): Module;
 
+        print(m: Module, options?: Options): Promise<Output>;
+        prinSynct(m: Module, options?: Options): Output;
+
         transform(src: string, options?: Options): Promise<Output>;
         transformSync(src: string, options?: Options): Output;
         transformFile(path: string, options?: Options): Promise<Output>;
@@ -19,6 +22,9 @@ declare module "@swc/core" {
     export function parseSync(src: string, options?: ParseOptions): Module;
     export function parseFile(path: string, options?: ParseOptions): Promise<Module>;
     export function parseFileSync(path: string, options?: ParseOptions): Module;
+
+    export function print(m: Module, options?: Options): Promise<Output>;
+    export function prinSynct(m: Module, options?: Options): Output;
 
     export function transform(src: string, options?: Options): Promise<Output>;
     export function transformSync(src: string, options?: Options): Output;

@@ -155,6 +155,19 @@ impl Compiler {
                 module.fold_with(&mut pass)
             });
 
+            self.print(&module, fm, &comments, config.source_maps, config.minify)
+        })
+    }
+
+    fn print(
+        &self,
+        module: &Module,
+        fm: Arc<SourceFile>,
+        comments: &Comments,
+        source_map: bool,
+        minify: bool,
+    ) -> Result<TransformOutput, Error> {
+        self.run(|| {
             let mut src_map_builder = SourceMapBuilder::new(None);
 
             match fm.name {
@@ -170,16 +183,14 @@ impl Compiler {
                 {
                     let handlers = box MyHandlers;
                     let mut emitter = Emitter {
-                        cfg: codegen::Config {
-                            minify: config.minify,
-                        },
-                        comments: if config.minify { None } else { Some(&comments) },
+                        cfg: codegen::Config { minify },
+                        comments: if minify { None } else { Some(&comments) },
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
                             "\n",
                             &mut buf,
-                            if config.source_maps {
+                            if source_map {
                                 Some(&mut src_map_builder)
                             } else {
                                 None
@@ -197,7 +208,7 @@ impl Compiler {
             };
             Ok(TransformOutput {
                 code: src,
-                map: if config.source_maps {
+                map: if source_map {
                     let mut buf = vec![];
                     src_map_builder
                         .into_sourcemap()
@@ -606,6 +617,101 @@ fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
     Ok(cx.undefined().upcast())
 }
+
+// ----- Printing -----
+
+struct PrintTask {
+    c: Arc<Compiler>,
+    module: Module,
+    options: Options,
+}
+
+impl Task for PrintTask {
+    type Output = TransformOutput;
+    type Error = Error;
+    type JsEvent = JsValue;
+    fn perform(&self) -> Result<Self::Output, Self::Error> {
+        let fm = self.c.cm.new_source_file(FileName::Anon, "".into());
+        let comments = Default::default();
+
+        self.c.print(
+            &self.module,
+            fm,
+            &comments,
+            self.options.source_maps.is_some(),
+            self.options
+                .config
+                .clone()
+                .unwrap_or_default()
+                .minify
+                .unwrap_or(false),
+        )
+    }
+
+    fn complete(
+        self,
+        cx: TaskContext,
+        result: Result<Self::Output, Self::Error>,
+    ) -> JsResult<Self::JsEvent> {
+        TransformOutput::complete(cx, result)
+    }
+}
+
+fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let module = cx.argument::<JsValue>(0)?;
+    let module: Module = neon_serde::from_value(&mut cx, module)?;
+
+    let options = cx.argument::<JsValue>(1)?;
+    let options: Options = neon_serde::from_value(&mut cx, options)?;
+
+    let callback = cx.argument::<JsFunction>(2)?;
+
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+
+        PrintTask {
+            c: c.clone(),
+            module,
+            options,
+        }
+        .schedule(callback)
+    }
+
+    Ok(cx.undefined().upcast())
+}
+
+fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let module = cx.argument::<JsValue>(0)?;
+    let module: Module = neon_serde::from_value(&mut cx, module)?;
+
+    let options = cx.argument::<JsValue>(1)?;
+    let options: Options = neon_serde::from_value(&mut cx, options)?;
+
+    let this = cx.this();
+    let result = {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+        let fm = c.cm.new_source_file(FileName::Anon, "".into());
+        let comments = Default::default();
+
+        c.print(
+            &module,
+            fm,
+            &comments,
+            options.source_maps.is_some(),
+            options.config.unwrap_or_default().minify.unwrap_or(false),
+        )
+    };
+    let result = match result {
+        Ok(v) => v,
+        Err(err) => return cx.throw_error(err.to_string()),
+    };
+
+    Ok(neon_serde::to_value(&mut cx, &result)?)
+}
+
 pub type ArcCompiler = Arc<Compiler>;
 
 declare_types! {
@@ -644,6 +750,14 @@ declare_types! {
 
         method parseFileSync(cx) {
             parse_file_sync(cx)
+        }
+
+        method print(cx) {
+            print(cx)
+        }
+
+        method printSync(cx) {
+            print_sync(cx)
         }
     }
 }
