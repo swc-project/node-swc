@@ -238,7 +238,7 @@ pub(crate) struct Config {
 
 /// One `BuiltConfig` per a directory with swcrc
 pub(crate) struct BuiltConfig {
-    pub pass: Box<dyn Pass + Send + Sync>,
+    pub pass: Box<dyn Pass>,
     pub syntax: Syntax,
     pub minify: bool,
     pub external_helpers: bool,
@@ -298,7 +298,7 @@ pub(crate) enum ModuleConfig {
 }
 
 impl ModuleConfig {
-    pub fn build(cm: Arc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass + Send + Sync> {
+    pub fn build(cm: Arc<SourceMap>, config: Option<ModuleConfig>) -> Box<Pass> {
         match config {
             None => box noop(),
             Some(ModuleConfig::CommonJs(config)) => box modules::common_js::common_js(config),
