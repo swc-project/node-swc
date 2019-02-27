@@ -34,7 +34,7 @@ use std::{
 use swc::{
     common::{
         self, comments::Comments, errors::Handler, FileName, FilePathMapping, FoldWith, Globals,
-        SourceFile, SourceMap, GLOBALS,
+        SourceFile, SourceMap, Spanned, GLOBALS,
     },
     ecmascript::{
         ast::Module,
@@ -631,7 +631,8 @@ impl Task for PrintTask {
     type Error = Error;
     type JsEvent = JsValue;
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let fm = self.c.cm.new_source_file(FileName::Anon, "".into());
+        let loc = self.c.cm.lookup_char_pos(self.module.span().lo());
+        let fm = loc.file;
         let comments = Default::default();
 
         self.c.print(
@@ -693,7 +694,8 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let result = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let fm = c.cm.new_source_file(FileName::Anon, "".into());
+        let loc = c.cm.lookup_char_pos(module.span().lo());
+        let fm = loc.file;
         let comments = Default::default();
 
         c.print(
