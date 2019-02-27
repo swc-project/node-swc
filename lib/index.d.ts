@@ -8,8 +8,15 @@ declare module "@swc/core" {
         parseSync(src: string, options?: ParseOptions): Module;
         parseFile(path: string, options?: ParseOptions): Promise<Module>;
         parseFileSync(path: string, options?: ParseOptions): Module;
-
+        /**
+         * Note: this method should be invoked on the compiler instance used
+         *  for `parse()` / `parseSync()`.
+         */
         print(m: Module, options?: Options): Promise<Output>;
+        /**
+         * Note: this method should be invoked on the compiler instance used
+         *  for `parse()` / `parseSync()`.
+         */
         prinSynct(m: Module, options?: Options): Output;
 
         transform(src: string, options?: Options): Promise<Output>;
