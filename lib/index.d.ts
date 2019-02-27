@@ -5,13 +5,25 @@ declare module "@swc/core" {
         constructor();
 
         parse(src: string, options?: ParseOptions): Promise<Module>;
-        parseFile(src: string, options?: ParseOptions): Promise<Module>;
+        parseSync(src: string, options?: ParseOptions): Module;
+        parseFile(path: string, options?: ParseOptions): Promise<Module>;
+        parseFileSync(path: string, options?: ParseOptions): Module;
 
         transform(src: string, options?: Options): Promise<Output>;
         transformSync(src: string, options?: Options): Output;
         transformFile(path: string, options?: Options): Promise<Output>;
         transformFileSync(path: string, options?: Options): Output;
     }
+
+    export function parse(src: string, options?: ParseOptions): Promise<Module>;
+    export function parseSync(src: string, options?: ParseOptions): Module;
+    export function parseFile(path: string, options?: ParseOptions): Promise<Module>;
+    export function parseFileSync(path: string, options?: ParseOptions): Module;
+
+    export function transform(src: string, options?: Options): Promise<Output>;
+    export function transformSync(src: string, options?: Options): Output;
+    export function transformFile(path: string, options?: Options): Promise<Output>;
+    export function transformFileSync(path: string, options?: Options): Output;
 
     export interface ParseOptions extends ParserConfig {
         readonly comments?: boolean;
@@ -470,12 +482,7 @@ declare module "@swc/core" {
         map?: string;
     }
 
-    export function parse(src: string, options?: ParseOptions): Promise<Module>;
-    export function parseFile(src: string, options?: ParseOptions): Promise<Module>;
-    export function transform(src: string, options?: Options): Promise<Output>;
-    export function transformSync(src: string, options?: Options): Output;
-    export function transformFile(path: string, options?: Options): Promise<Output>;
-    export function transformFileSync(path: string, options?: Options): Output;
+
 
     export const DEFAULT_EXTENSIONS: string[];
 

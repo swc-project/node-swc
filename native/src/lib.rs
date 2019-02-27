@@ -521,6 +521,70 @@ fn parse(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     Ok(cx.undefined().upcast())
 }
 
+fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let src = cx.argument::<JsString>(0)?;
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+
+    let this = cx.this();
+    let module = {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+
+        let fm = c.cm.new_source_file(FileName::Anon, src.value());
+        let comments = Default::default();
+
+        c.parse_js(
+            fm,
+            options.syntax,
+            if options.comments {
+                Some(&comments)
+            } else {
+                None
+            },
+        )
+    };
+    let module = match module {
+        Ok(v) => v,
+        Err(err) => return cx.throw_error(err.to_string()),
+    };
+
+    Ok(neon_serde::to_value(&mut cx, &module)?)
+}
+
+fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let path = cx.argument::<JsString>(0)?;
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+
+    let this = cx.this();
+    let module = {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+
+        let fm =
+            c.cm.load_file(Path::new(&path.value()))
+                .expect("failed to read module file");
+        let comments = Default::default();
+
+        c.parse_js(
+            fm,
+            options.syntax,
+            if options.comments {
+                Some(&comments)
+            } else {
+                None
+            },
+        )
+    };
+    let module = match module {
+        Ok(v) => v,
+        Err(err) => return cx.throw_error(err.to_string()),
+    };
+
+    Ok(neon_serde::to_value(&mut cx, &module)?)
+}
+
 fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
     let options_arg = cx.argument::<JsValue>(1)?;
@@ -570,8 +634,16 @@ declare_types! {
             parse(cx)
         }
 
+        method parseSync(cx) {
+            parse_sync(cx)
+        }
+
         method parseFile(cx) {
             parse_file(cx)
+        }
+
+        method parseFileSync(cx) {
+            parse_file_sync(cx)
         }
     }
 }
