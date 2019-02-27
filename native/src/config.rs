@@ -18,6 +18,15 @@ use swc::{
 };
 
 #[derive(Default, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ParseOptions {
+    #[serde(default)]
+    pub comments: bool,
+    #[serde(flatten)]
+    pub syntax: Syntax,
+}
+
+#[derive(Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct Options {
     #[serde(flatten, default)]

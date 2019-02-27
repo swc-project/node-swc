@@ -1,4 +1,4 @@
-const swc = require('../lib/index');
+const swc = require('../../lib/index');
 
 it('should perform dce', () => {
     const out = swc.transformSync(`if (__DEBUG__) {

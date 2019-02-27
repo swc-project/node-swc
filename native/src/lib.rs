@@ -19,7 +19,7 @@ mod config;
 mod error;
 
 use crate::{
-    config::{BuiltConfig, Config, Options, RootMode},
+    config::{BuiltConfig, Config, Options, ParseOptions, RootMode},
     error::Error,
 };
 use neon::prelude::*;
@@ -33,12 +33,13 @@ use std::{
 };
 use swc::{
     common::{
-        self, errors::Handler, FileName, FilePathMapping, FoldWith, Globals, SourceFile, SourceMap,
-        GLOBALS,
+        self, comments::Comments, errors::Handler, FileName, FilePathMapping, FoldWith, Globals,
+        SourceFile, SourceMap, GLOBALS,
     },
     ecmascript::{
+        ast::Module,
         codegen::{self, Emitter},
-        parser::{Parser, Session as ParseSess, SourceFileInput},
+        parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
         transforms::helpers::{self, Helpers},
     },
 };
@@ -113,6 +114,24 @@ impl Compiler {
         GLOBALS.set(&self.globals, op)
     }
 
+    pub(crate) fn parse_js(
+        &self,
+        fm: Arc<SourceFile>,
+        syntax: Syntax,
+        comments: Option<&Comments>,
+    ) -> Result<Module, Error> {
+        let session = ParseSess {
+            handler: &self.handler,
+        };
+        let mut parser = Parser::new(session, syntax, SourceFileInput::from(&*fm), comments);
+        let module = parser.parse_module().map_err(|mut e| {
+            e.emit();
+            Error::FailedToParseModule {}
+        })?;
+
+        Ok(module)
+    }
+
     pub(crate) fn process_js_file(
         &self,
         fm: Arc<SourceFile>,
@@ -125,24 +144,12 @@ impl Compiler {
 
             let config = self.config_for_file(&opts, &*fm)?;
 
-            let session = ParseSess {
-                handler: &self.handler,
-            };
-            let mut parser = Parser::new(
-                session,
+            let comments = Default::default();
+            let module = self.parse_js(
+                fm.clone(),
                 config.syntax,
-                SourceFileInput::from(&*fm),
-                if config.minify {
-                    None
-                } else {
-                    Some(Default::default())
-                },
-            );
-            let module = parser.parse_module().map_err(|mut e| {
-                e.emit();
-                Error::FailedToParseModule {}
-            })?;
-
+                if config.minify { None } else { Some(&comments) },
+            )?;
             let mut pass = config.pass;
             let module = helpers::HELPERS.set(&Helpers::new(config.external_helpers), || {
                 module.fold_with(&mut pass)
@@ -166,7 +173,7 @@ impl Compiler {
                         cfg: codegen::Config {
                             minify: config.minify,
                         },
-                        comments: parser.take_comments(),
+                        comments: if config.minify { None } else { Some(&comments) },
                         cm: self.cm.clone(),
                         wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
                             self.cm.clone(),
@@ -226,13 +233,13 @@ fn init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
     Ok(Arc::new(c))
 }
 
-struct TransformAsync {
+struct TransformTask {
     c: Arc<Compiler>,
     fm: Arc<SourceFile>,
     options: Options,
 }
 
-struct TransformFileAsync {
+struct TransformFileTask {
     c: Arc<Compiler>,
     path: PathBuf,
     options: Options,
@@ -241,32 +248,23 @@ struct TransformFileAsync {
 #[derive(Serialize)]
 struct TransformOutput {
     code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     map: Option<String>,
 }
 
 impl TransformOutput {
-    fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsObject> {
+    fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsValue> {
         match result {
-            Ok(TransformOutput { code, map }) => {
-                let code = cx.string(&code);
-                let map = map.map(|map| cx.string(&map));
-
-                let obj = cx.empty_object();
-                obj.set(&mut cx, "code", code)?;
-                if let Some(map) = map {
-                    obj.set(&mut cx, "map", map)?;
-                }
-                Ok(obj.upcast())
-            }
+            Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
             Err(err) => cx.throw_error(err.to_string()),
         }
     }
 }
 
-impl Task for TransformAsync {
+impl Task for TransformTask {
     type Output = TransformOutput;
     type Error = Error;
-    type JsEvent = JsObject;
+    type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         self.c
@@ -282,10 +280,10 @@ impl Task for TransformAsync {
     }
 }
 
-impl Task for TransformFileAsync {
+impl Task for TransformFileTask {
     type Output = TransformOutput;
     type Error = Error;
-    type JsEvent = JsObject;
+    type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         let fm = self
@@ -306,7 +304,7 @@ impl Task for TransformFileAsync {
     }
 }
 
-fn transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let source = cx.argument::<JsString>(0)?;
     let options_arg = cx.argument::<JsValue>(1)?;
     let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
@@ -325,7 +323,7 @@ fn transform_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             source.value(),
         );
 
-        TransformAsync {
+        TransformTask {
             c: c.clone(),
             fm,
             options,
@@ -366,7 +364,7 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     Ok(neon_serde::to_value(&mut cx, &output)?)
 }
 
-fn transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+fn transform_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let path = cx.argument::<JsString>(0)?;
     let path_value = path.value();
     let path = Path::new(&path_value);
@@ -380,7 +378,7 @@ fn transform_file_async(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> 
         let guard = cx.lock();
         let c = this.borrow(&guard);
 
-        TransformFileAsync {
+        TransformFileTask {
             c: c.clone(),
             path: path.into(),
             options,
@@ -417,6 +415,133 @@ fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     Ok(neon_serde::to_value(&mut cx, &output)?)
 }
 
+// ----- Parsing -----
+
+struct ParseTask {
+    c: Arc<Compiler>,
+    fm: Arc<SourceFile>,
+    options: ParseOptions,
+}
+
+struct ParseFileTask {
+    c: Arc<Compiler>,
+    path: PathBuf,
+    options: ParseOptions,
+}
+
+fn complete_parse(mut cx: TaskContext, result: Result<Module, Error>) -> JsResult<JsValue> {
+    match result {
+        Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
+        Err(err) => cx.throw_error(err.to_string()),
+    }
+}
+
+impl Task for ParseTask {
+    type Output = Module;
+    type Error = Error;
+    type JsEvent = JsValue;
+
+    fn perform(&self) -> Result<Self::Output, Self::Error> {
+        let comments = Default::default();
+
+        self.c.parse_js(
+            self.fm.clone(),
+            self.options.syntax,
+            if self.options.comments {
+                Some(&comments)
+            } else {
+                None
+            },
+        )
+    }
+
+    fn complete(
+        self,
+        cx: TaskContext,
+        result: Result<Self::Output, Self::Error>,
+    ) -> JsResult<Self::JsEvent> {
+        complete_parse(cx, result)
+    }
+}
+
+impl Task for ParseFileTask {
+    type Output = Module;
+    type Error = Error;
+    type JsEvent = JsValue;
+
+    fn perform(&self) -> Result<Self::Output, Self::Error> {
+        let comments = Default::default();
+        let fm = self
+            .c
+            .cm
+            .load_file(&self.path)
+            .map_err(|err| Error::FailedToReadModule { err })?;
+
+        self.c.parse_js(
+            fm,
+            self.options.syntax,
+            if self.options.comments {
+                Some(&comments)
+            } else {
+                None
+            },
+        )
+    }
+
+    fn complete(
+        self,
+        cx: TaskContext,
+        result: Result<Self::Output, Self::Error>,
+    ) -> JsResult<Self::JsEvent> {
+        complete_parse(cx, result)
+    }
+}
+
+fn parse(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let src = cx.argument::<JsString>(0)?;
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+    let callback = cx.argument::<JsFunction>(2)?;
+
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+
+        let fm = c.cm.new_source_file(FileName::Anon, src.value());
+
+        ParseTask {
+            c: c.clone(),
+            fm,
+            options,
+        }
+        .schedule(callback);
+    };
+
+    Ok(cx.undefined().upcast())
+}
+
+fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    let path = cx.argument::<JsString>(0)?;
+    let options_arg = cx.argument::<JsValue>(1)?;
+    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+    let callback = cx.argument::<JsFunction>(2)?;
+
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+
+        ParseFileTask {
+            c: c.clone(),
+            path: path.value().into(),
+            options,
+        }
+        .schedule(callback);
+    };
+
+    Ok(cx.undefined().upcast())
+}
 pub type ArcCompiler = Arc<Compiler>;
 
 declare_types! {
@@ -426,7 +551,7 @@ declare_types! {
         }
 
         method transform(cx) {
-            transform_async(cx)
+            transform(cx)
         }
 
         method transformSync(cx) {
@@ -434,11 +559,19 @@ declare_types! {
         }
 
         method transformFile(cx) {
-            transform_file_async(cx)
+            transform_file(cx)
         }
 
         method transformFileSync(cx) {
             transform_file_sync(cx)
+        }
+
+        method parse(cx) {
+            parse(cx)
+        }
+
+        method parseFile(cx) {
+            parse_file(cx)
         }
     }
 }

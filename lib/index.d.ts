@@ -4,10 +4,17 @@ declare module "@swc/core" {
     export class Compiler {
         constructor();
 
+        parse(src: string, options?: ParseOptions): Promise<Module>;
+        parseFile(src: string, options?: ParseOptions): Promise<Module>;
+
         transform(src: string, options?: Options): Promise<Output>;
         transformSync(src: string, options?: Options): Output;
         transformFile(path: string, options?: Options): Promise<Output>;
         transformFileSync(path: string, options?: Options): Output;
+    }
+
+    export interface ParseOptions extends ParserConfig {
+        readonly comments?: boolean;
     }
 
     /**
@@ -463,6 +470,8 @@ declare module "@swc/core" {
         map?: string;
     }
 
+    export function parse(src: string, options?: ParseOptions): Promise<Module>;
+    export function parseFile(src: string, options?: ParseOptions): Promise<Module>;
     export function transform(src: string, options?: Options): Promise<Output>;
     export function transformSync(src: string, options?: Options): Output;
     export function transformFile(path: string, options?: Options): Promise<Output>;
