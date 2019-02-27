@@ -28,6 +28,8 @@
     "babel-plugin-transform-node-env-inline": "^0.4.3",
     "bench-runner": "^1.3.4",
     "jest": "^23.6.0",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "source-map": "^0.7.3",
+    "sourcemap-validator": "^1.1.0"
   }
 }
