@@ -553,7 +553,7 @@ declare module "@swc/core" {
         | TsIndexSignature;
 
 
-    export interface ClassPropertyBase extends HasSpan, HasDecorator {
+    export interface ClassPropertyBase extends Node, HasSpan, HasDecorator {
         value?: Expression;
 
         typeAnnotation?: TsTypeAnnotation;
@@ -575,10 +575,14 @@ declare module "@swc/core" {
     }
 
     export interface ClassProperty extends ClassPropertyBase {
+        readonly type: 'ClassProperty';
+
         key: Expression,
     }
 
     export interface PrivateProperty extends ClassPropertyBase {
+        readonly type: 'PrivateProperty';
+
         key: PrivateName,
     }
 
@@ -596,7 +600,7 @@ declare module "@swc/core" {
         is_optional?: boolean;
     }
 
-    export interface ClassMethodBase extends HasSpan {
+    export interface ClassMethodBase extends Node, HasSpan {
         function: Fn;
 
         kind: MethodKind;
@@ -611,10 +615,14 @@ declare module "@swc/core" {
     }
 
     export interface ClassMethod extends ClassMethodBase {
+        readonly type: 'ClassMethod';
+
         key: PropertyName;
     }
 
     export interface PrivateMethod extends ClassMethodBase {
+        readonly type: 'PrivateMethod';
+
         key: PrivateName;
     }
 
