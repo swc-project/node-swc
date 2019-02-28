@@ -731,7 +731,7 @@ declare module "@swc/core" {
     export interface SpreadElement extends Node {
         readonly type: 'SpreadElement';
 
-        spread?: Span;
+        spread: Span;
 
         arguments: Expression;
     }
