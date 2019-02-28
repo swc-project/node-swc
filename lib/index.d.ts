@@ -38,7 +38,7 @@ declare module "@swc/core" {
     export function transformFile(path: string, options?: Options): Promise<Output>;
     export function transformFileSync(path: string, options?: Options): Output;
 
-    export interface ParseOptions extends ParserConfig {
+    export type ParseOptions = ParserConfig & {
         readonly comments?: boolean;
     }
 
