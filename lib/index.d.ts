@@ -717,7 +717,7 @@ declare module "@swc/core" {
     export interface ArrayExpression extends ExpressionBase {
         readonly type: 'ArrayExpression';
 
-        elements?: (Expression | SpreadElement)[]
+        elements?: (Expression | SpreadElement | undefined)[]
     }
 
     export interface ObjectExpression extends ExpressionBase {
