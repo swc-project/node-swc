@@ -1198,6 +1198,7 @@ declare module "@swc/core" {
     }
 
     export interface NamedExportSpecifier extends Node, HasSpan {
+        readonly type: 'ExportSpecifier';
 
         orig: Identifier;
         /**
@@ -1273,6 +1274,8 @@ declare module "@swc/core" {
     }
 
     export interface RestElement extends Node, HasSpan, PatternBase {
+        readonly type: 'RestElement';
+
         rest: Span;
 
         argument: Pattern
