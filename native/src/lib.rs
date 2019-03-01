@@ -40,7 +40,10 @@ use swc::{
         ast::Module,
         codegen::{self, Emitter},
         parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
-        transforms::helpers::{self, Helpers},
+        transforms::{
+            helpers::{self, Helpers},
+            util,
+        },
     },
 };
 
@@ -168,7 +171,10 @@ impl Compiler {
             )?;
             let mut pass = config.pass;
             let module = helpers::HELPERS.set(&Helpers::new(config.external_helpers), || {
-                module.fold_with(&mut pass)
+                util::HANDLER.set(&self.handler, || {
+                    // Fold module
+                    module.fold_with(&mut pass)
+                })
             });
 
             self.print(&module, fm, &comments, config.source_maps, config.minify)
