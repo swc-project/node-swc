@@ -9,6 +9,15 @@ it('should handle minify', () => {
     }).code.trim()).toBe("import foo,{bar}from'foo';");
 });
 
+it('should handle sourceMaps = false', () => {
+    const src = '/* Comment */import foo, {bar} from "foo"';
+    const out = swc.transformSync(src, {
+        sourceMaps: false,
+    });
+
+    expect(out.map).toBeFalsy();
+});
+
 it('should handle exportNamespaceFrom', () => {
     const src = "export * as Foo from 'bar';";
     const out = swc.transformSync(src, {

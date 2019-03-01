@@ -165,8 +165,8 @@ impl Options {
                 need_interop_analysis
             ),
             helpers::InjectHelpers,
-            ModuleConfig::build(c.cm.clone(), config.module),
             hygiene(),
+            ModuleConfig::build(c.cm.clone(), config.module),
             fixer(),
         );
 
@@ -175,7 +175,11 @@ impl Options {
             pass: box pass,
             external_helpers,
             syntax,
-            source_maps: self.source_maps.is_some(),
+            source_maps: self.source_maps.as_ref().map(|s| match s{
+                SourceMapsConfig::Bool(v)=>*v,
+                // TODO: Handle source map
+                SourceMapsConfig::Str(_)=>true
+            }).unwrap_or(false),
         }
     }
 }
