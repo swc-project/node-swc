@@ -175,11 +175,15 @@ impl Options {
             pass: box pass,
             external_helpers,
             syntax,
-            source_maps: self.source_maps.as_ref().map(|s| match s{
-                SourceMapsConfig::Bool(v)=>*v,
-                // TODO: Handle source map
-                SourceMapsConfig::Str(_)=>true
-            }).unwrap_or(false),
+            source_maps: self
+                .source_maps
+                .as_ref()
+                .map(|s| match s {
+                    SourceMapsConfig::Bool(v) => *v,
+                    // TODO: Handle source map
+                    SourceMapsConfig::Str(_) => true,
+                })
+                .unwrap_or(false),
         }
     }
 }

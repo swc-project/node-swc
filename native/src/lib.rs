@@ -19,7 +19,7 @@ mod config;
 mod error;
 
 use crate::{
-    config::{BuiltConfig, Config, Options, ParseOptions, RootMode},
+    config::{BuiltConfig, Config, ConfigFile, Merge, Options, ParseOptions, RootMode},
     error::Error,
 };
 use neon::prelude::*;
@@ -71,11 +71,24 @@ impl Compiler {
             ref root,
             root_mode,
             swcrc,
+            config_file,
             ..
         } = opts;
         let root = root
             .clone()
             .unwrap_or_else(|| ::std::env::current_dir().unwrap());
+
+        let config_file = match config_file {
+            Some(ConfigFile::Str(ref s)) => {
+                let path = Path::new(s);
+                let mut r =
+                    File::open(&path).map_err(|err| Error::FailedToReadConfigFile { err })?;
+                let config: Config = serde_json::from_reader(r)
+                    .map_err(|err| Error::FailedToParseConfigFile { err })?;
+                Some(config)
+            }
+            _ => None,
+        };
 
         if *swcrc {
             match fm.name {
@@ -87,8 +100,11 @@ impl Compiler {
                         if swcrc.exists() {
                             let mut r = File::open(&swcrc)
                                 .map_err(|err| Error::FailedToReadConfigFile { err })?;
-                            let config: Config = serde_json::from_reader(r)
+                            let mut config: Config = serde_json::from_reader(r)
                                 .map_err(|err| Error::FailedToParseConfigFile { err })?;
+                            if let Some(config_file) = config_file {
+                                config.merge(&config_file)
+                            }
                             let built = opts.build(self, Some(config));
                             return Ok(built);
                         }
@@ -103,7 +119,7 @@ impl Compiler {
             }
         }
 
-        let built = opts.build(self, None);
+        let built = opts.build(self, config_file);
         Ok(built)
     }
 

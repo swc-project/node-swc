@@ -125,7 +125,7 @@ declare module "@swc/core" {
         readonly envName?: string;
 
         /**
-         * Defaults to searching for a default swc.config.js file, but can
+         * Defaults to searching for a default `.swcrc` file, but can
          * be passed the path of any JS or JSON5 config file.
          *
          * 
@@ -137,7 +137,7 @@ declare module "@swc/core" {
          * a specific config file, it is recommended to stick with a
          * naming scheme that is independent of the "swcrc" name.
          * 
-         * Defaults to `path.resolve(opts.root, "swc.config.js")`
+         * Defaults to `path.resolve(opts.root, ".swcrc")`
          */
         readonly configFile?: string | boolean;
 
