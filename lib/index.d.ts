@@ -1335,6 +1335,7 @@ declare module "@swc/core" {
     export interface AssignmentProperty extends Node {
         readonly type: 'AssignmentProperty';
 
+        key: Identifier;
         value: Expression;
     }
 
