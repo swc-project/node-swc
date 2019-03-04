@@ -177,7 +177,15 @@ impl Compiler {
                 })
             });
 
-            self.print(&module, fm, &comments, config.source_maps, config.minify)
+            self.print(
+                &module,
+                fm,
+                &comments,
+                config.source_maps,
+                config.minify,
+                config.emit_ast,
+                config.emit_code,
+            )
         })
     }
 
@@ -188,6 +196,8 @@ impl Compiler {
         comments: &Comments,
         source_map: bool,
         minify: bool,
+        emit_ast: bool,
+        emit_code: bool,
     ) -> Result<TransformOutput, Error> {
         self.run(|| {
             let mut src_map_builder = SourceMapBuilder::new(None);
@@ -200,7 +210,7 @@ impl Compiler {
                 _ => {}
             }
 
-            let src = {
+            let src = if emit_code {
                 let mut buf = vec![];
                 {
                     let handlers = box MyHandlers;
@@ -226,9 +236,13 @@ impl Compiler {
                         .emit_module(&module)
                         .map_err(|err| Error::FailedToEmitModule { err })?;
                 }
-                String::from_utf8(buf).map_err(|err| Error::CodeNotUtf8 { err })?
+                Some(String::from_utf8(buf).map_err(|err| Error::CodeNotUtf8 { err })?)
+            } else {
+                None
             };
+            let ast = if emit_ast { Some(module.clone()) } else { None };
             Ok(TransformOutput {
+                ast,
                 code: src,
                 map: if source_map {
                     let mut buf = vec![];
@@ -280,17 +294,24 @@ struct TransformFileTask {
 
 #[derive(Serialize)]
 struct TransformOutput {
-    code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ast: Option<Module>,
     #[serde(skip_serializing_if = "Option::is_none")]
     map: Option<String>,
 }
 
 impl TransformOutput {
-    fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsValue> {
-        match result {
+    fn complete<'cx>(
+        c: &Compiler,
+        mut cx: TaskContext<'cx>,
+        result: Result<TransformOutput, Error>,
+    ) -> JsResult<'cx, JsValue> {
+        c.run(|| match result {
             Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
             Err(err) => cx.throw_error(err.to_string()),
-        }
+        })
     }
 }
 
@@ -309,7 +330,7 @@ impl Task for TransformTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        TransformOutput::complete(&self.c, cx, result)
     }
 }
 
@@ -333,7 +354,7 @@ impl Task for TransformFileTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        TransformOutput::complete(&self.c, cx, result)
     }
 }
 
@@ -394,7 +415,13 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             .expect("failed to process js file")
     };
 
-    Ok(neon_serde::to_value(&mut cx, &output)?)
+    let c = {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+        c.clone()
+    };
+
+    Ok(c.run(|| neon_serde::to_value(&mut cx, &output))?)
 }
 
 fn transform_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -462,11 +489,15 @@ struct ParseFileTask {
     options: ParseOptions,
 }
 
-fn complete_parse(mut cx: TaskContext, result: Result<Module, Error>) -> JsResult<JsValue> {
-    match result {
+fn complete_parse<'cx>(
+    c: &Compiler,
+    mut cx: TaskContext<'cx>,
+    result: Result<Module, Error>,
+) -> JsResult<'cx, JsValue> {
+    c.run(|| match result {
         Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
         Err(err) => cx.throw_error(err.to_string()),
-    }
+    })
 }
 
 impl Task for ParseTask {
@@ -493,7 +524,7 @@ impl Task for ParseTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete_parse(cx, result)
+        complete_parse(&self.c, cx, result)
     }
 }
 
@@ -526,7 +557,7 @@ impl Task for ParseFileTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete_parse(cx, result)
+        complete_parse(&self.c, cx, result)
     }
 }
 
@@ -668,6 +699,8 @@ impl Task for PrintTask {
                 .unwrap_or_default()
                 .minify
                 .unwrap_or(false),
+            self.options.emit_ast,
+            self.options.emit_code,
         )
     }
 
@@ -676,7 +709,7 @@ impl Task for PrintTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        TransformOutput::complete(&self.c, cx, result)
     }
 }
 
@@ -706,34 +739,46 @@ fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let module = cx.argument::<JsValue>(0)?;
-    let module: Module = neon_serde::from_value(&mut cx, module)?;
-
-    let options = cx.argument::<JsValue>(1)?;
-    let options: Options = neon_serde::from_value(&mut cx, options)?;
+    println!("print_sync -> start",);
 
     let this = cx.this();
-    let result = {
+    let c = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let loc = c.cm.lookup_char_pos(module.span().lo());
-        let fm = loc.file;
-        let comments = Default::default();
-
-        c.print(
-            &module,
-            fm,
-            &comments,
-            options.source_maps.is_some(),
-            options.config.unwrap_or_default().minify.unwrap_or(false),
-        )
-    };
-    let result = match result {
-        Ok(v) => v,
-        Err(err) => return cx.throw_error(err.to_string()),
+        c.clone()
     };
 
-    Ok(neon_serde::to_value(&mut cx, &result)?)
+    c.run(|| {
+        let module = cx.argument::<JsValue>(0)?;
+        println!("print_sync -> before neon_serde::from_value",);
+        let module: Module = neon_serde::from_value(&mut cx, module)?;
+
+        println!("print_sync -> before arg 1",);
+        let options = cx.argument::<JsValue>(1)?;
+        let options: Options = neon_serde::from_value(&mut cx, options)?;
+
+        let result = {
+            let loc = c.cm.lookup_char_pos(module.span().lo());
+            let fm = loc.file;
+            let comments = Default::default();
+            println!("print_sync -> before print",);
+            c.print(
+                &module,
+                fm,
+                &comments,
+                options.source_maps.is_some(),
+                options.config.unwrap_or_default().minify.unwrap_or(false),
+                options.emit_ast,
+                options.emit_code,
+            )
+        };
+        let result = match result {
+            Ok(v) => v,
+            Err(err) => return cx.throw_error(err.to_string()),
+        };
+
+        Ok(neon_serde::to_value(&mut cx, &result)?)
+    })
 }
 
 pub type ArcCompiler = Arc<Compiler>;

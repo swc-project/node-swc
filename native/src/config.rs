@@ -70,6 +70,20 @@ pub(crate) struct Options {
 
     #[serde(default)]
     pub source_root: Option<String>,
+
+    #[serde(default = "default_emit_code")]
+    pub emit_code: bool,
+
+    #[serde(default = "default_emit_ast")]
+    pub emit_ast: bool,
+}
+
+fn default_emit_code() -> bool {
+    true
+}
+
+fn default_emit_ast() -> bool {
+    false
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -185,6 +199,8 @@ impl Options {
                     SourceMapsConfig::Str(_) => true,
                 })
                 .unwrap_or(false),
+            emit_ast: self.emit_ast,
+            emit_code: self.emit_code,
         }
     }
 }
@@ -252,6 +268,8 @@ pub(crate) struct BuiltConfig {
     pub minify: bool,
     pub external_helpers: bool,
     pub source_maps: bool,
+    pub emit_ast: bool,
+    pub emit_code: bool,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]

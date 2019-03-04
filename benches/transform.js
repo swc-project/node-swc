@@ -104,6 +104,9 @@ module.exports = {
 `;
 
 const PARSERS = [
+  ['swc (plugin)', '../', (module) => module.transformSync(SOURCE, {
+    plugins: []
+  })],
   ['swc (es3)', '../', (module) => module.transformSync(SOURCE, {
     jsc: { target: 'es3' },
   })],
