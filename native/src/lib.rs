@@ -739,8 +739,6 @@ fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    println!("print_sync -> start",);
-
     let this = cx.this();
     let c = {
         let guard = cx.lock();
@@ -750,10 +748,8 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
     c.run(|| {
         let module = cx.argument::<JsValue>(0)?;
-        println!("print_sync -> before neon_serde::from_value",);
         let module: Module = neon_serde::from_value(&mut cx, module)?;
 
-        println!("print_sync -> before arg 1",);
         let options = cx.argument::<JsValue>(1)?;
         let options: Options = neon_serde::from_value(&mut cx, options)?;
 
@@ -761,7 +757,6 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             let loc = c.cm.lookup_char_pos(module.span().lo());
             let fm = loc.file;
             let comments = Default::default();
-            println!("print_sync -> before print",);
             c.print(
                 &module,
                 fm,
