@@ -814,7 +814,9 @@ declare module "@swc/core" {
         alternate: Expression;
     }
 
-    export type Super = Span;
+    export interface Super extends Node, HasSpan {
+        readonly type: 'Super';
+    }
 
     export interface CallExpression extends ExpressionBase {
         readonly type: 'CallExpression';
