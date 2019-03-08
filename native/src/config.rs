@@ -165,8 +165,8 @@ impl Options {
                 need_interop_analysis
             ),
             helpers::InjectHelpers,
-            hygiene(),
             ModuleConfig::build(c.cm.clone(), config.module),
+            hygiene(),
             fixer(),
         );
 
