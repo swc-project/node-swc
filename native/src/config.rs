@@ -12,7 +12,7 @@ use swc::{
             chain_at, compat, const_modules, fixer, helpers, hygiene, modules,
             pass::{noop, Optional, Pass},
             proposals::{class_properties, decorators, export},
-            react, simplifier, typescript, InlineGlobals,
+            react, resolver, simplifier, typescript, InlineGlobals,
         },
     },
 };
@@ -143,6 +143,7 @@ impl Options {
 
         let pass = chain_at!(
             Module,
+            resolver(),
             Optional::new(typescript::strip(), syntax.typescript()),
             const_modules,
             pass,
