@@ -57,3 +57,10 @@ it('should handle jsc.target = es5', () => {
     });
     expect(out.code.trim()).toBe(`foo.default;`)
 });
+
+
+it('should handle react correctly', () => {
+    const out = swc.transformFileSync(__dirname + '/../../issue-351/input.js');
+
+    expect(out.code).toContain(`.default.createElement('div', null);`);
+});
