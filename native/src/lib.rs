@@ -34,7 +34,7 @@ use std::{
 use swc::{
     common::{
         self, comments::Comments, errors::Handler, FileName, FilePathMapping, FoldWith, Globals,
-        SourceFile, SourceMap, Spanned, GLOBALS,
+        SourceFile, SourceMap, Spanned, CM, GLOBALS,
     },
     ecmascript::{
         ast::Module,
@@ -130,7 +130,7 @@ impl Compiler {
     where
         F: FnOnce() -> T,
     {
-        GLOBALS.set(&self.globals, op)
+        GLOBALS.set(&self.globals, || CM.set(&self.cm, op))
     }
 
     pub(crate) fn parse_js(

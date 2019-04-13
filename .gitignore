@@ -8,3 +8,9 @@ native/artifacts.json
 yarn.lock
 package-lock.json
 *.log
+
+# Ignore compiled javascript files
+!lib/index.js
+!lib/index.d.ts
+lib/*.js
+lib/*.ts
