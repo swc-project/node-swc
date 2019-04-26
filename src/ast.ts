@@ -38,7 +38,7 @@ export interface HasDecorator {
     decorators?: Decorator[];
 }
 
-export interface Class extends HasSpan, HasDecorator {
+export interface Class extends Node, HasSpan, HasDecorator {
     body?: ClassMember[];
 
     superClass?: Expression,
