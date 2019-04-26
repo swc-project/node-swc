@@ -422,7 +422,7 @@ export interface ParenthesisExpression extends ExpressionBase {
     expression: Expression
 }
 
-export interface Fn extends HasSpan, HasDecorator {
+export interface Fn extends Node, HasSpan, HasDecorator {
     params: Pattern[],
 
     body?: BlockStatement,
