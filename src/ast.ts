@@ -175,7 +175,7 @@ export interface VariableDeclaration extends Node, HasSpan {
     declarations: VariableDeclarator[],
 }
 
-export type VariableDeclarationKind = 'get' | 'let' | 'const';
+export type VariableDeclarationKind = 'var' | 'let' | 'const';
 
 export interface VariableDeclarator extends Node, HasSpan {
     readonly type: 'VariableDeclarator';
@@ -376,7 +376,7 @@ export interface YieldExpression extends ExpressionBase {
     delegate?: boolean;
 }
 
-export interface MetaProperty extends Node {
+export interface MetaProperty extends Node, HasSpan {
     readonly type: 'MetaProperty';
 
     meta: Identifier;
