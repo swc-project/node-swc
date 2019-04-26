@@ -780,7 +780,7 @@ export interface ArrayPattern extends Node, HasSpan, PatternBase {
 export interface ObjectPattern extends Node, HasSpan, PatternBase {
     readonly type: 'ObjectPattern';
 
-    props: ObjectPatternProperty[];
+    properties: ObjectPatternProperty[];
 }
 
 export interface AssignmentPattern extends Node, HasSpan, PatternBase {
