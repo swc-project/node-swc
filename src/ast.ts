@@ -31,7 +31,7 @@ export interface Node {
 }
 
 export interface HasSpan {
-    span?: Span;
+    span: Span;
 }
 
 export interface HasDecorator {
