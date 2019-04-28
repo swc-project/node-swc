@@ -103,32 +103,45 @@ module.exports = {
 };
 `;
 
+const targets = [
+  'es3',
+  'es5',
+  'es2015',
+  'es2016',
+  'es2017',
+  'es2018',
+];
+
+
 const PARSERS = [
-  ['swc (plugin)', '../', (module) => module.transformSync(SOURCE, {
-    plugins: []
-  })],
-  ['swc (es3)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: { target: 'es3' },
-  })],
-  ['swc (es2015)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: { target: 'es2015' },
-  })],
-  ['swc (es2016)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: { target: 'es2016' },
-  })],
-  ['swc (es2017)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: { target: 'es2017' },
-  })],
-  ['swc (es2018)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: { target: 'es2018' },
-  })],
-  ['swc-optimize (es3)', '../', (module) => module.transformSync(SOURCE, {
-    jsc: {
-      transform: {
-        optimizer: {}
-      }
-    }
-  })],
+  ...targets.map((target) => {
+    return [
+      `swc (${target})`, '../', (module) => module.transformSync(SOURCE, {
+        jsc: {
+          target,
+        },
+      })];
+  }),
+  ...targets.map((target) => {
+    return [
+      `swc (plugin, ${target})`, '../', (module) => module.transformSync(SOURCE, {
+        jsc: {
+          target,
+        },
+        plugins: []
+      })];
+  }),
+  ...targets.map((target) => {
+    return [
+      `swc (optimize, ${target})`, '../', (module) => module.transformSync(SOURCE, {
+        jsc: {
+          target,
+          transform: {
+            optimizer: {}
+          }
+        },
+      })];
+  }),
   ['babel (es5)', '@babel/core', (module) => module.transformSync(SOURCE, {
     presets: ["@babel/preset-env", "@babel/preset-react"],
     // This does less work than swc's InlineGlobals pass, but it's ok.
