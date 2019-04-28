@@ -152,7 +152,7 @@ export type Declaration = ClassDeclaration
 export interface FunctionDeclaration extends Fn {
     readonly type: 'FunctionDeclaration';
 
-    ident: Identifier,
+    identifier: Identifier,
 
     declare?: boolean;
 }

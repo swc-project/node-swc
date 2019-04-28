@@ -593,7 +593,7 @@ export default class Visitor {
     }
 
     visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
-        decl.ident = this.visitIdentifier(decl.ident);
+        decl.identifier = this.visitIdentifier(decl.identifier);
         decl = this.visitFunction(decl);
 
         return decl;

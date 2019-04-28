@@ -12,5 +12,5 @@ package-lock.json
 # Ignore compiled javascript files
 !lib/index.js
 !lib/index.d.ts
-lib/*.js
-lib/*.ts
+lib/**/*.js
+lib/**/*.ts

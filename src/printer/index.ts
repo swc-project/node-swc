@@ -720,7 +720,7 @@ export default class Printer {
     printFunctionDeclaration(n: ast.FunctionDeclaration): void {
         this.p('function');
         this.sp();
-        this.printIdentifier(n.ident);
+        this.printIdentifier(n.identifier);
         this.formattingSpace();
 
         this.printFunctionTrailing(n);
@@ -1151,7 +1151,7 @@ export default class Printer {
 
     printParenthesisExpression(n: ast.ParenthesisExpression): void {
         this.p('(');
-        this.printExpression(n);
+        this.printExpression(n.expression);
         this.p(')');
     }
 
@@ -1601,17 +1601,17 @@ export default class Printer {
             .replace("\r", "\\r")
             .replace("\t", "\\t")
             .replace('\{000B}', "\\v")
-            .replace("\00", "\\x000")
-            .replace("\01", "\\x001")
-            .replace("\02", "\\x002")
-            .replace("\03", "\\x003")
-            .replace("\04", "\\x004")
-            .replace("\05", "\\x005")
-            .replace("\06", "\\x006")
-            .replace("\07", "\\x007")
-            .replace("\08", "\\x008")
-            .replace("\09", "\\x009")
-            .replace("\0", "\\0");
+            .replace("\o00", "\\x000")
+            .replace("\o01", "\\x001")
+            .replace("\o02", "\\x002")
+            .replace("\o03", "\\x003")
+            .replace("\o04", "\\x004")
+            .replace("\o05", "\\x005")
+            .replace("\o06", "\\x006")
+            .replace("\o07", "\\x007")
+            .replace("\o08", "\\x008")
+            .replace("\o09", "\\x009")
+            .replace("\o0", "\\0");
 
 
         if (n.value.indexOf("'") === -1) {
@@ -2199,7 +2199,9 @@ function getSpan(n: any): ast.Span | undefined {
 }
 
 function isOnSingleLine(sp: ast.Span): boolean {
-    return sp.loc.start.line === sp.loc.end.line
+    if (sp.loc)
+        return sp.loc.start.line === sp.loc.end.line
+    return false;
 }
 
 function isOnSameLine(l: ast.Span, r: ast.Span): boolean {
@@ -2273,7 +2275,7 @@ function lastOrUndefined<T>(l: T[]): T | undefined {
 
 function getStartsOnNewLine(n: any): boolean {
     const sp = getSpan(n);
-    if (!sp) {
+    if (!sp || !sp.loc) {
         return false;
     }
     return sp.loc.start.line !== sp.loc.end.line
