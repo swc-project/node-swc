@@ -34,7 +34,7 @@ use std::{
 use swc::{
     common::{
         self, comments::Comments, errors::Handler, FileName, FilePathMapping, FoldWith, Globals,
-        SourceFile, SourceMap, Spanned, CM, GLOBALS,
+        SourceFile, SourceMap, CM, GLOBALS,
     },
     ecmascript::{
         ast::Module,
@@ -671,111 +671,6 @@ fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     Ok(cx.undefined().upcast())
 }
 
-// ----- Printing -----
-
-struct PrintTask {
-    c: Arc<Compiler>,
-    module: Module,
-    options: Options,
-}
-
-impl Task for PrintTask {
-    type Output = TransformOutput;
-    type Error = Error;
-    type JsEvent = JsValue;
-    fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let loc = self.c.cm.lookup_char_pos(self.module.span().lo());
-        let fm = loc.file;
-        let comments = Default::default();
-
-        self.c.print(
-            &self.module,
-            fm,
-            &comments,
-            self.options.source_maps.is_some(),
-            self.options
-                .config
-                .clone()
-                .unwrap_or_default()
-                .minify
-                .unwrap_or(false),
-            self.options.emit_ast,
-            self.options.emit_code,
-        )
-    }
-
-    fn complete(
-        self,
-        cx: TaskContext,
-        result: Result<Self::Output, Self::Error>,
-    ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(&self.c, cx, result)
-    }
-}
-
-fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let module = cx.argument::<JsValue>(0)?;
-    let module: Module = neon_serde::from_value(&mut cx, module)?;
-
-    let options = cx.argument::<JsValue>(1)?;
-    let options: Options = neon_serde::from_value(&mut cx, options)?;
-
-    let callback = cx.argument::<JsFunction>(2)?;
-
-    let this = cx.this();
-    {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
-
-        PrintTask {
-            c: c.clone(),
-            module,
-            options,
-        }
-        .schedule(callback)
-    }
-
-    Ok(cx.undefined().upcast())
-}
-
-fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let this = cx.this();
-    let c = {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
-        c.clone()
-    };
-
-    c.run(|| {
-        let module = cx.argument::<JsValue>(0)?;
-        let module: Module = neon_serde::from_value(&mut cx, module)?;
-
-        let options = cx.argument::<JsValue>(1)?;
-        let options: Options = neon_serde::from_value(&mut cx, options)?;
-
-        let result = {
-            let loc = c.cm.lookup_char_pos(module.span().lo());
-            let fm = loc.file;
-            let comments = Default::default();
-            c.print(
-                &module,
-                fm,
-                &comments,
-                options.source_maps.is_some(),
-                options.config.unwrap_or_default().minify.unwrap_or(false),
-                options.emit_ast,
-                options.emit_code,
-            )
-        };
-        let result = match result {
-            Ok(v) => v,
-            Err(err) => return cx.throw_error(err.to_string()),
-        };
-
-        Ok(neon_serde::to_value(&mut cx, &result)?)
-    })
-}
-
 pub type ArcCompiler = Arc<Compiler>;
 
 declare_types! {
@@ -814,14 +709,6 @@ declare_types! {
 
         method parseFileSync(cx) {
             parse_file_sync(cx)
-        }
-
-        method print(cx) {
-            print(cx)
-        }
-
-        method printSync(cx) {
-            print_sync(cx)
         }
     }
 }
