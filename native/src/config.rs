@@ -143,12 +143,12 @@ impl Options {
 
         let pass = chain_at!(
             Module,
+            // handle jsx
+            Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
             resolver(),
             Optional::new(typescript::strip(), syntax.typescript()),
             const_modules,
             pass,
-            // handle jsx
-            Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
             Optional::new(decorators(), syntax.decorators()),
             Optional::new(class_properties(), syntax.class_props()),
             Optional::new(
