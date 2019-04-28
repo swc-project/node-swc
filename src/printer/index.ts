@@ -1737,7 +1737,170 @@ export default class Printer {
         start = 0,
         count = children ? children.length - start : 0,
     ) {
+        const isUndefined = children === undefined;
+        if (isUndefined && format & ListFormat.OptionalIfUndefined) {
+            return;
+        }
+
+        const isEmpty = children === undefined || start >= children.length || count === 0;
+        if (isEmpty && format & ListFormat.OptionalIfEmpty) {
+            return;
+        }
+
+        if (format & ListFormat.BracketsMask) {
+            this.p(getOpeningBracket(format));
+            if (isEmpty && !isUndefined) {
+                // Emit comments within empty bracketed lists
+                // TODO: children.lo()
+                this.emitTrailingCommentsOfPosition(parentNode.span.start, /*prefixSpace*/ true);
+            }
+        }
+
+        if (isEmpty) {
+            // Write a line terminator if the parent node was multi-line
+            if (format & ListFormat.MultiLine) {
+                if (this.pretty) {
+                    this.line();
+                }
+            } else if (format & ListFormat.SpaceBetweenBraces && !(format & ListFormat.NoSpaceIfEmpty)) {
+                if (this.pretty) {
+                    this.sp();
+                }
+            }
+        } else {
+            // Write the opening line terminator or leading whitespace.
+            const mayEmitInterveningComments = (format & ListFormat.NoInterveningComments) === 0;
+            let shouldEmitInterveningComments = mayEmitInterveningComments;
+            if (shouldWriteLeadingLineTerminator(parentNode.span!, children!, format)) { // TODO: GH#18217
+                if (this.pretty) {
+                    this.line();
+                }
+                shouldEmitInterveningComments = false;
+            } else if (format & ListFormat.SpaceBetweenBraces) {
+                this.formattingSpace()
+            }
+
+            // Increase the indent, if requested.
+            if (format & ListFormat.Indented) {
+                if (this.pretty) {
+                    this.increaseIndent();
+                }
+            }
+
+            // Emit each child.
+            let previousSibling: ast.Span | undefined;
+            let shouldDecreaseIndentAfterEmit = false;
+            for (let i = 0; i < count; i++) {
+                const child = children![start + i];
+
+                // Write the delimiter if this is not the first node.
+                if (previousSibling) {
+                    // i.e
+                    //      function commentedParameters(
+                    //          /* Parameter a */
+                    //          a
+                    //          /* End of parameter a */ -> this comment isn't considered to be trailing comment of parameter "a" due to newline
+                    //          ,
+                    if (format & ListFormat.DelimitersMask && previousSibling.end !== parentNode.span!.end) {
+                        this.emitLeadingCommentsOfPosition(previousSibling.end);
+                    }
+                    this.printDelimiter(format);
+
+                    // Write either a line terminator or whitespace to separate the elements.
+                    if (shouldWriteSeparatingLineTerminator(previousSibling, child, format)) {
+                        // If a synthesized node in a single-line list starts on a new
+                        // line, we should increase the indent.
+                        if ((format & (ListFormat.LinesMask | ListFormat.Indented)) === ListFormat.SingleLine) {
+                            this.increaseIndent();
+                            shouldDecreaseIndentAfterEmit = true;
+                        }
+
+                        if (this.pretty) {
+                            this.line();
+                        }
+                        shouldEmitInterveningComments = false;
+                    } else if (previousSibling && format & ListFormat.SpaceBetweenSiblings) {
+                        this.formattingSpace();
+                    }
+                }
+
+                // Emit this child.
+                if (shouldEmitInterveningComments) {
+                    const commentRange: ast.Span = (child as any as ast.HasSpan).span;
+                    if (commentRange) {
+                        this.emitTrailingCommentsOfPosition(commentRange.start);
+                    }
+                } else {
+                    shouldEmitInterveningComments = mayEmitInterveningComments;
+                }
+
+                emit(child);
+
+                if (shouldDecreaseIndentAfterEmit) {
+                    if (this.pretty) {
+                        this.decreaseIndent();
+                    }
+                    shouldDecreaseIndentAfterEmit = false;
+                }
+
+                previousSibling = (child as any as ast.HasSpan).span;
+            }
+
+            // Write a trailing comma, if requested.
+            const hasTrailingComma = (format & ListFormat.AllowTrailingComma) && false;
+            if (format & ListFormat.CommaDelimited && hasTrailingComma) {
+                this.p(",");
+            }
+
+
+            // Emit any trailing comment of the last element in the list
+            // i.e
+            //       var array = [...
+            //          2
+            //          /* end of element 2 */
+            //       ];
+            if (previousSibling &&
+                format & ListFormat.DelimitersMask &&
+                previousSibling.end !== parentNode.span.end) {
+                this.emitLeadingCommentsOfPosition(previousSibling.end);
+            }
+
+            // Decrease the indent, if requested.
+            if (format & ListFormat.Indented) {
+                if (this.pretty) {
+                    this.decreaseIndent();
+                }
+            }
+
+            // Write the closing line terminator or closing whitespace.
+            if (shouldWriteClosingLineTerminator(parentNode.span, children!, format)) {
+                if (this.pretty) {
+                    this.line();
+                }
+            }
+            else if (format & ListFormat.SpaceBetweenBraces) {
+                this.formattingSpace();
+            }
+        }
+
+        if (format & ListFormat.BracketsMask) {
+            if (isEmpty && !isUndefined) {
+                // Emit leading comments within empty lists
+                // TODO: children.end
+                this.emitLeadingCommentsOfPosition(parentNode.span.end);
+            }
+            this.p(getClosingBracket(format));
+        }
     }
+
+    private emitLeadingCommentsOfPosition(
+        pos: number,
+    ) { }
+
+    private emitTrailingCommentsOfPosition(
+        pos: number,
+        prefixSpace?: boolean,
+    ) { }
 
     private line(): void {
         this.p('\n');
@@ -1818,14 +1981,162 @@ function unimpl(type: string): Error {
     return new Error(`not implemented yet: codegen of ${type}`);
 }
 
-function isSynthesized(n: any): boolean {
-    const s = n as ast.HasSpan;
-    return !!(s.span && s.span.ctxt === 0)
+function isSpan(n: any): n is ast.Span {
+    return n.start && n.end && n.ctxt
 }
 
-function startsWithAlphaNum(n: ast.Pattern | ast.Expression | ast.Statement): boolean {
-    switch (n.type) {
+function isSynthesized(n: ast.Span | any): boolean {
+    if (isSpan(n)) {
+        return n.ctxt !== 0
     }
+
+    const s = n as ast.HasSpan;
+    return !!(s.span && s.span.ctxt !== 0)
+}
+
+function startsWithAlphaNum(n: ast.Pattern | ast.Expression | ast.Statement | ast.Super): boolean {
+    switch (n.type) {
+        case 'Super':
+        case 'Identifier':
+        case 'BooleanLiteral':
+        case 'NumericLiteral':
+        case 'NullLiteral':
+        case 'AwaitExpression':
+        case 'FunctionExpression':
+        case 'ClassExpression':
+        case 'ThisExpression':
+        case 'YieldExpression':
+        case 'NewExpression':
+        case 'MetaProperty':
+            return true;
+
+        case 'PrivateName':
+            return false;
+
+        case 'StringLiteral':
+        case 'RegExpLiteral':
+        case 'TemplateLiteral':
+            return false;
+
+        case 'SequenceExpression':
+            if (n.expressions.length !== 0) {
+                return startsWithAlphaNum(n.expressions[0])
+            }
+            return false;
+
+        case 'AssignmentExpression':
+            return startsWithAlphaNum(n.left);
+
+        case 'BinaryExpression':
+            return startsWithAlphaNum(n.left);
+
+        case 'ConditionalExpression':
+            return startsWithAlphaNum(n.test);
+
+        case 'CallExpression':
+            return startsWithAlphaNum(n.callee);
+
+        case 'MemberExpression':
+            return startsWithAlphaNum(n.object);
+
+        case 'UnaryExpression':
+            if (n.operator === 'void' || n.operator === 'typeof' || n.operator === 'delete') return true;
+            return false;
+
+        case 'ArrowFunctionExpression':
+            return false;
+
+        case 'TemplateLiteral':
+        case 'UpdateExpression':
+        case 'ArrayExpression':
+        case 'ObjectExpression':
+        case 'ParenthesisExpression':
+            return false;
+
+        case 'TaggedTemplateExpression':
+            return startsWithAlphaNum(n.tag);
+
+        case 'JSXEmptyExpression':
+            return false;
+
+
+        case 'JSXFragment':
+        case 'JSXElement':
+            return false;
+
+        case 'JSXNamespacedName':
+            return true;
+
+        case 'JSXMemberExpression':
+            // return startsWithAlphaNum(n.object)
+            return true
+
+        case 'TsTypeAssertion':
+            return false;
+
+        case 'TsNonNullExpression':
+            return startsWithAlphaNum(n.expression);
+
+        case 'TsAsExpression':
+            return startsWithAlphaNum(n.expression);
+
+        case 'TsTypeCastExpression':
+            return startsWithAlphaNum(n.expression);
+
+
+
+
+        // -------------------------
+        //
+        //         Patterns
+        //
+        // -------------------------
+
+        case 'AssignmentPattern':
+            return startsWithAlphaNum(n.left);
+
+        case 'ObjectPattern':
+        case 'ArrayPattern':
+        case 'RestElement':
+            return false;
+
+
+        // -------------------------
+        //
+        //        Statements
+        //
+        // -------------------------
+        case 'DebuggerStatement':
+        case 'WithStatement':
+        case 'WhileStatement':
+        case 'DoWhileStatement':
+        case 'ReturnStatement':
+        case 'LabeledStatement':
+        case 'BreakStatement':
+        case 'ContinueStatement':
+        case 'SwitchStatement':
+        case 'ThrowStatement':
+        case 'TryStatement':
+        case 'ForStatement':
+        case 'ForInStatement':
+        case 'ForOfStatement':
+        case 'IfStatement':
+            return true;
+        case 'BlockStatement':
+            return false
+
+
+        case 'ClassDeclaration':
+        case 'FunctionDeclaration':
+        case 'VariableDeclaration':
+        case 'TsEnumDeclaration':
+        case 'TsInterfaceDeclaration':
+        case 'TsModuleDeclaration':
+        case 'TsTypeAliasDeclaration':
+            return true;
+    }
+
+    return true;
 }
 
 function shouldEmitWsBeforeOperand(n: ast.UnaryExpression): boolean {
@@ -1855,3 +2166,115 @@ function shouldEmitWsBeforeOperand(n: ast.UnaryExpression): boolean {
     return false;
 }
 
+
+function shouldWriteLeadingLineTerminator<N>(parentNode: ast.Span, children: N[], format: ListFormat): boolean {
+    if (format & ListFormat.MultiLine) {
+        return true;
+    }
+
+    if (format & ListFormat.PreserveLines) {
+        if (format & ListFormat.PreferNewLine) {
+            return true;
+        }
+
+        const firstChild = children[0];
+        if (firstChild === undefined) {
+            return !isOnSingleLine(parentNode);
+        } else if (isSynthesized(parentNode) || isSynthesized(firstChild)) {
+            return synthesizedNodeStartsOnNewLine(firstChild, format);
+        } else {
+            const fcSpan = getSpan(firstChild)
+            if (fcSpan)
+                return !isOnSameLine(parentNode, fcSpan);
+        }
+    }
+
+
+    return false
+}
+
+function getSpan(n: any): ast.Span | undefined {
+    if (isSpan(n)) return n;
+    return (n as ast.HasSpan).span
+}
+
+function isOnSingleLine(sp: ast.Span): boolean {
+    return sp.loc.start.line === sp.loc.end.line
+}
+
+function isOnSameLine(l: ast.Span, r: ast.Span): boolean {
+    return l.loc.start.line === r.loc.start.line
+}
+
+function shouldWriteSeparatingLineTerminator<N>(
+    previousNode: ast.Span | undefined,
+    nextNode: N,
+    format: ListFormat
+): boolean {
+    if (format & ListFormat.MultiLine) {
+        return true;
+    } else if (format & ListFormat.PreserveLines) {
+        if (previousNode === undefined || nextNode === undefined) {
+            return false;
+        } else if (isSynthesized(previousNode) || isSynthesized(nextNode)) {
+            return synthesizedNodeStartsOnNewLine(previousNode, format) || synthesizedNodeStartsOnNewLine(nextNode, format);
+        } else {
+            const nnSpan = getSpan(nextNode);
+            if (nnSpan)
+                return !isOnSameLine(previousNode, nnSpan);
+            return false;
+        }
+    } else {
+        return getStartsOnNewLine(nextNode);
+    }
+}
+
+function shouldWriteClosingLineTerminator(parentNode: ast.Span, children: any[], format: ListFormat) {
+    if (format & ListFormat.MultiLine) {
+        return (format & ListFormat.NoTrailingNewLine) === 0;
+    }
+    else if (format & ListFormat.PreserveLines) {
+        if (format & ListFormat.PreferNewLine) {
+            return true;
+        }
+
+        const lastChild = lastOrUndefined(children);
+        if (lastChild === undefined) {
+            return !isOnSingleLine(parentNode);
+        } else if (isSynthesized(parentNode) || isSynthesized(lastChild)) {
+            return synthesizedNodeStartsOnNewLine(lastChild, format);
+        } else {
+            return !isOnSameLine(parentNode, lastChild!);
+        }
+    } else {
+        return false;
+    }
+}
+
+
+function synthesizedNodeStartsOnNewLine<N>(node: N, format: ListFormat) {
+    if (isSynthesized(node)) {
+        const startsOnNewLine = getStartsOnNewLine(node);
+        if (startsOnNewLine === undefined) {
+            return (format & ListFormat.PreferNewLine) !== 0;
+        }
+
+        return startsOnNewLine;
+    }
+
+    return (format & ListFormat.PreferNewLine) !== 0;
+}
+
+function lastOrUndefined<T>(l: T[]): T | undefined {
+    if (l) {
+        return l[l.length]
+    }
+}
+
+function getStartsOnNewLine(n: any): boolean {
+    const sp = getSpan(n);
+    if (!sp) {
+        return false;
+    }
+    return sp.loc.start.line !== sp.loc.end.line
+}
