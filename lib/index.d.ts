@@ -1,6 +1,9 @@
 import { Module } from "./ast";
+import Visitor from './visitor';
+import Printer from './printer';
 
 declare module "@swc/core" {
+    export { Visitor, Printer };
 
     export class Compiler {
         constructor();
