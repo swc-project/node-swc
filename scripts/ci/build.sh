@@ -50,6 +50,10 @@ ls -al ./native/target/release
 
 ls -al ./native/target/release/deps
 
+ls -al ./native/target/release/native
+
+ls -al ./native/target/release/build
+
 # Verify abi
 echo 'Verifying binding with jest...'
 npm install -g jest
