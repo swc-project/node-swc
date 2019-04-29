@@ -46,6 +46,10 @@ npm install -g neon-cli
 echo 'Building...'
 neon build --release
 
+ls -al ./native/target/release
+
+ls -al ./native/target/release/deps
+
 # Verify abi
 echo 'Verifying binding with jest...'
 npm install -g jest
