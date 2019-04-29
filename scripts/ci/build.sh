@@ -17,8 +17,8 @@ rm -rf ./native/index.node \
     ./native/target/release/.fingerprint/neon* \
     ./native/target/release/deps/ffi* \
     ./native/target/release/deps/libffi* \
-    ./native/target/release/deps/neon-* \
-    ./native/target/release/deps/libneon-*
+    ./native/target/release/deps/neon* \
+    ./native/target/release/deps/libneon*
 echo 'Removed old files'
 
 export PATH="/c/nvm-root:/c/nodejs:$PATH"
