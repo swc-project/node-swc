@@ -39,7 +39,6 @@ test_script:
   - bash ./scripts/ci/build.sh 6.16.0 48
 
 cache:
-  - native/target
   - C:\Users\appveyor\.cargo\registry
 
 artifacts:
