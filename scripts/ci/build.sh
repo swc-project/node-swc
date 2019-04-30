@@ -15,7 +15,7 @@ echo 'Removing old files'
 if [[ -z "$APPVEYOR" ]]; then
     echo 'Mac os / linux works without hack'
 else
-    rm -rf ./native/release/deps
+    rm -rf ./native/release/
 fi
 
 rm -rf ./native/index.node \
