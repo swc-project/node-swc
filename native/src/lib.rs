@@ -84,8 +84,7 @@ impl Compiler {
         let config_file = match config_file {
             Some(ConfigFile::Str(ref s)) => {
                 let path = Path::new(s);
-                let mut r =
-                    File::open(&path).map_err(|err| Error::FailedToReadConfigFile { err })?;
+                let r = File::open(&path).map_err(|err| Error::FailedToReadConfigFile { err })?;
                 let config: Config = serde_json::from_reader(r)
                     .map_err(|err| Error::FailedToParseConfigFile { err })?;
                 Some(config)
@@ -101,7 +100,7 @@ impl Compiler {
                         let swcrc = dir.join(".swcrc");
 
                         if swcrc.exists() {
-                            let mut r = File::open(&swcrc)
+                            let r = File::open(&swcrc)
                                 .map_err(|err| Error::FailedToReadConfigFile { err })?;
                             let mut config: Config = serde_json::from_reader(r)
                                 .map_err(|err| Error::FailedToParseConfigFile { err })?;
