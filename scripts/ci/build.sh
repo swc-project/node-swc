@@ -11,6 +11,13 @@ set -e
 
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
+
+if [[ -z "$APPVEYOR" ]]; then
+    echo 'Mac os / linux works without hack'
+else
+    rm -rf ./native/release/deps
+fi
+
 rm -rf ./native/index.node \
     ./native/target/release/libffi.d* \
     ./native/target/release/ffi.d* \
