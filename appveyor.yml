@@ -1,5 +1,6 @@
 os: Visual Studio 2015
 environment:
+  CARGO_INCREMENTAL: "0"
   RUSTFLAGS: --cfg procmacro2_semver_exempt --cfg parallel_queries
   matrix:
     - platform: x64
@@ -42,14 +43,14 @@ cache:
   - C:\Users\appveyor\.cargo\registry
 
 artifacts:
-  - path: '*.node'
+  - path: "*.node"
     name: Bindings
     type: File
 
 deploy:
   tag: $(APPVEYOR_REPO_TAG_NAME)
   # release: myproduct-v$(appveyor_build_version)
-  description: 'Automated release'
+  description: "Automated release"
   provider: GitHub
   auth_token:
     secure: EiuGSWjzYgvu70zRDHNQiO/aOdL23on7Et4CBUIP+Bw2nlcVe+Cp1ZOvAcaPaKGg
