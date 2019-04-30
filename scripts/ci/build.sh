@@ -14,6 +14,7 @@ echo 'Removing old files'
 rm -rf ./native/index.node \
     ./native/target/release/libffi.d* \
     ./native/target/release/ffi.d* \
+    ./native/target/release/build/ffi* \
     ./native/target/release/.fingerprint/neon* \
     ./native/target/release/deps/ffi* \
     ./native/target/release/deps/libffi* \
@@ -49,8 +50,6 @@ neon build --release
 ls -al ./native/target/release
 
 ls -al ./native/target/release/deps
-
-ls -al ./native/target/release/native
 
 ls -al ./native/target/release/build
 
