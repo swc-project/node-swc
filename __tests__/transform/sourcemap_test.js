@@ -3,14 +3,34 @@ const swc = require('../../lib/index'),
     sourceMap = require('source-map');
 
 it('should handle sourcemap correctly', async () => {
-    const raw = `class Foo extends Array {}`;
+    const raw = `
+class Foo extends Array {
+}
+console.log('foo')
+    `;
     const out = await swc.transform(raw, {
         filename: 'input.js',
         sourceMaps: true
     });
 
+
     expect(out.map).toBeTruthy();
     validate(out.code, out.map, { 'input.js': raw });
+
+    // await sourceMap.SourceMapConsumer.with(JSON.parse(out.map), null, async (consumer) => {
+    //     consumer.eachMapping((mapping) => {
+    //         console.log(mapping);
+    //     });
+    // });
+
+
+    // // Dump output and sourcemap to file
+    // // https://sokra.github.io/source-map-visualization/#custom
+
+    // const fs = require('fs');
+    // fs.writeFileSync('./test.js', out.code);
+    // fs.writeFileSync('./test.map', out.map);
+
 })
 
 it('should handle input sourcemap correctly', async () => {
@@ -51,11 +71,11 @@ it('should handle input sourcemap correctly', async () => {
     await sourceMap.SourceMapConsumer.with(JSON.parse(out1.map), null, async (consumer1) => {
         await sourceMap.SourceMapConsumer.with(JSON.parse(out2.map), null, async (consumer2) => {
             consumer1.eachMapping((mapping) => {
-                console.log(mapping);
+                // console.log(mapping);
             });
 
             consumer2.eachMapping((mapping) => {
-                console.log(mapping);
+                // console.log(mapping);
             });
         });
     });
