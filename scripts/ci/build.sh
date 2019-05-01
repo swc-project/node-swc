@@ -17,6 +17,7 @@ if [[ -z "$APPVEYOR" ]]; then
 else
     echo "Deleting all files"
     rm -rf ./native/release
+    rm -rf ./native/artifacts.json
 fi
 
 rm -rf ./native/index.node \
