@@ -16,7 +16,6 @@ if [[ -z "$APPVEYOR" ]]; then
     echo 'Mac os / linux works without hack'
 else
     echo "Deleting all files"
-    rm -rf ./native/release
     rm -rf ./native/artifacts.json
 fi
 
