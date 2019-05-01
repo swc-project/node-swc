@@ -15,7 +15,7 @@ echo 'Removing old files'
 if [[ -z "$APPVEYOR" ]]; then
     echo 'Mac os / linux works without hack'
 else
-    echo "Deleting all files"
+    echo "Deleting artifacts.json"
     rm -rf ./native/artifacts.json
 fi
 
