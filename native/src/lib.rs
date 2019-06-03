@@ -225,7 +225,7 @@ impl Compiler {
                         .emit_module(&module)
                         .map_err(|err| Error::FailedToEmitModule { err })?;
                 }
-                String::from_utf8(buf).map_err(|err| Error::CodeNotUtf8 { err })?
+                String::from_utf8(buf).map_err(|err| Error::GeneratedCodeNotUtf8 { err })?
             };
             Ok(TransformOutput {
                 code: src,
