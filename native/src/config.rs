@@ -145,8 +145,8 @@ impl Options {
             Module,
             // handle jsx
             Optional::new(react::react(c.cm.clone(), transform.react), syntax.jsx()),
-            resolver(),
             Optional::new(typescript::strip(), syntax.typescript()),
+            resolver(),
             const_modules,
             pass,
             Optional::new(decorators(), syntax.decorators()),
