@@ -48,12 +48,10 @@ export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries'
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
-echo 'Installing neon...'
-npm install -g neon-cli
 
 # Build it
 echo 'Building...'
-neon build --release
+npx neon build --release
 
 ls -al ./native/target/release
 
