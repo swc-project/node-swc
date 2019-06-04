@@ -41,8 +41,8 @@ cache:
   directories:
     - /home/travis/.cargo
 # But don't cache the cargo registry
-before_cache:
-  - rm -rf /home/travis/.cargo/registry
+# before_cache:
+#   - rm -rf /home/travis/.cargo/registry
 
 branches:
   except:
