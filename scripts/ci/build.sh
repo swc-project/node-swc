@@ -63,8 +63,8 @@ ls -al ./native/target/release/build
 
 # Verify abi
 echo 'Verifying binding with jest...'
-npm install -g jest
-jest __tests__/import_test.js
+# npm install -g jest
+# jest __tests__/import_test.js
 
 
 mv native/index.node $SWC_NAME-$2.node
