@@ -7,6 +7,7 @@ extern crate fxhash;
 #[macro_use]
 extern crate neon;
 extern crate failure;
+extern crate hashbrown;
 extern crate lazy_static;
 extern crate neon_serde;
 extern crate path_clean;

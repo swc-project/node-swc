@@ -26,9 +26,8 @@ pub(crate) enum Error {
 
     #[fail(display = "sourcemap is not utf8: {}", err)]
     SourceMapNotUtf8 { err: FromUtf8Error },
-
-    #[fail(display = "generated code is not utf8: {}", err)]
-    GeneratedCodeNotUtf8 { err: FromUtf8Error },
+    /* #[fail(display = "generated code is not utf8: {}", err)]
+     * GeneratedCodeNotUtf8 { err: FromUtf8Error }, */
 }
 
 /// Returns true if `SWC_DEBUG` environment is set to `1` or `true`.

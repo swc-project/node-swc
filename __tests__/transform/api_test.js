@@ -76,5 +76,5 @@ it("should handle cjs imports", () => {
 it("should handle comments in arrow expression", () => {
   const out = swc.transformFileSync(__dirname + "/../../issue-406/input.js");
 
-  expect(out.code).toContain(`.default.bar = true`);
+  expect(out.code).toContain(`return true`);
 });

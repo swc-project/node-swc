@@ -1,5 +1,5 @@
 use crate::Compiler;
-use fxhash::{FxHashMap, FxHashSet};
+use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use std::{env, path::PathBuf, sync::Arc};
 use swc::{
@@ -334,7 +334,7 @@ pub(crate) struct TransformConfig {
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct ConstModulesConfig {
     #[serde(default)]
-    pub globals: FxHashMap<JsWord, FxHashMap<JsWord, String>>,
+    pub globals: HashMap<JsWord, HashMap<JsWord, String>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -348,13 +348,13 @@ pub(crate) struct OptimizerConfig {
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub(crate) struct GlobalPassOption {
     #[serde(default)]
-    pub vars: FxHashMap<String, String>,
+    pub vars: HashMap<String, String>,
     #[serde(default = "default_envs")]
-    pub envs: FxHashSet<String>,
+    pub envs: HashSet<String>,
 }
 
-fn default_envs() -> FxHashSet<String> {
-    let mut v = FxHashSet::default();
+fn default_envs() -> HashSet<String> {
+    let mut v = HashSet::default();
     v.insert(String::from("NODE_ENV"));
     v.insert(String::from("SWC_ENV"));
     v
@@ -366,8 +366,8 @@ impl GlobalPassOption {
             c: &Compiler,
             values: impl Iterator<Item = (String, String)>,
             is_env: bool,
-        ) -> FxHashMap<JsWord, Expr> {
-            let mut m = FxHashMap::default();
+        ) -> HashMap<JsWord, Expr> {
+            let mut m = HashMap::default();
 
             for (k, v) in values {
                 let v = if is_env {
