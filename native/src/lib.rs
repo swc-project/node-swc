@@ -226,9 +226,7 @@ impl Compiler {
                         .map_err(|err| Error::FailedToEmitModule { err })?;
                 }
                 // Invalid utf8 is valid in javascript world.
-                unsafe{
-                    String::from_utf8_unchecked(buf)
-                }
+                unsafe { String::from_utf8_unchecked(buf) }
             };
             Ok(TransformOutput {
                 code: src,
