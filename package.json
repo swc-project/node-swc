@@ -5,6 +5,9 @@
   "main": "lib/index.js",
   "author": "강동윤 <kdy1@outlook.kr>",
   "license": "MIT",
+  "engines": {
+    "node": ">=0.8 <0.12"
+  },
   "dependencies": {
     "mkdirp": "^0.5.1",
     "neon-cli": "^0.2.0",
