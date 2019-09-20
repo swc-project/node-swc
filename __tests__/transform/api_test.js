@@ -78,3 +78,9 @@ it("should handle comments in arrow expression", () => {
 
   expect(out.code).toContain(`return true`);
 });
+
+it("should handle comments in return statement", () => {
+  const out = swc.transformFileSync(__dirname + "/../../issue-415/input.js");
+
+  expect(out.code.replace(/ /g, "")).toContain(`return(/*#__PURE__*/`);
+});
