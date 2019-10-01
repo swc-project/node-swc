@@ -50,6 +50,7 @@ branches:
     - windows
 
 script:
+  - bash ./scripts/ci/build.sh 12.11.0 72
   - bash ./scripts/ci/build.sh 11.6.0 67
   - bash ./scripts/ci/build.sh 10.15.0 64
   - bash ./scripts/ci/build.sh 8.15.0 57
@@ -59,10 +60,11 @@ deploy:
   provider: releases
   api_key: $GH_TOKEN
   file:
-    - $SWC_NAME-48.node
+    # - $SWC_NAME-48.node
     - $SWC_NAME-57.node
     - $SWC_NAME-64.node
     - $SWC_NAME-67.node
+    - $SWC_NAME-72.node
   skip_cleanup: true
   on:
     tags: true

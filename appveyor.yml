@@ -25,15 +25,17 @@ install:
   - set NVM_SYMLINK=C:\\nodejs
   - nvm root C:\\nvm-root
   - nvm version
+  - nvm install 12.11.0
   - nvm install 11.6.0
   - nvm install 10.15.0
   - nvm install 8.15.0
-  - nvm install 6.16.0
+  # - nvm install 6.16.0
 
 build: false
 skip_non_tags: true
 
 test_script:
+  - bash ./scripts/ci/build.sh 12.11.0 72
   - bash ./scripts/ci/build.sh 11.6.0 67
   - bash ./scripts/ci/build.sh 10.15.0 64
   - bash ./scripts/ci/build.sh 8.15.0 57
