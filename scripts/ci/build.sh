@@ -12,7 +12,7 @@ set -e
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
-if [[ -z "$APPVEYOR" ]]; then
+if [[ -z "$APPVEYOR" ]] && [[ "$TRAVIS_OS_NAME" != "windows" ]] ; then
     echo 'Mac os / linux works without hack'
 else
     echo "Deleting artifacts.json"
