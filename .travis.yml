@@ -75,8 +75,8 @@ matrix:
       osx_image: xcode9.2
       env: SWC_NAME=darwin-x64
 
-    - os: windows
-      env: SWC_NAME=win32-x64
+    # - os: windows
+    #   env: SWC_NAME=win32-x64
 
     - os: linux
       env: SWC_NAME=linux-x64
