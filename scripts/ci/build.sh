@@ -50,7 +50,7 @@ echo 'Installing deps...'
 npm install --ignore-scripts
 
 echo 'Installing neon@0.2.0'
-npm install neon@0.2.0
+npm install neon-cli@0.2.0
 
 # Build it
 echo 'Building...'
