@@ -32,8 +32,7 @@ install:
   - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
   - sh /tmp/rustup.sh --default-toolchain none -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - rustup toolchain install nightly-2019-10-12
-  - rustup default nightly-2019-10-12
+  - rustup toolchain install nightly
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
 # cargo-update to work
