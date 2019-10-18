@@ -6,7 +6,7 @@
   "author": "강동윤 <kdy1@outlook.kr>",
   "license": "MIT",
   "engines": {
-    "node": ">=0.8 <0.12"
+    "node": ">=8.0.0"
   },
   "repository": {
     "type": "git",
