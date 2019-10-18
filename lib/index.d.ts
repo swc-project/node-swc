@@ -39,7 +39,7 @@ declare module "@swc/core" {
     export function transformFileSync(path: string, options?: Options): Output;
 
     export type ParseOptions = ParserConfig & {
-        readonly comments?: boolean;
+        comments?: boolean;
     }
 
     /**
@@ -52,8 +52,8 @@ declare module "@swc/core" {
          * 
          * Defaults to `process.cwd()`.
          */
-        readonly cwd?: string;
-        readonly caller?: CallerOptions;
+        cwd?: string;
+        caller?: CallerOptions;
         /** The filename associated with the code currently being compiled,
          * if there is one. The filename is optional, but not all of Swc's
          * functionality is available when the filename is unknown, because a 
@@ -68,7 +68,7 @@ declare module "@swc/core" {
          * - .swcrc files are loaded relative to the file being compiled.
          * If this option is omitted, Swc will behave as if swcrc: false has been set.
          */
-        readonly filename?: string;
+        filename?: string;
 
         /**
          * The initial path that will be processed based on the "rootMode" to
@@ -80,7 +80,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `opts.cwd`
          */
-        readonly root?: string;
+        root?: string;
 
         /**
          * This option, combined with the "root" value, defines how Swc chooses 
@@ -112,7 +112,7 @@ declare module "@swc/core" {
          * to skip loading any swc.config.js files in the project root,
          * which can lead to unexpected errors and compilation failure.
          */
-        readonly rootMode?: 'root' | 'upward' | 'upward-optional';
+        rootMode?: 'root' | 'upward' | 'upward-optional';
 
         /**
          * The current active environment used during configuration loading.
@@ -122,7 +122,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `process.env.SWC_ENV || process.env.NODE_ENV || "development"`
          */
-        readonly envName?: string;
+        envName?: string;
 
         /**
          * Defaults to searching for a default `.swcrc` file, but can
@@ -139,7 +139,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `path.resolve(opts.root, ".swcrc")`
          */
-        readonly configFile?: string | boolean;
+        configFile?: string | boolean;
 
         /**
          * true will enable searching for configuration files relative to the "filename" provided to Swc.
@@ -152,7 +152,7 @@ declare module "@swc/core" {
          *
          * Defaults to true as long as the filename option has been specificed
          */
-        readonly swcrc?: boolean;
+        swcrc?: boolean;
 
         /**
          * By default, Babel will only search for .babelrc files within the "root" package
@@ -172,7 +172,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `opts.root`
          */
-        readonly swcrcRoots?: boolean | MatchPattern | MatchPattern[];
+        swcrcRoots?: boolean | MatchPattern | MatchPattern[];
 
         /**
          * `true` will attempt to load an input sourcemap from the file itself, if it
@@ -183,7 +183,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `true`.
          */
-        readonly inputSourceMap?: boolean | string;
+        inputSourceMap?: boolean | string;
 
         /**
          * - true to generate a sourcemap for the code and include it in the result object.
@@ -198,23 +198,23 @@ declare module "@swc/core" {
          * - Note: These options are bit weird, so it may make the most sense to just use true
          *  and handle the rest in your own code, depending on your use case.
          */
-        readonly sourceMaps?: boolean | "inline" | "both";
+        sourceMaps?: boolean | "inline" | "both";
 
         /**
          * The name to use for the file inside the source map object.
          * 
          * Defaults to `path.basename(opts.filenameRelative)` when available, or `"unknown"`.
          */
-        readonly sourceFileName?: string;
+        sourceFileName?: string;
 
         /**
          * The sourceRoot fields to set in the generated source map, if one is desired.
          */
-        readonly sourceRoot?: string;
+        sourceRoot?: string;
     }
 
     export interface CallerOptions {
-        readonly name: string,
+        name: string,
         [key: string]: any
     }
 
@@ -222,26 +222,26 @@ declare module "@swc/core" {
      * .swcrc
      */
     export interface Config {
-        readonly jsc?: JscConfig;
-        readonly module?: ModuleConfig;
-        readonly minify?: boolean;
+        jsc?: JscConfig;
+        module?: ModuleConfig;
+        minify?: boolean;
     }
 
     export interface JscConfig {
         /**
          * Defaults to EsParserConfig
          */
-        readonly parser?: ParserConfig;
-        readonly transform?: TransformConfig;
+        parser?: ParserConfig;
+        transform?: TransformConfig;
         /**
          * Use `@swc/helpers` instead of inline helpers.
          */
-        readonly externalHelpers?: boolean;
+        externalHelpers?: boolean;
 
         /**
          * Defaults to `es3` (which enableds **all** pass).
          */
-        readonly target?: JscTarget;
+        target?: JscTarget;
     }
 
     export type JscTarget = 'es3'
@@ -254,59 +254,59 @@ declare module "@swc/core" {
 
     export type ParserConfig = TsParserConfig | EsParserConfig;
     export interface TsParserConfig {
-        readonly syntax: "typescript";
+        syntax: "typescript";
         /**
          * Defaults to `false`.
          */
-        readonly tsx?: boolean;
+        tsx?: boolean;
         /**
          * Defaults to `false`.
          */
-        readonly decorators?: boolean;
+        decorators?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly dynamicImport?: boolean;
+        dynamicImport?: boolean;
     }
 
     export interface EsParserConfig {
-        readonly syntax: "ecmascript";
+        syntax: "ecmascript";
         /**
          * Defaults to false.
          */
-        readonly jsc?: boolean;
+        jsc?: boolean;
         /**
          * Defaults to `false`. This is not implemented yet.
          */
-        readonly numericSeparator?: boolean;
+        numericSeparator?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly classPrivateProperty?: boolean;
+        classPrivateProperty?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly privateMethod?: boolean;
+        privateMethod?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly classProperty?: boolean;
+        classProperty?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly functionBind?: boolean;
+        functionBind?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly decorators?: boolean;
+        decorators?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly decoratorsBeforeExport?: boolean;
+        decoratorsBeforeExport?: boolean;
         /**
          * Defaults to `false`
          */
-        readonly dynamicImport?: boolean;
+        dynamicImport?: boolean;
     }
 
     /**
@@ -316,14 +316,14 @@ declare module "@swc/core" {
         /**
          * Effective only if `syntax` supports ƒ.
          */
-        readonly react?: ReactConfig,
+        react?: ReactConfig,
 
-        readonly constModules?: ConstModulesConfig;
+        constModules?: ConstModulesConfig;
 
         /**
          * Defaults to null, which skips optimizer pass.
          */
-        readonly optimizer?: OptimizerConfig;
+        optimizer?: OptimizerConfig;
     }
 
     export interface ReactConfig {
@@ -332,13 +332,13 @@ declare module "@swc/core" {
          * 
          * Defaults to `React.createElement`.
          */
-        readonly pragma: String,
+        pragma: String,
         /**
          * Replace the component used when compiling JSX fragments.
          * 
          * Defaults to `React.Fragment`
          */
-        readonly pragmaFrag: String,
+        pragmaFrag: String,
         /**
          * Toggles whether or not to throw an error if a XML namespaced tag name is used. For example:
          * `<f:image />`
@@ -347,7 +347,7 @@ declare module "@swc/core" {
          * JSX does not currently have support for it.
          * 
          */
-        readonly throwIfNamespace: boolean,
+        throwIfNamespace: boolean,
         /**
          * Toggles plugins that aid in development, such as @swc/plugin-transform-react-jsx-self 
          * and @swc/plugin-transform-react-jsx-source.
@@ -355,11 +355,11 @@ declare module "@swc/core" {
          * Defaults to `false`,
          * 
          */
-        readonly development: boolean,
+        development: boolean,
         /**
          * Use `Object.assign()` instead of `_extends`. Defaults to false.
          */
-        readonly useBuiltins: boolean,
+        useBuiltins: boolean,
 
     }
     /**
@@ -369,15 +369,15 @@ declare module "@swc/core" {
      * See: https://github.com/swc-project/swc/issues/18#issuecomment-466272558
      */
     export interface ConstModulesConfig {
-        readonly globals?: {
-            readonly [module: string]: {
-                readonly [name: string]: string
+        globals?: {
+            [module: string]: {
+                [name: string]: string
             }
         };
     }
 
     export interface OptimizerConfig {
-        readonly globals?: GlobalPassOption;
+        globals?: GlobalPassOption;
     }
 
     /**
@@ -389,14 +389,14 @@ declare module "@swc/core" {
          * 
          * e.g. `{ __DEBUG__: true }`
          */
-        readonly vars?: { [key: string]: string };
+        vars?: { [key: string]: string };
 
         /**
          * Name of environment variables to inline.
          * 
          * Defaults to `["NODE_ENV", "SWC_ENV"]`
          */
-        readonly envs?: string[];
+        envs?: string[];
     }
 
     export type ModuleConfig = CommonJsConfig | UmdConfig | AmdConfig;
@@ -413,14 +413,14 @@ declare module "@swc/core" {
          * 
          * Defaults to `false`.
          */
-        readonly strict?: boolean;
+        strict?: boolean;
 
         /**
          * Emits 'use strict' directive.
          * 
          * Defaults to `true`.
          */
-        readonly strict_mode?: boolean;
+        strict_mode?: boolean;
 
         /**
          * Changes Babel's compiled import statements to be lazily evaluated when their imported bindings are used for the first time.
@@ -456,7 +456,7 @@ declare module "@swc/core" {
          * 
          * Defaults to `false`.
          */
-        readonly lazy?: boolean | string[];
+        lazy?: boolean | string[];
         /**
          * By default, when using exports with swc a non-enumerable __esModule property is exported.
          * This property is then used to determine if the import is the default export or if
@@ -467,21 +467,21 @@ declare module "@swc/core" {
          * 
          * Defaults to `false`.
          */
-        readonly noInterop?: boolean;
+        noInterop?: boolean;
     }
 
     export interface CommonJsConfig extends BaseModuleConfig {
-        readonly type: 'commonjs';
+        type: 'commonjs';
     }
 
     export interface UmdConfig extends BaseModuleConfig {
-        readonly type: 'umd';
-        readonly globals?: { [key: string]: string };
+        type: 'umd';
+        globals?: { [key: string]: string };
     }
 
     export interface AmdConfig extends BaseModuleConfig {
-        readonly type: 'amd';
-        readonly moduleId: string;
+        type: 'amd';
+        moduleId: string;
     }
 
     export interface Output {
@@ -520,7 +520,7 @@ declare module "@swc/core" {
     }
 
     export interface Node {
-        readonly type: string;
+        type: string;
     }
 
     export interface HasSpan {
@@ -575,19 +575,19 @@ declare module "@swc/core" {
     }
 
     export interface ClassProperty extends ClassPropertyBase {
-        readonly type: 'ClassProperty';
+        type: 'ClassProperty';
 
         key: Expression,
     }
 
     export interface PrivateProperty extends ClassPropertyBase {
-        readonly type: 'PrivateProperty';
+        type: 'PrivateProperty';
 
         key: PrivateName,
     }
 
     export interface Constructor extends Node, HasSpan {
-        readonly type: 'Constructor';
+        type: 'Constructor';
 
         key: PropertyName;
 
@@ -615,19 +615,19 @@ declare module "@swc/core" {
     }
 
     export interface ClassMethod extends ClassMethodBase {
-        readonly type: 'ClassMethod';
+        type: 'ClassMethod';
 
         key: PropertyName;
     }
 
     export interface PrivateMethod extends ClassMethodBase {
-        readonly type: 'PrivateMethod';
+        type: 'PrivateMethod';
 
         key: PrivateName;
     }
 
     export interface Decorator extends Node, HasSpan {
-        readonly type: 'Decorator';
+        type: 'Decorator';
 
         expression: Expression;
     }
@@ -643,7 +643,7 @@ declare module "@swc/core" {
         | TsModuleDeclaration;
 
     export interface FunctionDeclaration extends Fn {
-        readonly type: 'FunctionDeclaration';
+        type: 'FunctionDeclaration';
 
         ident: Identifier,
 
@@ -651,7 +651,7 @@ declare module "@swc/core" {
     }
 
     export interface ClassDeclaration extends Class, Node {
-        readonly type: 'ClassDeclaration';
+        type: 'ClassDeclaration';
 
         identifier: Identifier;
 
@@ -659,7 +659,7 @@ declare module "@swc/core" {
     }
 
     export interface VariableDeclaration extends Node, HasSpan {
-        readonly type: 'VariableDeclaration';
+        type: 'VariableDeclaration';
 
         kind: VariableDeclarationKind;
 
@@ -671,7 +671,7 @@ declare module "@swc/core" {
     export type VariableDeclarationKind = 'get' | 'let' | 'const';
 
     export interface VariableDeclarator extends Node, HasSpan {
-        readonly type: 'VariableDeclarator';
+        type: 'VariableDeclarator';
 
         id: Pattern;
 
@@ -719,17 +719,17 @@ declare module "@swc/core" {
     interface ExpressionBase extends Node, HasSpan { }
 
     export interface ThisExpression extends ExpressionBase {
-        readonly type: 'ThisExpression';
+        type: 'ThisExpression';
     }
 
     export interface ArrayExpression extends ExpressionBase {
-        readonly type: 'ArrayExpression';
+        type: 'ArrayExpression';
 
         elements?: (Expression | SpreadElement | undefined)[]
     }
 
     export interface ObjectExpression extends ExpressionBase {
-        readonly type: 'ObjectExpression';
+        type: 'ObjectExpression';
 
         properties?: (Property | SpreadElement)[]
     }
@@ -737,7 +737,7 @@ declare module "@swc/core" {
     export type PropertOrSpread = Property | SpreadElement;
 
     export interface SpreadElement extends Node {
-        readonly type: 'SpreadElement';
+        type: 'SpreadElement';
 
         spread: Span;
 
@@ -745,7 +745,7 @@ declare module "@swc/core" {
     }
 
     export interface UnaryExpression extends ExpressionBase {
-        readonly type: 'UnaryExpression';
+        type: 'UnaryExpression';
 
         operator: UnaryOperator;
 
@@ -753,7 +753,7 @@ declare module "@swc/core" {
     }
 
     export interface UpdateExpression extends ExpressionBase {
-        readonly type: 'UpdateExpression';
+        type: 'UpdateExpression';
 
         operator: UpdateOperator;
 
@@ -763,7 +763,7 @@ declare module "@swc/core" {
     }
 
     export interface BinaryExpression extends ExpressionBase {
-        readonly type: 'BinaryExpression';
+        type: 'BinaryExpression';
 
         operator: BinaryOperator;
 
@@ -773,19 +773,19 @@ declare module "@swc/core" {
     }
 
     export interface FunctionExpression extends Fn, ExpressionBase {
-        readonly type: 'FunctionExpression';
+        type: 'FunctionExpression';
 
         identifier?: Identifier;
     }
 
     export interface ClassExpression extends Class, ExpressionBase {
-        readonly type: 'ClassExpression';
+        type: 'ClassExpression';
 
         identifier?: Identifier;
     }
 
     export interface AssignmentExpression extends ExpressionBase {
-        readonly type: 'AssignmentExpression';
+        type: 'AssignmentExpression';
 
         operator: AssignmentOperator;
 
@@ -795,7 +795,7 @@ declare module "@swc/core" {
     }
 
     export interface MemberExpression extends ExpressionBase {
-        readonly type: 'MemberExpression';
+        type: 'MemberExpression';
 
         object: Expression | Super;
 
@@ -805,7 +805,7 @@ declare module "@swc/core" {
     }
 
     export interface ConditionalExpression extends ExpressionBase {
-        readonly type: 'ConditionalExpression';
+        type: 'ConditionalExpression';
 
         test: Expression;
 
@@ -817,7 +817,7 @@ declare module "@swc/core" {
     export type Super = Span;
 
     export interface CallExpression extends ExpressionBase {
-        readonly type: 'CallExpression';
+        type: 'CallExpression';
 
         callee: Expression | Super,
 
@@ -827,7 +827,7 @@ declare module "@swc/core" {
     }
 
     export interface NewExpression extends ExpressionBase {
-        readonly type: 'NewExpression';
+        type: 'NewExpression';
 
         callee: Expression
 
@@ -837,13 +837,13 @@ declare module "@swc/core" {
     }
 
     export interface SequenceExpression extends ExpressionBase {
-        readonly type: 'SequenceExpression';
+        type: 'SequenceExpression';
 
         expressions: Expression[];
     }
 
     export interface ArrowFunctionExpression extends ExpressionBase {
-        readonly type: 'ArrowFunctionExpression';
+        type: 'ArrowFunctionExpression';
 
         params: Pattern[];
 
@@ -860,7 +860,7 @@ declare module "@swc/core" {
     }
 
     export interface YieldExpression extends ExpressionBase {
-        readonly type: 'YieldExpression';
+        type: 'YieldExpression';
 
         argument?: Expression,
 
@@ -868,7 +868,7 @@ declare module "@swc/core" {
     }
 
     export interface MetaProperty extends Node {
-        readonly type: 'MetaProperty';
+        type: 'MetaProperty';
 
         meta: Identifier;
 
@@ -876,7 +876,7 @@ declare module "@swc/core" {
     }
 
     export interface AwaitExpression extends ExpressionBase {
-        readonly type: 'AwaitExpression';
+        type: 'AwaitExpression';
 
         argument: Expression;
     }
@@ -888,11 +888,11 @@ declare module "@swc/core" {
     }
 
     export interface TemplateLiteral extends ExpressionBase, TplBase {
-        readonly type: 'TemplateLiteral';
+        type: 'TemplateLiteral';
     }
 
     export interface TaggedTemplateExpression extends ExpressionBase, TplBase {
-        readonly type: 'TaggedTemplateExpression';
+        type: 'TaggedTemplateExpression';
 
         tag: Expression;
 
@@ -900,7 +900,7 @@ declare module "@swc/core" {
     }
 
     export interface TemplateElement extends ExpressionBase {
-        readonly type: 'TemplateElement';
+        type: 'TemplateElement';
 
         tail: boolean;
         cooked?: StringLiteral,
@@ -908,7 +908,7 @@ declare module "@swc/core" {
     }
 
     export interface ParenthesisExpression extends ExpressionBase {
-        readonly type: 'ParenthesisExpression';
+        type: 'ParenthesisExpression';
 
         expression: Expression
     }
@@ -932,7 +932,7 @@ declare module "@swc/core" {
     }
 
     export interface Identifier extends HasSpan, PatternBase {
-        readonly type: 'Identifier';
+        type: 'Identifier';
 
         value: string;
 
@@ -941,7 +941,7 @@ declare module "@swc/core" {
     }
 
     export interface PrivateName extends ExpressionBase {
-        readonly type: 'PrivateName';
+        type: 'PrivateName';
 
         id: Identifier,
     }
@@ -949,7 +949,7 @@ declare module "@swc/core" {
     export type JSXObject = JSXMemberExpression | Identifier;
 
     export interface JSXMemberExpression extends Node {
-        readonly type: 'JSXMemberExpression';
+        type: 'JSXMemberExpression';
 
         object: JSXObject,
         property: Identifier,
@@ -959,18 +959,18 @@ declare module "@swc/core" {
      * XML-based namespace syntax:
      */
     export interface JSXNamespacedName extends Node {
-        readonly type: 'JSXNamespacedName';
+        type: 'JSXNamespacedName';
 
         namespace: Identifier;
         name: Identifier;
     }
 
     export interface JSXEmptyExpression extends Node, HasSpan {
-        readonly type: 'JSXEmptyExpression';
+        type: 'JSXEmptyExpression';
     }
 
     export interface JSXExpressionContainer extends Node {
-        readonly type: 'JSXExpressionContainer';
+        type: 'JSXExpressionContainer';
 
         expression: JSXExpression;
     }
@@ -978,7 +978,7 @@ declare module "@swc/core" {
     export type JSXExpression = JSXEmptyExpression | Expression;
 
     export interface JSXSpreadChild extends Node {
-        readonly type: 'JSXSpreadChild';
+        type: 'JSXSpreadChild';
 
         expression: Expression;
     }
@@ -986,7 +986,7 @@ declare module "@swc/core" {
     export type JSXElementName = Identifier | JSXMemberExpression | JSXNamespacedName;
 
     export interface JSXOpeningElement extends Node, HasSpan {
-        readonly type: 'JSXOpeningElement';
+        type: 'JSXOpeningElement';
 
         name: JSXElementName;
 
@@ -1000,13 +1000,13 @@ declare module "@swc/core" {
     export type JSXAttributeOrSpread = JSXAttribute | SpreadElement;
 
     export interface JSXClosingElement extends Node, HasSpan {
-        readonly type: 'JSXClosingElement';
+        type: 'JSXClosingElement';
 
         name: JSXElementName;
     }
 
     export interface JSXAttribute extends Node, HasSpan {
-        readonly type: 'JSXAttribute';
+        type: 'JSXAttribute';
 
         name: JSXAttributeName,
 
@@ -1018,14 +1018,14 @@ declare module "@swc/core" {
     export type JSXAttrValue = Literal | JSXExpressionContainer | JSXElement | JSXFragment;
 
     export interface JSXText extends Node, HasSpan {
-        readonly type: 'JSXText';
+        type: 'JSXText';
 
         value: string;
         raw: string;
     }
 
     export interface JSXElement extends Node, HasSpan {
-        readonly type: 'JSXElement';
+        type: 'JSXElement';
 
         opening: JSXOpeningElement;
         children: JSXElementChild[];
@@ -1035,7 +1035,7 @@ declare module "@swc/core" {
     export type JSXElementChild = JSXText | JSXExpressionContainer | JSXSpreadChild | JSXElement | JSXFragment;
 
     export interface JSXFragment extends Node, HasSpan {
-        readonly type: 'JSXFragment';
+        type: 'JSXFragment';
 
         opening: JSXOpeningFragment;
 
@@ -1045,11 +1045,11 @@ declare module "@swc/core" {
     }
 
     export interface JSXOpeningFragment extends Node, HasSpan {
-        readonly type: 'JSXOpeningFragment';
+        type: 'JSXOpeningFragment';
     }
 
     export interface JSXClosingFragment extends Node, HasSpan {
-        readonly type: 'JSXClosingFragment';
+        type: 'JSXClosingFragment';
     }
 
     export type Literal = StringLiteral
@@ -1060,24 +1060,24 @@ declare module "@swc/core" {
         | JSXText;
 
     export interface StringLiteral extends Node, HasSpan {
-        readonly type: 'StringLiteral';
+        type: 'StringLiteral';
 
         value: string;
         has_escape?: boolean;
     }
 
     export interface BooleanLiteral extends Node, HasSpan {
-        readonly type: 'BooleanLiteral';
+        type: 'BooleanLiteral';
 
         value: boolean;
     }
 
     export interface NullLiteral extends Node, HasSpan {
-        readonly type: 'NullLiteral';
+        type: 'NullLiteral';
     }
 
     export interface RegExpLiteral extends Node, HasSpan {
-        readonly type: 'RegExpLiteral';
+        type: 'RegExpLiteral';
 
         pattern: StringLiteral;
         flags?: RegexFlags;
@@ -1086,7 +1086,7 @@ declare module "@swc/core" {
     export type RegexFlags = StringLiteral;
 
     export interface NumericLiteral extends Node, HasSpan {
-        readonly type: 'NumericLiteral';
+        type: 'NumericLiteral';
 
         value: number
     }
@@ -1102,19 +1102,19 @@ declare module "@swc/core" {
         | TsNamespaceExportDeclaration;
 
     export interface ExportDefaultExpression extends Node, HasSpan {
-        readonly type: 'ExportDefaultExpression';
+        type: 'ExportDefaultExpression';
 
         expression: Expression;
     }
 
     export interface ExportDeclaration extends Node, HasSpan {
-        readonly type: 'ExportDeclaration';
+        type: 'ExportDeclaration';
 
         declaration: Declaration;
     }
 
     export interface ImportDeclaration extends Node, HasSpan {
-        readonly type: 'ImportDeclaration';
+        type: 'ImportDeclaration';
 
         specifiers?: ImporSpecifier[];
 
@@ -1126,7 +1126,7 @@ declare module "@swc/core" {
         | ImportNamespaceSpecifier;
 
     export interface ExportAllDeclaration extends Node, HasSpan {
-        readonly type: 'ExportAllDeclaration';
+        type: 'ExportAllDeclaration';
 
         source: StringLiteral;
     }
@@ -1137,7 +1137,7 @@ declare module "@swc/core" {
      * - `export { foo as bar } from 'mod'`
      */
     export interface ExportNamedDeclaration extends Node, HasSpan {
-        readonly type: 'ExportNamedDeclaration';
+        type: 'ExportNamedDeclaration';
 
         specifiers: ExportSpecifier[];
 
@@ -1145,7 +1145,7 @@ declare module "@swc/core" {
     }
 
     export interface ExportDefaultDeclaration extends Node, HasSpan {
-        readonly type: 'ExportDefaultDeclaration';
+        type: 'ExportDefaultDeclaration';
 
         decl: DefaultDecl;
     }
@@ -1160,7 +1160,7 @@ declare module "@swc/core" {
      * e.g. `import foo from 'mod.js'`
      */
     export interface ImportDefaultSpecifier extends Node, HasSpan {
-        readonly type: 'ImportDefaultSpecifier';
+        type: 'ImportDefaultSpecifier';
         local: Identifier;
     }
 
@@ -1168,7 +1168,7 @@ declare module "@swc/core" {
      * e.g. `import * as foo from 'mod.js'`.
      */
     export interface ImportNamespaceSpecifier extends Node, HasSpan {
-        readonly type: 'ImportNamespaceSpecifier';
+        type: 'ImportNamespaceSpecifier';
 
         local: Identifier;
     }
@@ -1183,7 +1183,7 @@ declare module "@swc/core" {
      * local = bar, imported = Some(foo) for 
      */
     export interface NamedImportSpecifier extends Node, HasSpan {
-        readonly type: 'ImportSpecifier';
+        type: 'ImportSpecifier';
         local: Identifier;
         imported?: Identifier;
     }
@@ -1194,19 +1194,19 @@ declare module "@swc/core" {
      * `export * as foo from 'src';`
      */
     export interface ExportNamespaceSpecifer extends Node, HasSpan {
-        readonly type: 'ExportNamespaceSpecifer';
+        type: 'ExportNamespaceSpecifer';
 
         name: Identifier;
     }
 
     export interface ExportDefaultSpecifier extends Node, HasSpan {
-        readonly type: 'ExportDefaultSpecifier';
+        type: 'ExportDefaultSpecifier';
 
         exported: Identifier;
     }
 
     export interface NamedExportSpecifier extends Node, HasSpan {
-        readonly type: 'ExportSpecifier';
+        type: 'ExportSpecifier';
 
         orig: Identifier;
         /**
@@ -1223,13 +1223,13 @@ declare module "@swc/core" {
     }
 
     export interface Module extends Node, HasSpan, HasInterpreter {
-        readonly type: 'Module';
+        type: 'Module';
 
         body: ModuleItem[]
     }
 
     export interface Script extends Node, HasSpan, HasInterpreter {
-        readonly type: 'Script';
+        type: 'Script';
 
         body: Statement[]
     }
@@ -1263,26 +1263,26 @@ declare module "@swc/core" {
 
 
     export interface ArrayPattern extends Node, HasSpan, PatternBase {
-        readonly type: 'ArrayPattern';
+        type: 'ArrayPattern';
 
         elements: (Pattern | undefined)[];
     }
 
     export interface ObjectPattern extends Node, HasSpan, PatternBase {
-        readonly type: 'ObjectPattern';
+        type: 'ObjectPattern';
 
         props: ObjectPatternProperty[];
     }
 
     export interface AssignmentPattern extends Node, HasSpan, PatternBase {
-        readonly type: 'AssignmentPattern';
+        type: 'AssignmentPattern';
 
         left: Pattern;
         right: Expression;
     }
 
     export interface RestElement extends Node, HasSpan, PatternBase {
-        readonly type: 'RestElement';
+        type: 'RestElement';
 
         rest: Span;
 
@@ -1297,7 +1297,7 @@ declare module "@swc/core" {
      * `{key: value}`
      */
     export interface KeyValuePatternProperty extends Node {
-        readonly type: 'KeyValuePatternProperty';
+        type: 'KeyValuePatternProperty';
 
         key: PropertyName,
         value: Pattern;
@@ -1307,7 +1307,7 @@ declare module "@swc/core" {
      * `{key}` or `{key = value}`
      */
     export interface AssignmentPatternProperty extends Node, HasSpan {
-        readonly type: 'AssignmentPatternProperty';
+        type: 'AssignmentPatternProperty';
 
         key: Identifier;
         value?: Expression;
@@ -1327,33 +1327,33 @@ declare module "@swc/core" {
     }
 
     export interface KeyValueProperty extends PropBase {
-        readonly type: 'KeyValueProperty';
+        type: 'KeyValueProperty';
 
         value: Expression;
     }
 
     export interface AssignmentProperty extends Node {
-        readonly type: 'AssignmentProperty';
+        type: 'AssignmentProperty';
 
         key: Identifier;
         value: Expression;
     }
 
     export interface GetterProperty extends PropBase, HasSpan {
-        readonly type: 'GetterProperty';
+        type: 'GetterProperty';
 
         body?: BlockStatement;
     }
 
     export interface SetterProperty extends PropBase, HasSpan {
-        readonly type: 'SetterProperty';
+        type: 'SetterProperty';
 
         param: Pattern;
         body?: BlockStatement;
     }
 
     export interface MethodProperty extends PropBase, Fn {
-        readonly type: 'MethodProperty';
+        type: 'MethodProperty';
 
     }
 
@@ -1364,7 +1364,7 @@ declare module "@swc/core" {
 
 
     export interface BlockStatement extends Node, HasSpan {
-        readonly type: 'BlockStatement';
+        type: 'BlockStatement';
 
         stmts: Statement[];
     }
@@ -1390,47 +1390,47 @@ declare module "@swc/core" {
         | Declaration;
 
     export interface EmptyStatement extends Node, HasSpan {
-        readonly type: 'EmptyStatement';
+        type: 'EmptyStatement';
     }
 
     export interface DebuggerStatement extends Node, HasSpan {
-        readonly type: 'DebuggerStatement';
+        type: 'DebuggerStatement';
     }
 
     export interface WithStatement extends Node, HasSpan {
-        readonly type: 'WithStatement';
+        type: 'WithStatement';
 
         object: Expression;
         body: Statement;
     }
 
     export interface ReturnStatement extends Node, HasSpan {
-        readonly type: 'ReturnStatement';
+        type: 'ReturnStatement';
 
         argument?: Expression;
     }
 
     export interface LabeledStatement extends Node, HasSpan {
-        readonly type: 'LabeledStatement';
+        type: 'LabeledStatement';
 
         label: Identifier;
         body: Statement;
     }
 
     export interface BreakStatement extends Node, HasSpan {
-        readonly type: 'BreakStatement';
+        type: 'BreakStatement';
 
         label?: Identifier;
     }
 
     export interface ContinueStatement extends Node, HasSpan {
-        readonly type: 'ContinueStatement';
+        type: 'ContinueStatement';
 
         label?: Identifier;
     }
 
     export interface IfStatement extends Node, HasSpan {
-        readonly type: 'IfStatement';
+        type: 'IfStatement';
 
         test: Expression;
         consequent: Statement;
@@ -1438,20 +1438,20 @@ declare module "@swc/core" {
     }
 
     export interface SwitchStatement extends Node, HasSpan {
-        readonly type: 'SwitchStatement';
+        type: 'SwitchStatement';
 
         discriminant: Expression;
         cases: SwitchCase[];
     }
 
     export interface ThrowStatement extends Node, HasSpan {
-        readonly type: 'ThrowStatement';
+        type: 'ThrowStatement';
 
         argument: Expression;
     }
 
     export interface TryStatement extends Node, HasSpan {
-        readonly type: 'TryStatement';
+        type: 'TryStatement';
 
         block: BlockStatement;
         handler?: CatchClause;
@@ -1459,21 +1459,21 @@ declare module "@swc/core" {
     }
 
     export interface WhileStatement extends Node, HasSpan {
-        readonly type: 'WhileStatement';
+        type: 'WhileStatement';
 
         test: Expression;
         body: Statement;
     }
 
     export interface DoWhileStatement extends Node, HasSpan {
-        readonly type: 'DoWhileStatement';
+        type: 'DoWhileStatement';
 
         test: Expression;
         body: Statement;
     }
 
     export interface ForStatement extends Node, HasSpan {
-        readonly type: 'ForStatement';
+        type: 'ForStatement';
 
         init?: VariableDeclaration | Expression;
         test?: Expression;
@@ -1482,7 +1482,7 @@ declare module "@swc/core" {
     }
 
     export interface ForInStatement extends Node, HasSpan {
-        readonly type: 'ForInStatement';
+        type: 'ForInStatement';
 
         left: VariableDeclaration | Pattern;
         right: Expression;
@@ -1490,7 +1490,7 @@ declare module "@swc/core" {
     }
 
     export interface ForOfStatement extends Node, HasSpan {
-        readonly type: 'ForOfStatement';
+        type: 'ForOfStatement';
 
         /**
          *  Span of the await token.
@@ -1504,7 +1504,7 @@ declare module "@swc/core" {
     }
 
     export interface SwitchCase extends Node, HasSpan {
-        readonly type: 'SwitchCase';
+        type: 'SwitchCase';
 
         /**
          * Undefined for default case
@@ -1514,7 +1514,7 @@ declare module "@swc/core" {
     }
 
     export interface CatchClause extends Node, HasSpan {
-        readonly type: 'CatchClause';
+        type: 'CatchClause';
 
         /**
          * The param is `undefined` if the catch binding is omitted. E.g., `try { foo() } catch {}`
@@ -1524,19 +1524,19 @@ declare module "@swc/core" {
     }
 
     export interface TsTypeAnnotation extends Node, HasSpan {
-        readonly type: 'TsTypeAnnotation';
+        type: 'TsTypeAnnotation';
 
         typeAnnotation: TsType;
     }
 
     export interface TsTypeParameterDeclaration extends Node, HasSpan {
-        readonly type: 'TsTypeParameterDeclaration';
+        type: 'TsTypeParameterDeclaration';
 
         parameters: TsTypeParameter[];
     }
 
     export interface TsTypeParameter extends Node, HasSpan {
-        readonly type: 'TsTypeParameter';
+        type: 'TsTypeParameter';
 
         name: Identifier;
         constraint?: TsType;
@@ -1544,20 +1544,20 @@ declare module "@swc/core" {
     }
 
     export interface TsTypeParameterInstantiation extends Node, HasSpan {
-        readonly type: 'TsTypeParameterInstantiation';
+        type: 'TsTypeParameterInstantiation';
 
         params: TsType[]
     }
 
     export interface TsTypeCastExpression extends Node, HasSpan {
-        readonly type: 'TsTypeCastExpression';
+        type: 'TsTypeCastExpression';
 
         expression: Expression;
         typeAnnotation: TsTypeAnnotation;
     }
 
     export interface TsParameterProperty extends Node, HasSpan, HasDecorator {
-        readonly type: 'TsParameterProperty';
+        type: 'TsParameterProperty';
 
         accessibility?: Accessibility;
         readonly: boolean;
@@ -1568,7 +1568,7 @@ declare module "@swc/core" {
         | AssignmentPattern;
 
     export interface TsQualifiedName extends Node {
-        readonly type: 'TsQualifiedName';
+        type: 'TsQualifiedName';
 
         left: TsEntityName;
         right: Identifier;
@@ -1589,7 +1589,7 @@ declare module "@swc/core" {
         | TsIndexSignature;
 
     export interface TsCallSignatureDeclaration extends Node, HasSpan {
-        readonly type: 'TsCallSignatureDeclaration';
+        type: 'TsCallSignatureDeclaration';
 
         params: TsFnParameter[];
         typeAnnotation?: TsTypeAnnotation;
@@ -1597,7 +1597,7 @@ declare module "@swc/core" {
     }
 
     export interface TsConstructSignatureDeclaration extends Node, HasSpan {
-        readonly type: 'TsConstructSignatureDeclaration';
+        type: 'TsConstructSignatureDeclaration';
 
         params: TsFnParameter[];
         typeAnnotation?: TsTypeAnnotation;
@@ -1605,7 +1605,7 @@ declare module "@swc/core" {
     }
 
     export interface TsPropertySignature extends Node, HasSpan {
-        readonly type: 'TsPropertySignature';
+        type: 'TsPropertySignature';
 
         readonly: boolean;
         key: Expression;
@@ -1620,7 +1620,7 @@ declare module "@swc/core" {
     }
 
     export interface TsMethodSignature extends Node, HasSpan {
-        readonly type: 'TsMethodSignature';
+        type: 'TsMethodSignature';
 
         readonly: boolean;
         key: Expression;
@@ -1633,7 +1633,7 @@ declare module "@swc/core" {
     }
 
     export interface TsIndexSignature extends Node, HasSpan {
-        readonly type: 'TsIndexSignature';
+        type: 'TsIndexSignature';
 
         readonly: boolean;
         params: TsFnParameter[];
@@ -1664,7 +1664,7 @@ declare module "@swc/core" {
     export type TsFnOrConstructorType = TsFunctionType | TsConstructorType;
 
     export interface TsKeywordType extends Node, HasSpan {
-        readonly type: 'TsKeywordType';
+        type: 'TsKeywordType';
 
         kind: TsKeywordTypeKind
     }
@@ -1683,20 +1683,20 @@ declare module "@swc/core" {
         | 'never';
 
     export interface TsThisType extends Node, HasSpan {
-        readonly type: 'TsThisType';
+        type: 'TsThisType';
     }
 
     export type TsFnParameter = Identifier | RestElement | ObjectPattern;
 
     export interface TsFunctionType extends Node, HasSpan {
-        readonly type: 'TsFunctionType';
+        type: 'TsFunctionType';
 
         typeParams?: TsTypeParameterDeclaration;
         typeAnnotation: TsTypeAnnotation;
     }
 
     export interface TsConstructorType extends Node, HasSpan {
-        readonly type: 'TsConstructorType';
+        type: 'TsConstructorType';
 
         params: TsFnParameter[];
 
@@ -1705,14 +1705,14 @@ declare module "@swc/core" {
     }
 
     export interface TsTypeReference extends Node, HasSpan {
-        readonly type: 'TsTypeReference';
+        type: 'TsTypeReference';
 
         typeName: TsEntityName;
         typeParams?: TsTypeParameterInstantiation;
     }
 
     export interface TsTypePredicate extends Node, HasSpan {
-        readonly type: 'TsTypePredicate';
+        type: 'TsTypePredicate';
 
         paramName: TsThisTypeOrIdent;
         typeAnnotation: TsTypeAnnotation;
@@ -1724,37 +1724,37 @@ declare module "@swc/core" {
      * `typeof` operator
      */
     export interface TsTypeQuery extends Node, HasSpan {
-        readonly type: 'TsTypeQuery';
+        type: 'TsTypeQuery';
 
         exprName: TsEntityName;
     }
 
     export interface TsTypeLiteral extends Node, HasSpan {
-        readonly type: 'TsTypeLiteral';
+        type: 'TsTypeLiteral';
 
         members: TsTypeElement[]
     }
 
     export interface TsArrayType extends Node, HasSpan {
-        readonly type: 'TsArrayType';
+        type: 'TsArrayType';
 
         elemType: TsType;
     }
 
     export interface TsTupleType extends Node, HasSpan {
-        readonly type: 'TsTupleType';
+        type: 'TsTupleType';
 
         elemTypes: TsType[];
     }
 
     export interface TsOptionalType extends Node, HasSpan {
-        readonly type: 'TsOptionalType';
+        type: 'TsOptionalType';
 
         typeAnnotation: TsType;
     }
 
     export interface TsRestType extends Node, HasSpan {
-        readonly type: 'TsRestType';
+        type: 'TsRestType';
 
         typeAnnotation: TsType
     }
@@ -1762,19 +1762,19 @@ declare module "@swc/core" {
     export type TsUnionOrIntersectionType = TsUnionType | TsIntersectionType;
 
     export interface TsUnionType extends Node, HasSpan {
-        readonly type: 'TsUnionType';
+        type: 'TsUnionType';
 
         types: TsType[]
     }
 
     export interface TsIntersectionType extends Node, HasSpan {
-        readonly type: 'TsIntersectionType';
+        type: 'TsIntersectionType';
 
         types: TsType[];
     }
 
     export interface TsConditionalType extends Node, HasSpan {
-        readonly type: 'TsConditionalType';
+        type: 'TsConditionalType';
 
         checkType: TsType;
         extendsType: TsType;
@@ -1783,19 +1783,19 @@ declare module "@swc/core" {
     }
 
     export interface TsInferType extends Node, HasSpan {
-        readonly type: 'TsInferType';
+        type: 'TsInferType';
 
         typeParam: TsTypeParameter;
     }
 
     export interface TsParenthesizedType extends Node, HasSpan {
-        readonly type: 'TsParenthesizedType';
+        type: 'TsParenthesizedType';
 
         typeAnnotation: TsType;
     }
 
     export interface TsTypeOperator extends Node, HasSpan {
-        readonly type: 'TsTypeOperator';
+        type: 'TsTypeOperator';
 
         op: TsTypeOperatorOp;
         typeAnnotation: TsType;
@@ -1804,7 +1804,7 @@ declare module "@swc/core" {
     export type TsTypeOperatorOp = 'keyof' | 'unique';
 
     export interface TsIndexedAccessType extends Node, HasSpan {
-        readonly type: 'TsIndexedAccessType';
+        type: 'TsIndexedAccessType';
 
         objectType: TsType;
         indexType: TsType;
@@ -1813,7 +1813,7 @@ declare module "@swc/core" {
     export type TruePlusMinus = true | '+' | '-';
 
     export interface TsMappedType extends Node, HasSpan {
-        readonly type: 'TsMappedType';
+        type: 'TsMappedType';
 
         readonly?: TruePlusMinus;
         typeParam: TsTypeParameter;
@@ -1822,7 +1822,7 @@ declare module "@swc/core" {
     }
 
     export interface TsLiteralType extends Node, HasSpan {
-        readonly type: 'TsLiteralType';
+        type: 'TsLiteralType';
 
         literal: TsLiteral;
     }
@@ -1834,7 +1834,7 @@ declare module "@swc/core" {
     // // ================
 
     export interface TsInterfaceDeclaration extends Node, HasSpan {
-        readonly type: 'TsInterfaceDeclaration';
+        type: 'TsInterfaceDeclaration';
 
         id: Identifier;
         declare: boolean;
@@ -1844,20 +1844,20 @@ declare module "@swc/core" {
     }
 
     export interface TsInterfaceBody extends Node, HasSpan {
-        readonly type: 'TsInterfaceBody';
+        type: 'TsInterfaceBody';
 
         body: TsTypeElement[]
     }
 
     export interface TsExpressionWithTypeArguments extends Node, HasSpan {
-        readonly type: 'TsExpressionWithTypeArguments';
+        type: 'TsExpressionWithTypeArguments';
 
         expression: TsEntityName;
         typeParams?: TsTypeParameterInstantiation;
     }
 
     export interface TsTypeAliasDeclaration extends Node, HasSpan {
-        readonly type: 'TsTypeAliasDeclaration';
+        type: 'TsTypeAliasDeclaration';
 
         declare: boolean;
         id: Identifier;
@@ -1866,7 +1866,7 @@ declare module "@swc/core" {
     }
 
     export interface TsEnumDeclaration extends Node, HasSpan {
-        readonly type: 'TsEnumDeclaration';
+        type: 'TsEnumDeclaration';
 
         declare: boolean;
         is_const: boolean;
@@ -1875,7 +1875,7 @@ declare module "@swc/core" {
     }
 
     export interface TsEnumMember extends Node, HasSpan {
-        readonly type: 'TsEnumMember';
+        type: 'TsEnumMember';
 
         id: TsEnumMemberId,
         init?: Expression,
@@ -1884,7 +1884,7 @@ declare module "@swc/core" {
     export type TsEnumMemberId = Identifier | StringLiteral;
 
     export interface TsModuleDeclaration extends Node, HasSpan {
-        readonly type: 'TsModuleDeclaration';
+        type: 'TsModuleDeclaration';
 
         declare: boolean;
         global: boolean;
@@ -1898,13 +1898,13 @@ declare module "@swc/core" {
     export type TsNamespaceBody = TsModuleBlock | TsNamespaceDeclaration;
 
     export interface TsModuleBlock extends Node, HasSpan {
-        readonly type: 'TsModuleBlock';
+        type: 'TsModuleBlock';
 
         body: ModuleItem[];
     }
 
     export interface TsNamespaceDeclaration extends Node, HasSpan {
-        readonly type: 'TsNamespaceDeclaration';
+        type: 'TsNamespaceDeclaration';
 
         declare: boolean;
         global: boolean;
@@ -1915,7 +1915,7 @@ declare module "@swc/core" {
     export type TsModuleName = Identifier | StringLiteral;
 
     export interface TsImportEqualsDeclaration extends Node, HasSpan {
-        readonly type: 'TsImportEqualsDeclaration';
+        type: 'TsImportEqualsDeclaration';
 
         declare: boolean;
         is_export: boolean;
@@ -1926,39 +1926,39 @@ declare module "@swc/core" {
     export type TsModuleReference = TsEntityName | TsExternalModuleReference;
 
     export interface TsExternalModuleReference extends Node, HasSpan {
-        readonly type: 'TsExternalModuleReference';
+        type: 'TsExternalModuleReference';
 
         expression: Expression;
     }
 
     export interface TsExportAssignment extends Node, HasSpan {
-        readonly type: 'TsExportAssignment';
+        type: 'TsExportAssignment';
 
         expression: Expression;
     }
 
     export interface TsNamespaceExportDeclaration extends Node, HasSpan {
-        readonly type: 'TsNamespaceExportDeclaration';
+        type: 'TsNamespaceExportDeclaration';
 
         id: Identifier;
     }
 
     export interface TsAsExpression extends ExpressionBase {
-        readonly type: 'TsAsExpression';
+        type: 'TsAsExpression';
 
         expression: Expression;
         typeAnnotation: TsType;
     }
 
     export interface TsTypeAssertion extends ExpressionBase {
-        readonly type: 'TsTypeAssertion';
+        type: 'TsTypeAssertion';
 
         expression: Expression;
         typeAnnotation: TsType;
     }
 
     export interface TsNonNullExpression extends ExpressionBase {
-        readonly type: 'TsNonNullExpression';
+        type: 'TsNonNullExpression';
 
         expression: Expression;
     }
