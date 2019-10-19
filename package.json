@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "mkdirp": "^0.5.1",
-    "neon-cli": "^0.2.0",
+    "neon-cli": "^0.3.2",
     "npmlog": "^4.1.2",
     "request": "^2.88.0",
     "true-case-path": "^1.0.3"
