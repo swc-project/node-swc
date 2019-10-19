@@ -49,9 +49,9 @@ export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries'
 echo 'Installing deps...'
 npm install --ignore-scripts
 
-echo 'Installing neon@0.2.0'
-npm install neon-cli@0.2.0 || true
-npm ls neon-cli
+# echo 'Installing neon@0.2.0'
+# npm install neon-cli@0.2.0 || true
+# npm ls neon-cli
 
 # Build it
 echo 'Building...'
