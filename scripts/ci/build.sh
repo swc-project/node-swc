@@ -51,7 +51,13 @@ npm install --ignore-scripts
 
 # Build it
 echo 'Building...'
-npx neon build --release
+
+if [ -x "$(command -v travis_wait)" ]; then
+    travis_wait npx neon build --release
+else
+    npx neon build --release
+fi
+
 
 ls -al ./native/target/release
 
