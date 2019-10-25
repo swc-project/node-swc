@@ -10,6 +10,11 @@ environment:
 
     - platform: x64
       SWC_NAME: win32-x64
+      NODE_ABI: "67"
+      NODE_VERSION: "11.6.0"
+
+    - platform: x64
+      SWC_NAME: win32-x64
       NODE_ABI: "64"
       NODE_VERSION: "10.15.0"
 
