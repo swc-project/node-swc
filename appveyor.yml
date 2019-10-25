@@ -51,7 +51,7 @@ install:
 build: false
 skip_non_tags: true
 
-test_script:
+script:
   # - bash ./scripts/ci/build.sh 12.11.0 72
   # - bash ./scripts/ci/build.sh 11.6.0 67
   # - bash ./scripts/ci/build.sh 10.15.0 64
