@@ -53,6 +53,7 @@ npm install --ignore-scripts
 echo 'Building...'
 
 if [ -x "$(command -v travis_wait)" ]; then
+    echo 'Using travis_wait'
     travis_wait npx neon build --release
 else
     npx neon build --release
