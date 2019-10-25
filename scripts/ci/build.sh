@@ -55,11 +55,9 @@ echo 'Building...'
 if [[ -z "${TRAVIS}" ]]; then   
     echo 'Using travis_wait'
     travis_wait npx neon build --release
-    
 else
     echo 'travis_wait does not exist'
     npx neon build --release 
-else
 fi
 
 
