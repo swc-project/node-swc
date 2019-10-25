@@ -3,254 +3,28 @@
 #![feature(never_type)]
 #![recursion_limit = "2048"]
 
-extern crate fxhash;
-#[macro_use]
-extern crate neon;
 extern crate failure;
+extern crate fxhash;
 extern crate hashbrown;
 extern crate lazy_static;
+extern crate neon;
 extern crate neon_serde;
 extern crate path_clean;
-extern crate serde;
-extern crate serde_json;
-extern crate sourcemap;
 extern crate swc;
 
-mod config;
-mod error;
-
-use crate::{
-    config::{BuiltConfig, Config, ConfigFile, Merge, Options, ParseOptions, RootMode},
-    error::Error,
-};
 use neon::prelude::*;
 use path_clean::clean;
-use serde::Serialize;
-use sourcemap::SourceMapBuilder;
 use std::{
-    fs::File,
     path::{Path, PathBuf},
     sync::Arc,
 };
 use swc::{
-    common::{
-        self, comments::Comments, errors::Handler, FileName, FilePathMapping, FoldWith, Globals,
-        SourceFile, SourceMap, Spanned, GLOBALS,
-    },
-    ecmascript::{
-        ast::Module,
-        codegen::{self, Emitter},
-        parser::{Parser, Session as ParseSess, SourceFileInput, Syntax},
-        transforms::{
-            helpers::{self, Helpers},
-            util,
-        },
-    },
+    common::{self, errors::Handler, FileName, FilePathMapping, SourceFile, SourceMap, Spanned},
+    config::{Options, ParseOptions},
+    ecmascript::ast::Module,
+    error::Error,
+    Compiler, TransformOutput,
 };
-
-pub type SourceMapString = String;
-
-pub struct Compiler {
-    pub globals: Globals,
-    pub cm: Arc<SourceMap>,
-    handler: Handler,
-}
-
-impl Compiler {
-    pub(crate) fn new(cm: Arc<SourceMap>, handler: Handler) -> Self {
-        Compiler {
-            cm,
-            handler,
-            globals: Globals::new(),
-        }
-    }
-
-    /// Handles config merging.
-    pub(crate) fn config_for_file(
-        &self,
-        opts: &Options,
-        fm: &SourceFile,
-    ) -> Result<BuiltConfig, Error> {
-        let Options {
-            ref root,
-            root_mode,
-            swcrc,
-            config_file,
-            ..
-        } = opts;
-        let root = root
-            .clone()
-            .unwrap_or_else(|| ::std::env::current_dir().unwrap());
-
-        let config_file = match config_file {
-            Some(ConfigFile::Str(ref s)) => {
-                let path = Path::new(s);
-                let r = File::open(&path).map_err(|err| Error::FailedToReadConfigFile { err })?;
-                let config: Config = serde_json::from_reader(r)
-                    .map_err(|err| Error::FailedToParseConfigFile { err })?;
-                Some(config)
-            }
-            _ => None,
-        };
-
-        if *swcrc {
-            match fm.name {
-                FileName::Real(ref path) => {
-                    let mut parent = path.parent();
-                    while let Some(dir) = parent {
-                        let swcrc = dir.join(".swcrc");
-
-                        if swcrc.exists() {
-                            let r = File::open(&swcrc)
-                                .map_err(|err| Error::FailedToReadConfigFile { err })?;
-                            let mut config: Config = serde_json::from_reader(r)
-                                .map_err(|err| Error::FailedToParseConfigFile { err })?;
-                            if let Some(config_file) = config_file {
-                                config.merge(&config_file)
-                            }
-                            let built = opts.build(self, Some(config));
-                            return Ok(built);
-                        }
-
-                        if dir == root && *root_mode == RootMode::Root {
-                            break;
-                        }
-                        parent = dir.parent();
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        let built = opts.build(self, config_file);
-        Ok(built)
-    }
-
-    pub(crate) fn run<F, T>(&self, op: F) -> T
-    where
-        F: FnOnce() -> T,
-    {
-        GLOBALS.set(&self.globals, op)
-    }
-
-    pub(crate) fn parse_js(
-        &self,
-        fm: Arc<SourceFile>,
-        syntax: Syntax,
-        comments: Option<&Comments>,
-    ) -> Result<Module, Error> {
-        let session = ParseSess {
-            handler: &self.handler,
-        };
-        let mut parser = Parser::new(session, syntax, SourceFileInput::from(&*fm), comments);
-        let module = parser.parse_module().map_err(|mut e| {
-            e.emit();
-            Error::FailedToParseModule {}
-        })?;
-
-        Ok(module)
-    }
-
-    pub(crate) fn process_js_file(
-        &self,
-        fm: Arc<SourceFile>,
-        opts: Options,
-    ) -> Result<TransformOutput, Error> {
-        self.run(|| {
-            if error::debug() {
-                eprintln!("processing js file: {:?}", fm)
-            }
-
-            let config = self.config_for_file(&opts, &*fm)?;
-
-            let comments = Default::default();
-            let module = self.parse_js(
-                fm.clone(),
-                config.syntax,
-                if config.minify { None } else { Some(&comments) },
-            )?;
-            let mut pass = config.pass;
-            let module = helpers::HELPERS.set(&Helpers::new(config.external_helpers), || {
-                util::HANDLER.set(&self.handler, || {
-                    // Fold module
-                    module.fold_with(&mut pass)
-                })
-            });
-
-            self.print(&module, fm, &comments, config.source_maps, config.minify)
-        })
-    }
-
-    fn print(
-        &self,
-        module: &Module,
-        fm: Arc<SourceFile>,
-        comments: &Comments,
-        source_map: bool,
-        minify: bool,
-    ) -> Result<TransformOutput, Error> {
-        self.run(|| {
-            let mut src_map_builder = SourceMapBuilder::new(None);
-
-            match fm.name {
-                FileName::Real(ref p) => {
-                    let id = src_map_builder.add_source(&p.display().to_string());
-                    src_map_builder.set_source_contents(id, Some(&fm.src));
-                }
-                _ => {}
-            }
-
-            let src = {
-                let mut buf = vec![];
-                {
-                    let handlers = box MyHandlers;
-                    let mut emitter = Emitter {
-                        cfg: codegen::Config { minify },
-                        comments: if minify { None } else { Some(&comments) },
-                        cm: self.cm.clone(),
-                        wr: box swc::ecmascript::codegen::text_writer::JsWriter::new(
-                            self.cm.clone(),
-                            "\n",
-                            &mut buf,
-                            if source_map {
-                                Some(&mut src_map_builder)
-                            } else {
-                                None
-                            },
-                        ),
-                        handlers,
-                        pos_of_leading_comments: Default::default(),
-                    };
-
-                    emitter
-                        .emit_module(&module)
-                        .map_err(|err| Error::FailedToEmitModule { err })?;
-                }
-                // Invalid utf8 is valid in javascript world.
-                unsafe { String::from_utf8_unchecked(buf) }
-            };
-            Ok(TransformOutput {
-                code: src,
-                map: if source_map {
-                    let mut buf = vec![];
-                    src_map_builder
-                        .into_sourcemap()
-                        .to_writer(&mut buf)
-                        .map_err(|err| Error::FailedToWriteSourceMap { err })?;
-                    let map =
-                        String::from_utf8(buf).map_err(|err| Error::SourceMapNotUtf8 { err })?;
-                    Some(map)
-                } else {
-                    None
-                },
-            })
-        })
-    }
-}
-
-struct MyHandlers;
-
-impl swc::ecmascript::codegen::Handlers for MyHandlers {}
 
 fn init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
     let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
@@ -279,19 +53,13 @@ struct TransformFileTask {
     options: Options,
 }
 
-#[derive(Serialize)]
-struct TransformOutput {
-    code: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    map: Option<String>,
-}
-
-impl TransformOutput {
-    fn complete(mut cx: TaskContext, result: Result<TransformOutput, Error>) -> JsResult<JsValue> {
-        match result {
-            Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
-            Err(err) => cx.throw_error(err.to_string()),
-        }
+fn complete_output(
+    mut cx: TaskContext,
+    result: Result<TransformOutput, Error>,
+) -> JsResult<JsValue> {
+    match result {
+        Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
+        Err(err) => cx.throw_error(err.to_string()),
     }
 }
 
@@ -310,7 +78,7 @@ impl Task for TransformTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        complete_output(cx, result)
     }
 }
 
@@ -334,7 +102,7 @@ impl Task for TransformFileTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        complete_output(cx, result)
     }
 }
 
@@ -677,7 +445,7 @@ impl Task for PrintTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        TransformOutput::complete(cx, result)
+        complete_output(cx, result)
     }
 }
 
