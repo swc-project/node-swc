@@ -51,15 +51,7 @@ npm install --ignore-scripts
 
 # Build it
 echo 'Building...'
-
-if [[ -z "${TRAVIS}" ]]; then   
-    echo 'travis_wait does not exist'
-    npx neon build --release 
-else
-    echo 'Using travis_wait'
-    travis_wait npx neon build --release
-fi
-
+npx neon build --release 
 
 if command -v travis_wait  > /dev/null 2>&1; then
     
