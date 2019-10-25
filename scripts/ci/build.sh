@@ -53,12 +53,6 @@ npm install --ignore-scripts
 echo 'Building...'
 npx neon build --release 
 
-if command -v travis_wait  > /dev/null 2>&1; then
-    
-    
-fi
-
-
 ls -al ./native/target/release
 
 ls -al ./native/target/release/deps
