@@ -84,3 +84,11 @@ it("should handle comments in return statement", () => {
 
   expect(out.code.replace(/ /g, "")).toContain(`return(/*#__PURE__*/`);
 });
+
+it("should handle multiple entries in swcrc", () => {
+  const out1 = swc.transformFileSync(__dirname + "/../../issue-414/a.js");
+  expect(out1.code).toContain(`require('foo')`);
+
+  const out2 = swc.transformFileSync(__dirname + "/../../issue-414/b.ts");
+  expect(out2.code).toContain(`define(['bar'], function(_bar) {`);
+});
