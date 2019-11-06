@@ -38,5 +38,9 @@
     "lodash": "^4.17.11",
     "source-map": "^0.7.3",
     "sourcemap-validator": "^1.1.0"
+  },
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/swc"
   }
 }
