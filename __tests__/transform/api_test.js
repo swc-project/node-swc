@@ -92,14 +92,3 @@ it("should handle multiple entries in swcrc", () => {
   const out2 = swc.transformFileSync(__dirname + "/../../issue-414/b.ts");
   expect(out2.code).toContain(`define(['bar'], function(_bar) {`);
 });
-
-it("should handle comments in return", () => {
-  const out = swc.transformSync(`() => {
-    return (
-      Promise.resolve('foo')
-        // Interfering
-        .then(() => {})
-    );
-  };`);
-  expect(out.code.replace(/ /gi, "")).toContain(`return(//Interfering`);
-});
