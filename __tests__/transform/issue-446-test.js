@@ -5,7 +5,7 @@ it("should handle comments in return", () => {
   () => {
     return (
       // Interfering comment
-      foo.bar
+      foo.bar || false
     );
   };
   `);

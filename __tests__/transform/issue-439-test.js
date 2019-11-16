@@ -8,5 +8,5 @@ it("should handle comments in return", () => {
           .then(() => {})
       );
     };`);
-  expect(out.code).toContain(`return(//Interfering`);
+  expect(out.code).toContain(`Promise.resolve('foo')// Interfering`);
 });
