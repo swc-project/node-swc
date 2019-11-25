@@ -36,13 +36,6 @@ it("should handle exportNamespaceFrom", () => {
   expect(out.code).toContain("export { _Foo as Foo }");
 });
 
-it("should handle exportNamespaceFrom configured by .swcrc", () => {
-  const out = swc.transformFileSync(__dirname + "/../../issue-226/input.js");
-
-  expect(out.code).toContain("import * as _Foo from 'bar';");
-  expect(out.code).toContain("export { _Foo as Foo }");
-});
-
 it("should handle jsc.target = es3", () => {
   const out = swc.transformSync(`foo.default`, {
     jsc: {
@@ -59,36 +52,4 @@ it("should handle jsc.target = es5", () => {
     }
   });
   expect(out.code.trim()).toBe(`foo.default;`);
-});
-
-it("should handle react correctly", () => {
-  const out = swc.transformFileSync(__dirname + "/../../issue-351/input.js");
-
-  expect(out.code).toContain(`.default.createElement('div', null);`);
-});
-
-it("should handle cjs imports", () => {
-  const out = swc.transformFileSync(__dirname + "/../../issue-389/input.js");
-
-  expect(out.code).toContain(`.default.bar = true`);
-});
-
-it("should handle comments in arrow expression", () => {
-  const out = swc.transformFileSync(__dirname + "/../../issue-406/input.js");
-
-  expect(out.code).toContain(`return true`);
-});
-
-it("should handle comments in return statement", () => {
-  const out = swc.transformFileSync(__dirname + "/../../issue-415/input.js");
-
-  expect(out.code.replace(/ /g, "")).toContain(`return(/*#__PURE__*/`);
-});
-
-it("should handle multiple entries in swcrc", () => {
-  const out1 = swc.transformFileSync(__dirname + "/../../issue-414/a.js");
-  expect(out1.code).toContain(`require('foo')`);
-
-  const out2 = swc.transformFileSync(__dirname + "/../../issue-414/b.ts");
-  expect(out2.code).toContain(`define(['bar'], function(_bar) {`);
 });
