@@ -9,6 +9,9 @@
 ####################
 set -e
 
+export CC=gcc-4.8
+export CXX=g++-4.8
+
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
