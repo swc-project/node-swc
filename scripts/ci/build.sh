@@ -7,9 +7,12 @@
 #
 # e.g. build.sh 11 67
 ####################
-set -e
+set -ex
 
+echo "Switching to node v$1 ($2)"
 if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
+nvm install $1
+nvm use $1
 
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
@@ -35,12 +38,6 @@ echo 'Removed old files'
 export PATH="/c/nvm-root:/c/nodejs:$PATH"
 
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]] || [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source ~/.nvm/nvm.sh ; fi
-
-
-echo "Switching to node v$1 ($2)"
-nvm install $1
-nvm use $1
 
 # if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
 # if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
