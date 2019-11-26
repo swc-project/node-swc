@@ -1,6 +1,9 @@
 language: shell
 sudo: false
 
+services:
+  - docker
+
 install:
   # Install lastest nvm
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
@@ -84,17 +87,36 @@ matrix:
     - os: linux
       env:
         - SWC_NAME=linux-x64
-      services:
-        - docker
       install:
         - ./scripts/ci/linux/start-docker.sh 12 72 12.12-alpine
-        - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
-        - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
-        - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
       script:
         - docker exec target-72 sh ./scripts/ci/linux/build.sh
+
+
+   - os: linux
+      env:
+        - SWC_NAME=linux-x64
+      install:
+        - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
+      script:
         - docker exec target-67 sh ./scripts/ci/linux/build.sh
+
+
+   - os: linux
+      env:
+        - SWC_NAME=linux-x64
+      install:
+        - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
+      script:
         - docker exec target-64 sh ./scripts/ci/linux/build.sh
+
+
+   - os: linux
+      env:
+        - SWC_NAME=linux-x64
+      install:
+        - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
+      script:
         - docker exec target-57 sh ./scripts/ci/linux/build.sh
 
 env:
