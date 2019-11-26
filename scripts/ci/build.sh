@@ -7,11 +7,13 @@
 #
 # e.g. build.sh 11 67
 ####################
-set -ex
+set -e
 
 echo "Switching to node v$1 ($2)"
 if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
+echo "Intsalling node $1"
 nvm install $1
+echo "nvm use $1"
 nvm use $1
 
 # Bypasses https://github.com/neon-bindings/neon/issues/384
