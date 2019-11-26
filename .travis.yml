@@ -87,6 +87,7 @@ matrix:
     - os: linux
       env:
         - SWC_NAME=linux-x64
+        - NODE_ABI=72
       install:
         - ./scripts/ci/linux/start-docker.sh 12 72 12.12-alpine
       script:
@@ -96,6 +97,7 @@ matrix:
    - os: linux
       env:
         - SWC_NAME=linux-x64
+        - NODE_ABI=67
       install:
         - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
       script:
@@ -105,6 +107,7 @@ matrix:
    - os: linux
       env:
         - SWC_NAME=linux-x64
+        - NODE_ABI=64
       install:
         - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
       script:
@@ -114,6 +117,7 @@ matrix:
    - os: linux
       env:
         - SWC_NAME=linux-x64
+        - NODE_ABI=57
       install:
         - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
       script:
