@@ -58,10 +58,10 @@ cache:
 
 
 script:
-  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/linux/build.sh 12.11.0 72
-  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/linux/build.sh 11.6.0 67
-  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/linux/build.sh 10.15.0 64
-  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/linux/build.sh 8.15.0 57
+  - travis_wait 30 bash ./scripts/ci/linux/build.sh 12.11.0 72
+  - travis_wait 30 bash ./scripts/ci/linux/build.sh 11.6.0 67
+  - travis_wait 30 bash ./scripts/ci/linux/build.sh 10.15.0 64
+  - travis_wait 30 bash ./scripts/ci/linux/build.sh 8.15.0 57
 
 deploy:
   provider: releases
@@ -92,7 +92,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 12 72 12.12-alpine
       script:
-        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux/build.sh 72
 
 
     - os: linux
@@ -102,7 +102,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
       script:
-        - travis_wait 30 docker exec target-67 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-67 sh ./scripts/ci/linux/build.sh 67
 
 
     - os: linux
@@ -112,7 +112,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
       script:
-        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux/build.sh 64
 
 
     - os: linux
@@ -122,7 +122,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
       script:
-        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh 57
 
 env:
   - CARGO_INCREMENTAL=0
