@@ -3,6 +3,10 @@ sudo: false
 
 services:
   - docker
+  
+branches:
+  except:
+    - master
 
 install:
   # Install lastest nvm
@@ -77,9 +81,6 @@ matrix:
     - os: osx
       osx_image: xcode9.2
       env: SWC_NAME=darwin-x64
-      branches:
-        except:
-          - master
 
     # - os: windows
     #   env: SWC_NAME=win32-x64
