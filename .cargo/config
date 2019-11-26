@@ -3,5 +3,4 @@
 rustflags = [
     "--cfg", "procmacro2_semver_exempt",
     "-Z", "thinlto=no",
-    "-C", "target-feature=+crt-static"
 ]

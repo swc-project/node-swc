@@ -46,14 +46,6 @@ which node && node --version
 which npm
 
 
-export RUSTFLAGS='--cfg procmacro2_semver_exempt --cfg parallel_queries' 
-if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    rustup target add x86_64-unknown-linux-musl
-    export CARGO_BUILD_TARGET="x86_64-unknown-linux-musl"
-    export RUSTFLAGS="$RUSTFLAGS -C target-feature=-crt-static"
-fi
-
-
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
