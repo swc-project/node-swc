@@ -9,6 +9,8 @@
 ####################
 set -e
 
+if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
+
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
