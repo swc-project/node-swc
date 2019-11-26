@@ -56,16 +56,13 @@ cache:
 # before_cache:
 #   - rm -rf /home/travis/.cargo/registry
 
-branches:
-  except:
-    - master
-    - windows
+
 
 script:
-  - travis_wait 30 bash ./scripts/ci/build.sh 12.11.0 72
-  - travis_wait 30 bash ./scripts/ci/build.sh 11.6.0 67
-  - travis_wait 30 bash ./scripts/ci/build.sh 10.15.0 64
-  - travis_wait 30 bash ./scripts/ci/build.sh 8.15.0 57
+  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 12.11.0 72
+  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 11.6.0 67
+  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 10.15.0 64
+  - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 8.15.0 57
   # - bash ./scripts/ci/build.sh 6.16.0 48
 
 deploy:
@@ -86,15 +83,21 @@ matrix:
     - os: osx
       osx_image: xcode9.2
       env: SWC_NAME=darwin-x64
+      branches:
+        except:
+          - master
 
     # - os: windows
     #   env: SWC_NAME=win32-x64
 
     - os: linux
-      env: SWC_NAME=linux-x64
+      env:
+        - SWC_NAME=linux-x64
+        - INDOCKER="docker exec target"
       services:
-       - docker
-
+        - docker
+      install:
+        - ./scrints/ci/start-docker.sh
 env:
   - CARGO_INCREMENTAL=0
 
