@@ -11,6 +11,6 @@ RUN ln -s "${HOME}"/.cargo/bin/* /usr/local/bin
 ENV RUSTFLAGS="-C target-feature=-crt-static --cfg procmacro2_semver_exempt -Z thinlto=no"
 ENV CARGO_INCREMENTAL=0
 
-RUN apk add --no-cache node=$NODE_VERSION
+RUN apk add --no-cache node=${NODE_VERSION}
 
 CMD ["sh"] 
