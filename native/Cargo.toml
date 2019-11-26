@@ -29,9 +29,5 @@ swc = { git = "https://github.com/swc-project/swc.git" }
 lto = true
 
 [profile.release]
-# lto = true
+lto = true
 codegen-units = 1
-
-[patch.crates-io]
-# This reduces compile time
-sourcemap = { git = "https://github.com/kdy1/rust-sourcemap.git" }
