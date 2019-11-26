@@ -89,7 +89,7 @@ matrix:
       services:
         - docker
       install:
-        - ./scrints/ci/start-docker.sh
+        - ./scripts/ci/start-docker.sh
 env:
   - CARGO_INCREMENTAL=0
 
