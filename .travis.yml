@@ -92,7 +92,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 12 72 12.12-alpine
       script:
-        - docker exec target-72 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux/build.sh
 
 
     - os: linux
@@ -102,7 +102,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
       script:
-        - docker exec target-67 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-67 sh ./scripts/ci/linux/build.sh
 
 
     - os: linux
@@ -112,7 +112,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
       script:
-        - docker exec target-64 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux/build.sh
 
 
     - os: linux
@@ -122,7 +122,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
       script:
-        - docker exec target-57 sh ./scripts/ci/linux/build.sh
+        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh
 
 env:
   - CARGO_INCREMENTAL=0
