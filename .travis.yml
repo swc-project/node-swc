@@ -55,7 +55,6 @@ script:
   - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 11.6.0 67
   - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 10.15.0 64
   - ${INDOCKER} travis_wait 30 bash ./scripts/ci/build.sh 8.15.0 57
-  # - bash ./scripts/ci/build.sh 6.16.0 48
 
 deploy:
   provider: releases
@@ -90,6 +89,12 @@ matrix:
         - docker
       install:
         - ./scripts/ci/start-docker.sh
+      script:
+        - ${INDOCKER} bash ./scripts/ci/build.sh 12.11.0 72
+        - ${INDOCKER} bash ./scripts/ci/build.sh 11.6.0 67
+        - ${INDOCKER} bash ./scripts/ci/build.sh 10.15.0 64
+        - ${INDOCKER} bash ./scripts/ci/build.sh 8.15.0 57
+
 env:
   - CARGO_INCREMENTAL=0
 
