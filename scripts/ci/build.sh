@@ -9,22 +9,21 @@
 ####################
 set -e
 
+if [[ -z "$APPVEYOR" ]] && [[ "$TRAVIS_OS_NAME" != "windows" ]] ; then
+    source ~/.nvm/nvm.sh
+else
+    echo "Deleting artifacts.json"
+    rm -rf ./native/artifacts.json
+fi
 echo "Switching to node v$1 ($2)"
-if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
 echo "Intsalling node $1"
 nvm install $1 || true
 echo "nvm use $1"
 nvm use --delete-prefix $1
 
+
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
-
-if [[ -z "$APPVEYOR" ]] && [[ "$TRAVIS_OS_NAME" != "windows" ]] ; then
-    echo 'Mac os / linux works without hack'
-else
-    echo "Deleting artifacts.json"
-    rm -rf ./native/artifacts.json
-fi
 
 rm -rf ./native/index.node \
     ./native/target/release/libffi.d* \
