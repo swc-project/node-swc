@@ -3,7 +3,7 @@ FROM node:${IMAGE}
 
 RUN apk add --no-cache wget build-base musl-dev
 
-RUN wget https://sh.rustup.rs | sh -s -- --default-toolchain nightly --profile minimal -y
+RUN wget https://sh.rustup.rs -O - | sh -s -- --default-toolchain nightly --profile minimal -y
 RUN ln -s "${HOME}"/.cargo/bin/* /usr/local/bin
 
 # hack to get dynlibs working with musl
