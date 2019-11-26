@@ -12,9 +12,9 @@ set -e
 echo "Switching to node v$1 ($2)"
 if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
 echo "Intsalling node $1"
-nvm install $1
+nvm install $1 || true
 echo "nvm use $1"
-nvm use $1
+nvm use --delete-prefix $1
 
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
