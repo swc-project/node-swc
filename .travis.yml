@@ -1,14 +1,6 @@
 language: shell
 sudo: false
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-4.8
-      - g++-4.8
-
 install:
   # Install lastest nvm
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
