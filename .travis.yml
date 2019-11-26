@@ -87,10 +87,10 @@ matrix:
       services:
         - docker
       install:
-        - ./scripts/ci/linux/start-docker.sh 12.11.0 72
-        - ./scripts/ci/linux/start-docker.sh 11.6.0 67
-        - ./scripts/ci/linux/start-docker.sh 10.15.0 64
-        - ./scripts/ci/linux/start-docker.sh 8.15.0 57
+        - ./scripts/ci/linux/start-docker.sh 12 72 12.12-alpine
+        - ./scripts/ci/linux/start-docker.sh 11 67 11.12-alpine
+        - ./scripts/ci/linux/start-docker.sh 10 64 10.16-alpine
+        - ./scripts/ci/linux/start-docker.sh 8 57 8.16-alpine
       script:
         - docker exec target-72 bash ./scripts/ci/linux/build.sh
         - docker exec target-67 bash ./scripts/ci/linux/build.sh
