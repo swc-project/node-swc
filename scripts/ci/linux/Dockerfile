@@ -1,6 +1,6 @@
-FROM alpine:3.7
+FROM alpine:3.10
 
-RUN apk add --no-cache wget build-base musl-dev bash
+RUN apk add --no-cache wget build-base musl-dev bash nodejs nodejs-npm
 
 RUN wget https://sh.rustup.rs | sh -s -- --default-toolchain nightly --profile minimal -y
 RUN ln -s "${HOME}"/.cargo/bin/* /usr/local/bin
