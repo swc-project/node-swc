@@ -95,7 +95,7 @@ matrix:
         - docker exec target-72 sh ./scripts/ci/linux/build.sh
 
 
-   - os: linux
+    - os: linux
      env:
        - SWC_NAME=linux-x64
        - NODE_ABI=67
@@ -105,7 +105,7 @@ matrix:
        - docker exec target-67 sh ./scripts/ci/linux/build.sh
 
 
-   - os: linux
+    - os: linux
      env:
        - SWC_NAME=linux-x64
        - NODE_ABI=64
@@ -115,7 +115,7 @@ matrix:
        - docker exec target-64 sh ./scripts/ci/linux/build.sh
 
 
-   - os: linux
+    - os: linux
      env:
        - SWC_NAME=linux-x64
        - NODE_ABI=57
