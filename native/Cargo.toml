@@ -29,5 +29,5 @@ swc = { git = "https://github.com/swc-project/swc.git" }
 lto = true
 
 [profile.release]
-lto = true
+# lto = true
 codegen-units = 1
