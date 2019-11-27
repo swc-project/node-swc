@@ -7,7 +7,7 @@ ENV CARGO_INCREMENTAL=0
 
 
 RUN yum -y update; yum clean all
-RUN yum -y install gcc epel-release; yum groupinstall "Development Tools"; yum clean all
+RUN yum -y install gcc make epel-release; yum groupinstall "Development Tools"; yum clean all
 
 ARG NODE_VERSION
 RUN curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION} | bash -
