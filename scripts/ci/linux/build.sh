@@ -9,10 +9,6 @@
 ####################
 set -e
 
-which node && node --version
-which npm
-
-
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
