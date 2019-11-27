@@ -1,6 +1,6 @@
 FROM centos:7
 
-RUN wget https://sh.rustup.rs -O - | sh -s -- --default-toolchain nightly --profile minimal -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly --profile minimal -y
 RUN ln -s "${HOME}"/.cargo/bin/* /usr/local/bin
 
 ENV CARGO_INCREMENTAL=0
