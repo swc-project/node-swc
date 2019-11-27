@@ -90,7 +90,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 12.12 72 12.x
       script:
-        - travis_wait 30 docker exec target-72 SWC_NAME=linux-x64 sh ./scripts/ci/linux/build.sh 72
+        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux/build.sh 72
 
     - os: linux
       env:
@@ -99,7 +99,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 11.12 67 11.x
       script:
-        - travis_wait 30 docker exec target-67 SWC_NAME=linux-x64 sh ./scripts/ci/linux/build.sh 67
+        - travis_wait 30 docker exec target-67 sh ./scripts/ci/linux/build.sh 67
 
     - os: linux
       env:
@@ -108,7 +108,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 10 64 10.x
       script:
-        - travis_wait 30 docker exec target-64 SWC_NAME=linux-x64 sh ./scripts/ci/linux/build.sh 64
+        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux/build.sh 64
 
     - os: linux
       env:
@@ -117,7 +117,7 @@ matrix:
       install:
         - ./scripts/ci/linux/start-docker.sh 8 57 8.x
       script:
-        - travis_wait 30 docker exec target-57 SWC_NAME=linux-x64 sh ./scripts/ci/linux/build.sh 57
+        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh 57
 
 env:
   - CARGO_INCREMENTAL=0

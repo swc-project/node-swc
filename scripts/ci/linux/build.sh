@@ -22,5 +22,5 @@ echo 'Verifying binding with jest...'
 npx jest __tests__/import_test.js
 
 
-mv native/index.node $SWC_NAME-$1.node
+mv native/index.node linux-x64-$1.node
 ls -al .
