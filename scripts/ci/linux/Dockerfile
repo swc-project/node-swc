@@ -10,7 +10,7 @@ RUN yum -y update; yum clean all
 RUN yum -y install epel-release; yum clean all
 
 ARG NODE_VERSION
-RUN curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION} | sudo bash -
+RUN curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION} | bash -
 RUN yum -y install nodejs; yum clean all
 
 CMD ["sh"] 
