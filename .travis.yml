@@ -4,9 +4,9 @@ sudo: false
 services:
   - docker
 
-branches:
-  except:
-    - master
+# branches:
+#   except:
+#     - master
 
 install:
   # Install lastest nvm
