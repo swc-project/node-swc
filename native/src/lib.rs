@@ -330,71 +330,80 @@ fn parse(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let src = cx.argument::<JsString>(0)?;
-    let options_arg = cx.argument::<JsValue>(1)?;
-    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
-
-    let cm;
-    let compiler;
+    let c;
     let this = cx.this();
-    let module = {
+    {
         let guard = cx.lock();
-        let c = this.borrow(&guard);
-        cm = c.cm.clone();
-        compiler = c.clone();
-        let fm = c.cm.new_source_file(FileName::Anon, src.value());
-        let comments = Default::default();
-        c.parse_js(
-            fm,
-            options.syntax,
-            if options.comments {
-                Some(&comments)
-            } else {
-                None
-            },
-        )
-    };
-    let module = match module {
-        Ok(v) => v,
-        Err(err) => return cx.throw_error(err.to_string()),
-    };
+        let compiler = this.borrow(&guard);
+        c = compiler.clone();
+    }
+    c.run(|| {
+        common::CM.set(&c.cm, || {
+            let src = cx.argument::<JsString>(0)?;
+            let options_arg = cx.argument::<JsValue>(1)?;
+            let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-    let v = compiler.run(|| common::CM.set(&cm, || Ok(neon_serde::to_value(&mut cx, &module)?)));
-    v
+            let module = {
+                let fm = c.cm.new_source_file(FileName::Anon, src.value());
+                let comments = Default::default();
+                c.parse_js(
+                    fm,
+                    options.syntax,
+                    if options.comments {
+                        Some(&comments)
+                    } else {
+                        None
+                    },
+                )
+            };
+            let module = match module {
+                Ok(v) => v,
+                Err(err) => return cx.throw_error(err.to_string()),
+            };
+
+            Ok(neon_serde::to_value(&mut cx, &module)?)
+        })
+    })
 }
 
 fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let path = cx.argument::<JsString>(0)?;
-    let options_arg = cx.argument::<JsValue>(1)?;
-    let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
-
+    let c;
     let this = cx.this();
-    let compiler;
-    let module = {
+    {
         let guard = cx.lock();
-        let c = this.borrow(&guard);
-        compiler = c.clone();
-        let fm =
-            c.cm.load_file(Path::new(&path.value()))
-                .expect("failed to read module file");
-        let comments = Default::default();
+        let compiler = this.borrow(&guard);
+        c = compiler.clone();
+    }
+    c.run(|| {
+        common::CM.set(&c.cm, || {
+            let path = cx.argument::<JsString>(0)?;
+            let options_arg = cx.argument::<JsValue>(1)?;
+            let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-        c.parse_js(
-            fm,
-            options.syntax,
-            if options.comments {
-                Some(&comments)
-            } else {
-                None
-            },
-        )
-    };
-    let module = match module {
-        Ok(v) => v,
-        Err(err) => return cx.throw_error(err.to_string()),
-    };
+            let module = {
+                let fm =
+                    c.cm.load_file(Path::new(&path.value()))
+                        .expect("failed to read module file");
+                let comments = Default::default();
 
-    Ok(compiler.run(|| neon_serde::to_value(&mut cx, &module))?)
+                c.parse_js(
+                    fm,
+                    options.syntax,
+                    if options.comments {
+                        Some(&comments)
+                    } else {
+                        None
+                    },
+                )
+            };
+            let module = match module {
+                Ok(v) => v,
+                Err(err) => return cx.throw_error(err.to_string()),
+            };
+
+            Ok(neon_serde::to_value(&mut cx, &module)?)
+        })
+    })
 }
 
 fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -485,34 +494,40 @@ fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let module = cx.argument::<JsValue>(0)?;
-    let module: Module = neon_serde::from_value(&mut cx, module)?;
-
-    let options = cx.argument::<JsValue>(1)?;
-    let options: Options = neon_serde::from_value(&mut cx, options)?;
-
+    let c;
     let this = cx.this();
-    let result = {
+    {
         let guard = cx.lock();
-        let c = this.borrow(&guard);
-        let loc = c.cm.lookup_char_pos(module.span().lo());
-        let fm = loc.file;
-        let comments = Default::default();
+        let compiler = this.borrow(&guard);
+        c = compiler.clone();
+    }
+    c.run(|| {
+        common::CM.set(&c.cm, || {
+            let module = cx.argument::<JsValue>(0)?;
+            let module: Module = neon_serde::from_value(&mut cx, module)?;
 
-        c.print(
-            &module,
-            fm,
-            &comments,
-            options.source_maps.is_some(),
-            options.config.unwrap_or_default().minify.unwrap_or(false),
-        )
-    };
-    let result = match result {
-        Ok(v) => v,
-        Err(err) => return cx.throw_error(err.to_string()),
-    };
+            let options = cx.argument::<JsValue>(1)?;
+            let options: Options = neon_serde::from_value(&mut cx, options)?;
 
-    Ok(neon_serde::to_value(&mut cx, &result)?)
+            let result = {
+                let loc = c.cm.lookup_char_pos(module.span().lo());
+                let fm = loc.file;
+                let comments = Default::default();
+                c.print(
+                    &module,
+                    fm,
+                    &comments,
+                    options.source_maps.is_some(),
+                    options.config.unwrap_or_default().minify.unwrap_or(false),
+                )
+            };
+            let result = match result {
+                Ok(v) => v,
+                Err(err) => return cx.throw_error(err.to_string()),
+            };
+            Ok(neon_serde::to_value(&mut cx, &result)?)
+        })
+    })
 }
 
 pub type ArcCompiler = Arc<Compiler>;
