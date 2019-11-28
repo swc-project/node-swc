@@ -233,6 +233,7 @@ dependencies = [
  "neon-build 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
  "neon-serde 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "path-clean 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc 0.1.0 (git+https://github.com/swc-project/swc.git)",
 ]

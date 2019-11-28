@@ -10,10 +10,12 @@ extern crate lazy_static;
 extern crate neon;
 extern crate neon_serde;
 extern crate path_clean;
+extern crate serde;
 extern crate swc;
 
 use neon::prelude::*;
 use path_clean::clean;
+use serde::Deserialize;
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
@@ -45,12 +47,14 @@ struct TransformTask {
     c: Arc<Compiler>,
     fm: Arc<SourceFile>,
     options: Options,
+    hook: Option<EventHandler>,
 }
 
 struct TransformFileTask {
     c: Arc<Compiler>,
     path: PathBuf,
     options: Options,
+    hook: Option<EventHandler>,
 }
 
 fn complete_output(
@@ -106,34 +110,48 @@ impl Task for TransformFileTask {
     }
 }
 
-fn transform(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let source = cx.argument::<JsString>(0)?;
+/// returns `compiler, (src / path), options, plugin, callback`
+fn start_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
+where
+    F: FnOnce(&Arc<Compiler>, String, Option<EventHandler>, Options) -> T,
+    T: Task,
+{
+    let c;
+    let this = cx.this();
+    {
+        let guard = cx.lock();
+        c = this.borrow(&guard).clone();
+    };
+
+    let s = cx.argument::<JsString>(0)?.value();
     let options_arg = cx.argument::<JsValue>(1)?;
     let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
     let callback = cx.argument::<JsFunction>(2)?;
 
-    let this = cx.this();
-    {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
+    let task = op(&c, s, "", options);
+    task.schedule(callback);
+
+    Ok(cx.undefined().upcast())
+}
+
+fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    start_transform(cx, |c, src, hook, options| {
         let fm = c.cm.new_source_file(
             if options.filename.is_empty() {
                 FileName::Anon
             } else {
                 FileName::Real(options.filename.clone().into())
             },
-            source.value(),
+            src,
         );
 
         TransformTask {
             c: c.clone(),
             fm,
+            hook,
             options,
         }
-        .schedule(callback);
-    };
-
-    Ok(cx.undefined().upcast())
+    })
 }
 
 fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -166,29 +184,17 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     Ok(neon_serde::to_value(&mut cx, &output)?)
 }
 
-fn transform_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let path = cx.argument::<JsString>(0)?;
-    let path_value = path.value();
-    let path = Path::new(&path_value);
-
-    let options_arg = cx.argument::<JsValue>(1)?;
-    let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
-    let callback = cx.argument::<JsFunction>(2)?;
-
-    let this = cx.this();
-    {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
+fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    start_transform(cx, |c, path, hook, options| {
+        let path = Path::new(&path);
 
         TransformFileTask {
             c: c.clone(),
             path: path.into(),
+            hook,
             options,
         }
-        .schedule(callback);
-    };
-
-    Ok(cx.undefined().upcast())
+    })
 }
 
 fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {

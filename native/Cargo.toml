@@ -25,6 +25,7 @@ path-clean = "0.1"
 lazy_static = "1"
 hashbrown = "0.5"
 swc = { git = "https://github.com/swc-project/swc.git" }
+serde = { version = "1", features = ["derive"] }
 
 [profile.bench]
 lto = true
