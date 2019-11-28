@@ -229,10 +229,11 @@ dependencies = [
  "fxhash 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hashbrown 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-build 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neon 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
+ "neon-build 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
  "neon-serde 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "path-clean 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc 0.1.0 (git+https://github.com/swc-project/swc.git)",
 ]
 
@@ -357,30 +358,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "neon"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/kdy1/neon.git?branch=threadsafe_callback#31338309e63f2155e985c2ef6d00469134d33c46"
 dependencies = [
  "cslice 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-build 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-runtime 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neon-build 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
+ "neon-runtime 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
  "semver 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "neon-build"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/kdy1/neon.git?branch=threadsafe_callback#31338309e63f2155e985c2ef6d00469134d33c46"
 dependencies = [
  "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-sys 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neon-sys 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
 ]
 
 [[package]]
 name = "neon-runtime"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/kdy1/neon.git?branch=threadsafe_callback#31338309e63f2155e985c2ef6d00469134d33c46"
 dependencies = [
  "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-sys 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neon-sys 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
 ]
 
 [[package]]
@@ -389,8 +390,8 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "error-chain 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "neon-runtime 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neon 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
+ "neon-runtime 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)",
  "num 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -398,7 +399,7 @@ dependencies = [
 [[package]]
 name = "neon-sys"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/kdy1/neon.git?branch=threadsafe_callback#31338309e63f2155e985c2ef6d00469134d33c46"
 dependencies = [
  "cc 1.0.47 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1256,11 +1257,11 @@ dependencies = [
 "checksum matches 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "7ffc5c5338469d4d3ea17d269fa8ea3512ad247247c30bd2df69e68309ed0a08"
 "checksum maybe-uninit 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
 "checksum memchr 2.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "88579771288728879b57485cc7d6b07d648c9f0141eb955f8ab7f9d45394468e"
-"checksum neon 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "53b85accbbd250627f899a6fc1f220bbb4c8c2ff6dc71830dc6b752b39c2eb97"
-"checksum neon-build 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ae406bf1065c4399e69d328a3bd8d4f088f2a205dc3881bf68c0ac775bfef337"
-"checksum neon-runtime 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "d8465ac4ed3f340dead85e053b75a5f639f48ac6343b3523eff90a751758eead"
+"checksum neon 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)" = "<none>"
+"checksum neon-build 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)" = "<none>"
+"checksum neon-runtime 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)" = "<none>"
 "checksum neon-serde 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4b45847cc4cec46db1ff2e921cd9948b38afa0c2348c99c06f9ae70406a30b60"
-"checksum neon-sys 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "8ae4cf3871ca5a395077e68144c1754e94e9e1e3329e7f8399d999ca573ed89a"
+"checksum neon-sys 0.3.3 (git+https://github.com/kdy1/neon.git?branch=threadsafe_callback)" = "<none>"
 "checksum new_debug_unreachable 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "f40f005c60db6e03bae699e414c58bf9aa7ea02a2d0b9bfbcf19286cc4c82b30"
 "checksum num 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "cf4825417e1e1406b3782a8ce92f4d53f26ec055e3622e1881ca8e9f5f9e08db"
 "checksum num-complex 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "fcb0cf31fb3ff77e6d2a6ebd6800df7fdcd106f2ad89113c9130bcd07f93dffc"
