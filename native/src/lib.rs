@@ -234,11 +234,13 @@ struct ParseFileTask {
 fn complete_parse<'a>(
     mut cx: TaskContext<'a>,
     result: Result<Module, Error>,
-    cm: &SourceMap,
+    c: &Compiler,
 ) -> JsResult<'a, JsValue> {
-    common::CM.set(cm, || match result {
-        Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
-        Err(err) => cx.throw_error(err.to_string()),
+    c.run(|| {
+        common::CM.set(&c.cm, || match result {
+            Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
+            Err(err) => cx.throw_error(err.to_string()),
+        })
     })
 }
 
@@ -266,7 +268,7 @@ impl Task for ParseTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete_parse(cx, result, &self.c.cm)
+        complete_parse(cx, result, &self.c)
     }
 }
 
@@ -299,7 +301,7 @@ impl Task for ParseFileTask {
         cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
-        complete_parse(cx, result, &self.c.cm)
+        complete_parse(cx, result, &self.c)
     }
 }
 
@@ -333,14 +335,15 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
     let cm;
+    let compiler;
     let this = cx.this();
     let module = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
         cm = c.cm.clone();
+        compiler = c.clone();
         let fm = c.cm.new_source_file(FileName::Anon, src.value());
         let comments = Default::default();
-
         c.parse_js(
             fm,
             options.syntax,
@@ -356,7 +359,8 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         Err(err) => return cx.throw_error(err.to_string()),
     };
 
-    common::CM.set(&cm, || Ok(neon_serde::to_value(&mut cx, &module)?))
+    let v = compiler.run(|| common::CM.set(&cm, || Ok(neon_serde::to_value(&mut cx, &module)?)));
+    v
 }
 
 fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -365,10 +369,11 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
     let this = cx.this();
+    let compiler;
     let module = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-
+        compiler = c.clone();
         let fm =
             c.cm.load_file(Path::new(&path.value()))
                 .expect("failed to read module file");
@@ -389,7 +394,7 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         Err(err) => return cx.throw_error(err.to_string()),
     };
 
-    Ok(neon_serde::to_value(&mut cx, &module)?)
+    Ok(compiler.run(|| neon_serde::to_value(&mut cx, &module))?)
 }
 
 fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
