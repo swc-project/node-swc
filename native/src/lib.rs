@@ -69,24 +69,58 @@ fn complete_output(
 }
 
 struct Hook<'a> {
+    c: Arc<Compiler>,
     hook: Option<&'a EventHandler>,
 }
 
 impl Fold<Module> for Hook<'_> {
     fn fold(&mut self, m: Module) -> Module {
+        if let Some(hook) = self.hook.take() {
+            let c = self.c.clone();
+
+            let module = m.clone();
+            hook.schedule_with(move |cx, this, callback| {
+                c.run(|| {
+                    let args: Vec<Handle<JsValue>> = vec![neon_serde::to_value(cx, &module)
+                        .expect("failed to serialize module")
+                        .upcast()];
+                    let result = callback.call(cx, this, args);
+
+                    // TODO: parse module
+                    
+                    // let cmd = match result {
+                    //     Ok(v) => {
+                    //         if let Ok(number) = v.downcast::<JsNumber>() {
+                    //             if number.value() == 12f64 {
+                    //                 "done".into()
+                    //             } else {
+                    //                 "wrong number".into()
+                    //             }
+                    //         } else {
+                    //             "no number returned".into()
+                    //         }
+                    //     }
+                    //     Err(e) => format!("threw {}", e),
+                    // };
+                    // let args: Vec<Handle<JsValue>> = vec![cx.string(cmd).upcast()];
+                    // let _result = callback.call(cx, this, args);
+                })
+            })
+        }
+
         m
     }
 }
 
 fn process_js(
-    c: &Compiler,
+    c: &Arc<Compiler>,
     fm: Arc<SourceFile>,
     hook: Option<&EventHandler>,
     opts: &Options,
 ) -> Result<TransformOutput, Error> {
     let config = c.run(|| c.config_for_file(opts, &*fm))?;
 
-    c.process_js(fm, Hook { hook }, config)
+    c.process_js(fm, Hook { c: c.clone(), hook }, config)
 }
 
 impl Task for TransformTask {
