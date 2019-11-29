@@ -22,7 +22,7 @@
   "types": "./lib/index.d.ts",
   "scripts": {
     "install": "node scripts/install.js || neon build --release",
-    "build": "neon build --release"
+    "build": "tsc -d && neon build --release"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
