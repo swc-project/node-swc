@@ -10,4 +10,5 @@ package-lock.json
 *.log
 .idea/
 *.d.ts
+!lib/util.js
 lib/**/*.js
