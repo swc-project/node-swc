@@ -1,6 +1,6 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
-#![feature(never_type)]
+#![feature(specialization)]
 #![recursion_limit = "2048"]
 
 extern crate failure;
@@ -20,7 +20,9 @@ use std::{
     sync::Arc,
 };
 use swc::{
-    common::{self, errors::Handler, FileName, FilePathMapping, SourceFile, SourceMap, Spanned},
+    common::{
+        self, errors::Handler, FileName, FilePathMapping, Fold, SourceFile, SourceMap, Spanned,
+    },
     config::{Options, ParseOptions},
     ecmascript::ast::Module,
     error::Error,
@@ -66,6 +68,16 @@ fn complete_output(
     }
 }
 
+struct Hook<'a> {
+    hook: Option<&'a EventHandler>,
+}
+
+impl Fold<Module> for Hook<'_> {
+    fn fold(&mut self, m: Module) -> Module {
+        m
+    }
+}
+
 fn process_js(
     c: &Compiler,
     fm: Arc<SourceFile>,
@@ -74,7 +86,7 @@ fn process_js(
 ) -> Result<TransformOutput, Error> {
     let config = c.run(|| c.config_for_file(opts, &*fm))?;
 
-    c.process_js(fm, noop(), config)
+    c.process_js(fm, Hook { hook }, config)
 }
 
 impl Task for TransformTask {
