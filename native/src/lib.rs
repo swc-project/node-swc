@@ -66,13 +66,24 @@ fn complete_output(
     }
 }
 
+fn process_js(
+    c: &Compiler,
+    fm: Arc<SourceFile>,
+    hook: Option<&EventHandler>,
+    opts: &Options,
+) -> Result<TransformOutput, Error> {
+    let config = c.run(|| c.config_for_file(opts, &*fm))?;
+
+    c.process_js(fm, noop(), config)
+}
+
 impl Task for TransformTask {
     type Output = TransformOutput;
     type Error = Error;
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        self.c.process_js_file(self.fm.clone(), &self.options)
+        process_js(&self.c, self.fm.clone(), self.hook.as_ref(), &self.options)
     }
 
     fn complete(
@@ -96,7 +107,7 @@ impl Task for TransformFileTask {
             .load_file(&self.path)
             .map_err(|err| Error::FailedToReadModule { err })?;
 
-        self.c.process_js_file(fm, &self.options)
+        process_js(&self.c, fm, self.hook.as_ref(), &self.options)
     }
 
     fn complete(
@@ -125,7 +136,7 @@ where
     let options_arg = cx.argument::<JsValue>(1)?;
 
     let hook = match cx.argument::<JsUndefined>(2) {
-        Ok(..   ) => None,
+        Ok(..) => None,
         Err(..) => Some(EventHandler::bind(this, cx.argument::<JsFunction>(2)?)),
     };
 
