@@ -301,13 +301,11 @@ fn complete_parse<'a>(
     result: Result<Module, Error>,
     c: &Compiler,
 ) -> JsResult<'a, JsValue> {
-    c.run(|| {
-        common::CM.set(&c.cm, || match result {
-            Ok(module) => Ok(cx
-                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
-                .upcast()),
-            Err(err) => cx.throw_error(err.to_string()),
-        })
+    c.run(|| match result {
+        Ok(module) => Ok(cx
+            .string(serde_json::to_string(&module).expect("failed to serialize Module"))
+            .upcast()),
+        Err(err) => cx.throw_error(err.to_string()),
     })
 }
 
@@ -405,27 +403,25 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         c = compiler.clone();
     }
     c.run(|| {
-        common::CM.set(&c.cm, || {
-            let src = cx.argument::<JsString>(0)?;
-            let options_arg = cx.argument::<JsValue>(1)?;
-            let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+        let src = cx.argument::<JsString>(0)?;
+        let options_arg = cx.argument::<JsValue>(1)?;
+        let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-            let module = {
-                let fm = c.cm.new_source_file(FileName::Anon, src.value());
-                let comments = Default::default();
-                c.parse_js(
-                    fm,
-                    options.syntax,
-                    if options.comments {
-                        Some(&comments)
-                    } else {
-                        None
-                    },
-                )
-            };
+        let module = {
+            let fm = c.cm.new_source_file(FileName::Anon, src.value());
+            let comments = Default::default();
+            c.parse_js(
+                fm,
+                options.syntax,
+                if options.comments {
+                    Some(&comments)
+                } else {
+                    None
+                },
+            )
+        };
 
-            complete_parse(cx, module, &c)
-        })
+        complete_parse(cx, module, &c)
     })
 }
 
@@ -438,30 +434,28 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         c = compiler.clone();
     }
     c.run(|| {
-        common::CM.set(&c.cm, || {
-            let path = cx.argument::<JsString>(0)?;
-            let options_arg = cx.argument::<JsValue>(1)?;
-            let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
+        let path = cx.argument::<JsString>(0)?;
+        let options_arg = cx.argument::<JsValue>(1)?;
+        let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-            let module = {
-                let fm =
-                    c.cm.load_file(Path::new(&path.value()))
-                        .expect("failed to read module file");
-                let comments = Default::default();
+        let module = {
+            let fm =
+                c.cm.load_file(Path::new(&path.value()))
+                    .expect("failed to read module file");
+            let comments = Default::default();
 
-                c.parse_js(
-                    fm,
-                    options.syntax,
-                    if options.comments {
-                        Some(&comments)
-                    } else {
-                        None
-                    },
-                )
-            };
+            c.parse_js(
+                fm,
+                options.syntax,
+                if options.comments {
+                    Some(&comments)
+                } else {
+                    None
+                },
+            )
+        };
 
-            complete_parse(cx, module, &c)
-        })
+        complete_parse(cx, module, &c)
     })
 }
 
@@ -562,28 +556,26 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         c = compiler.clone();
     }
     c.run(|| {
-        common::CM.set(&c.cm, || {
-            let module = cx.argument::<JsString>(0)?;
-            let module: Module =
-                serde_json::from_str(&module.value()).expect("failed to deserialize Module");
+        let module = cx.argument::<JsString>(0)?;
+        let module: Module =
+            serde_json::from_str(&module.value()).expect("failed to deserialize Module");
 
-            let options = cx.argument::<JsValue>(1)?;
-            let options: Options = neon_serde::from_value(&mut cx, options)?;
+        let options = cx.argument::<JsValue>(1)?;
+        let options: Options = neon_serde::from_value(&mut cx, options)?;
 
-            let result = {
-                let loc = c.cm.lookup_char_pos(module.span().lo());
-                let fm = loc.file;
-                let comments = Default::default();
-                c.print(
-                    &module,
-                    fm,
-                    &comments,
-                    options.source_maps.is_some(),
-                    options.config.unwrap_or_default().minify.unwrap_or(false),
-                )
-            };
-            complete_output(cx, result)
-        })
+        let result = {
+            let loc = c.cm.lookup_char_pos(module.span().lo());
+            let fm = loc.file;
+            let comments = Default::default();
+            c.print(
+                &module,
+                fm,
+                &comments,
+                options.source_maps.is_some(),
+                options.config.unwrap_or_default().minify.unwrap_or(false),
+            )
+        };
+        complete_output(cx, result)
     })
 }
 
