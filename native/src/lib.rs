@@ -541,8 +541,9 @@ impl Task for PrintTask {
 }
 
 fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let module = cx.argument::<JsValue>(0)?;
-    let module: Module = neon_serde::from_value(&mut cx, module)?;
+    let module = cx.argument::<JsString>(0)?;
+    let module: Module =
+        serde_json::from_str(&module.value()).expect("failed to deserialize Module");
 
     let options = cx.argument::<JsValue>(1)?;
     let options: Options = neon_serde::from_value(&mut cx, options)?;
@@ -575,8 +576,9 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     }
     c.run(|| {
         common::CM.set(&c.cm, || {
-            let module = cx.argument::<JsValue>(0)?;
-            let module: Module = neon_serde::from_value(&mut cx, module)?;
+            let module = cx.argument::<JsString>(0)?;
+            let module: Module =
+                serde_json::from_str(&module.value()).expect("failed to deserialize Module");
 
             let options = cx.argument::<JsValue>(1)?;
             let options: Options = neon_serde::from_value(&mut cx, options)?;
