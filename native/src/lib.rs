@@ -21,7 +21,7 @@ use std::{
 };
 use swc::{
     common::{
-        self, comments::Comments, errors::Handler, FileName, FilePathMapping, Fold, SourceFile,
+        self, comments::Comments, errors::Handler, FileName, FilePathMapping, SourceFile,
         SourceMap, Spanned,
     },
     config::{Options, ParseOptions},
@@ -58,14 +58,12 @@ struct TransformTask {
     c: Arc<Compiler>,
     input: Input,
     options: Options,
-    hook: Option<EventHandler>,
 }
 
 struct TransformFileTask {
     c: Arc<Compiler>,
     path: PathBuf,
     options: Options,
-    hook: Option<EventHandler>,
 }
 
 fn complete_output<'a>(
@@ -78,59 +76,14 @@ fn complete_output<'a>(
     }
 }
 
-struct Hook<'a> {
-    c: Arc<Compiler>,
-    hook: Option<&'a EventHandler>,
-}
-
-impl Fold<Module> for Hook<'_> {
-    fn fold(&mut self, m: Module) -> Module {
-        if let Some(hook) = self.hook.take() {
-            let c = self.c.clone();
-
-            let module = m.clone();
-            hook.schedule_with(move |cx, this, callback| {
-                c.run(|| {
-                    let args: Vec<Handle<JsValue>> = vec![neon_serde::to_value(cx, &module)
-                        .expect("failed to serialize module")
-                        .upcast()];
-                    let result = callback.call(cx, this, args);
-
-                    // TODO: parse module
-                    // let cmd = match result {
-                    //     Ok(v) => {
-                    //         if let Ok(number) = v.downcast::<JsNumber>() {
-                    //             if number.value() == 12f64 {
-                    //                 "done".into()
-                    //             } else {
-                    //                 "wrong number".into()
-                    //             }
-                    //         } else {
-                    //             "no number returned".into()
-                    //         }
-                    //     }
-                    //     Err(e) => format!("threw {}", e),
-                    // };
-                    // let args: Vec<Handle<JsValue>> =
-                    // vec![cx.string(cmd).upcast()];
-                    // let _result = callback.call(cx, this, args);
-                })
-            })
-        }
-
-        m
-    }
-}
-
 fn process_js(
     c: &Arc<Compiler>,
     fm: Arc<SourceFile>,
-    hook: Option<&EventHandler>,
     opts: &Options,
 ) -> Result<TransformOutput, Error> {
-    let config = c.run(|| c.config_for_file(opts, &*fm))?;
+    // let config = c.run(|| c.config_for_file(opts, &*fm))?;
 
-    c.process_js(fm, Hook { c: c.clone(), hook }, config)
+    c.process_js_file(fm, opts)
 }
 
 impl Task for TransformTask {
@@ -146,9 +99,7 @@ impl Task for TransformTask {
                 let fm = loc.file;
                 print_js(&self.c, &Default::default(), &m, fm, false, false)
             }
-            Input::Source(ref s) => {
-                process_js(&self.c, s.clone(), self.hook.as_ref(), &self.options)
-            }
+            Input::Source(ref s) => process_js(&self.c, s.clone(), &self.options),
         }
     }
 
@@ -173,7 +124,7 @@ impl Task for TransformFileTask {
             .load_file(&self.path)
             .map_err(|err| Error::FailedToReadModule { err })?;
 
-        process_js(&self.c, fm, self.hook.as_ref(), &self.options)
+        process_js(&self.c, fm, &self.options)
     }
 
     fn complete(
@@ -188,7 +139,7 @@ impl Task for TransformFileTask {
 /// returns `compiler, (src / path), options, plugin, callback`
 fn schedule_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
 where
-    F: FnOnce(&Arc<Compiler>, String, bool, Option<EventHandler>, Options) -> T,
+    F: FnOnce(&Arc<Compiler>, String, bool, Options) -> T,
     T: Task,
 {
     let c;
@@ -202,16 +153,10 @@ where
     let is_module = cx.argument::<JsBoolean>(1)?;
     let options_arg = cx.argument::<JsValue>(2)?;
 
-    // let hook = match cx.argument::<JsUndefined>(3) {
-    //     Ok(..) => None,
-    //     Err(..) => Some(EventHandler::bind(this, cx.argument::<JsFunction>(2)?)),
-    // };
-    let hook = None;
-
     let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
-    let callback = cx.argument::<JsFunction>(4)?;
+    let callback = cx.argument::<JsFunction>(3)?;
 
-    let task = op(&c, s, is_module.value(), hook, options);
+    let task = op(&c, s, is_module.value(), options);
     task.schedule(callback);
 
     Ok(cx.undefined().upcast())
@@ -242,7 +187,7 @@ where
             print_js(&c, &Default::default(), &m, fm, false, false)
         } else {
             let fm = op(&c, s.value(), &options).expect("failed to create fm");
-            process_js(&c, fm, None, &options)
+            process_js(&c, fm, &options)
         }
     };
 
@@ -250,7 +195,7 @@ where
 }
 
 fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    schedule_transform(cx, |c, src, is_module, hook, options| {
+    schedule_transform(cx, |c, src, is_module, options| {
         let input = if is_module {
             Input::Module(src)
         } else {
@@ -267,7 +212,6 @@ fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         TransformTask {
             c: c.clone(),
             input,
-            hook,
             options,
         }
     })
@@ -287,13 +231,12 @@ fn transform_sync(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    schedule_transform(cx, |c, path, _, hook, options| {
+    schedule_transform(cx, |c, path, _, options| {
         let path = clean(&path);
 
         TransformFileTask {
             c: c.clone(),
             path: path.into(),
-            hook,
             options,
         }
     })
