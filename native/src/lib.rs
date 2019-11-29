@@ -21,7 +21,8 @@ use std::{
 };
 use swc::{
     common::{
-        self, errors::Handler, FileName, FilePathMapping, Fold, SourceFile, SourceMap, Spanned,
+        self, comments::Comments, errors::Handler, FileName, FilePathMapping, Fold, SourceFile,
+        SourceMap, Spanned,
     },
     config::{Options, ParseOptions},
     ecmascript::ast::Module,
@@ -44,9 +45,18 @@ fn init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
     Ok(Arc::new(c))
 }
 
+/// Input to transform
+#[derive(Debug)]
+enum Input {
+    /// json string
+    Module(String),
+    /// Raw source code.
+    Source(Arc<SourceFile>),
+}
+
 struct TransformTask {
     c: Arc<Compiler>,
-    fm: Arc<SourceFile>,
+    input: Input,
     options: Options,
     hook: Option<EventHandler>,
 }
@@ -129,7 +139,17 @@ impl Task for TransformTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        process_js(&self.c, self.fm.clone(), self.hook.as_ref(), &self.options)
+        match self.input {
+            Input::Module(ref s) => {
+                let m: Module = serde_json::from_str(&s).expect("failed to deserialize Module");
+                let loc = self.c.cm.lookup_char_pos(m.span().lo());
+                let fm = loc.file;
+                print_js(&self.c, &Default::default(), &m, fm, false, false)
+            }
+            Input::Source(ref s) => {
+                process_js(&self.c, s.clone(), self.hook.as_ref(), &self.options)
+            }
+        }
     }
 
     fn complete(
@@ -168,7 +188,7 @@ impl Task for TransformFileTask {
 /// returns `compiler, (src / path), options, plugin, callback`
 fn schedule_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
 where
-    F: FnOnce(&Arc<Compiler>, String, Option<EventHandler>, Options) -> T,
+    F: FnOnce(&Arc<Compiler>, String, bool, Option<EventHandler>, Options) -> T,
     T: Task,
 {
     let c;
@@ -179,17 +199,19 @@ where
     };
 
     let s = cx.argument::<JsString>(0)?.value();
-    let options_arg = cx.argument::<JsValue>(1)?;
+    let is_module = cx.argument::<JsBoolean>(1)?;
+    let options_arg = cx.argument::<JsValue>(2)?;
 
-    let hook = match cx.argument::<JsUndefined>(2) {
-        Ok(..) => None,
-        Err(..) => Some(EventHandler::bind(this, cx.argument::<JsFunction>(2)?)),
-    };
+    // let hook = match cx.argument::<JsUndefined>(3) {
+    //     Ok(..) => None,
+    //     Err(..) => Some(EventHandler::bind(this, cx.argument::<JsFunction>(2)?)),
+    // };
+    let hook = None;
 
     let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
-    let callback = cx.argument::<JsFunction>(3)?;
+    let callback = cx.argument::<JsFunction>(4)?;
 
-    let task = op(&c, s, hook, options);
+    let task = op(&c, s, is_module.value(), hook, options);
     task.schedule(callback);
 
     Ok(cx.undefined().upcast())
@@ -200,7 +222,8 @@ where
     F: FnOnce(&Compiler, String, &Options) -> Result<Arc<SourceFile>, Error>,
 {
     let s = cx.argument::<JsString>(0)?;
-    let options: Options = match cx.argument_opt(1) {
+    let is_module = cx.argument::<JsBoolean>(1)?;
+    let options: Options = match cx.argument_opt(2) {
         Some(v) => neon_serde::from_value(&mut cx, v)?,
         None => {
             let obj = cx.empty_object().upcast();
@@ -212,28 +235,38 @@ where
     let output = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        let fm = op(&c, s.value(), &options).expect("failed to create fm");
-
-        c.process_js_file(fm, &options)
+        if is_module.value() {
+            let m: Module = serde_json::from_str(&s.value()).expect("failed to deserialize Module");
+            let loc = c.cm.lookup_char_pos(m.span().lo());
+            let fm = loc.file;
+            print_js(&c, &Default::default(), &m, fm, false, false)
+        } else {
+            let fm = op(&c, s.value(), &options).expect("failed to create fm");
+            process_js(&c, fm, None, &options)
+        }
     };
 
     complete_output(cx, output)
 }
 
 fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    schedule_transform(cx, |c, src, hook, options| {
-        let fm = c.cm.new_source_file(
-            if options.filename.is_empty() {
-                FileName::Anon
-            } else {
-                FileName::Real(options.filename.clone().into())
-            },
-            src,
-        );
+    schedule_transform(cx, |c, src, is_module, hook, options| {
+        let input = if is_module {
+            Input::Module(src)
+        } else {
+            Input::Source(c.cm.new_source_file(
+                if options.filename.is_empty() {
+                    FileName::Anon
+                } else {
+                    FileName::Real(options.filename.clone().into())
+                },
+                src,
+            ))
+        };
 
         TransformTask {
             c: c.clone(),
-            fm,
+            input,
             hook,
             options,
         }
@@ -254,7 +287,7 @@ fn transform_sync(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    schedule_transform(cx, |c, path, hook, options| {
+    schedule_transform(cx, |c, path, _, hook, options| {
         let path = clean(&path);
 
         TransformFileTask {
@@ -569,6 +602,17 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         };
         complete_output(cx, result)
     })
+}
+
+fn print_js(
+    c: &Compiler,
+    comments: &Comments,
+    module: &Module,
+    fm: Arc<SourceFile>,
+    source_map: bool,
+    minify: bool,
+) -> Result<TransformOutput, Error> {
+    c.print(&module, fm, comments, source_map, minify)
 }
 
 pub type ArcCompiler = Arc<Compiler>;

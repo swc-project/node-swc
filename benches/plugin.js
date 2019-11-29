@@ -104,12 +104,21 @@ module.exports = {
 `;
 
 const TESTS = [
-  ['parse', '../', (module) => module.parseSync(SOURCE)],
-  ['parse + print', '../', (module) => module.printSync(module.parseSync(SOURCE))],
+  ["parse", "../", module => module.parseSync(SOURCE)],
+  [
+    "parse + print",
+    "../",
+    module => module.printSync(module.parseSync(SOURCE))
+  ],
+  [
+    "parse + transform",
+    "../",
+    module => module.transformSync(module.parseSync(SOURCE))
+  ]
 ];
 
-suite('parse', () => {
-  TESTS.map((args) => {
+suite("plugin", () => {
+  TESTS.map(args => {
     const [name, requirePath, fn] = args;
     try {
       const func = fn.bind(null, require(requirePath));
