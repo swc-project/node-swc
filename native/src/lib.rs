@@ -166,7 +166,7 @@ impl Task for TransformFileTask {
 }
 
 /// returns `compiler, (src / path), options, plugin, callback`
-fn start_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
+fn schedule_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
 where
     F: FnOnce(&Arc<Compiler>, String, Option<EventHandler>, Options) -> T,
     T: Task,
@@ -196,7 +196,7 @@ where
 }
 
 fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    start_transform(cx, |c, src, hook, options| {
+    schedule_transform(cx, |c, src, hook, options| {
         let fm = c.cm.new_source_file(
             if options.filename.is_empty() {
                 FileName::Anon
@@ -245,7 +245,7 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 }
 
 fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    start_transform(cx, |c, path, hook, options| {
+    schedule_transform(cx, |c, path, hook, options| {
         let path = Path::new(&path);
 
         TransformFileTask {
