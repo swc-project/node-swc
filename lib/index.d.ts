@@ -1,4 +1,10 @@
 declare module "@swc/core" {
+  export interface Plugin {
+    (module: Module): Module;
+  }
+
+  export function plugins(ps: Plugin[]): Plugin;
+
   export class Compiler {
     constructor();
 
@@ -222,7 +228,7 @@ declare module "@swc/core" {
      */
     sourceRoot?: string;
 
-    plugin: (m: Module) => Module;
+    plugin: Plugin;
   }
 
   export interface CallerOptions {
