@@ -11,7 +11,6 @@ extern crate neon;
 extern crate neon_serde;
 extern crate path_clean;
 extern crate serde;
-extern crate serde_json;
 extern crate swc;
 
 use neon::prelude::*;
@@ -88,7 +87,7 @@ impl Fold<Module> for Hook<'_> {
                     let result = callback.call(cx, this, args);
 
                     // TODO: parse module
-
+                    
                     // let cmd = match result {
                     //     Ok(v) => {
                     //         if let Ok(number) = v.downcast::<JsNumber>() {
@@ -103,8 +102,7 @@ impl Fold<Module> for Hook<'_> {
                     //     }
                     //     Err(e) => format!("threw {}", e),
                     // };
-                    // let args: Vec<Handle<JsValue>> =
-                    // vec![cx.string(cmd).upcast()];
+                    // let args: Vec<Handle<JsValue>> = vec![cx.string(cmd).upcast()];
                     // let _result = callback.call(cx, this, args);
                 })
             })
@@ -307,10 +305,7 @@ fn complete_parse<'a>(
 ) -> JsResult<'a, JsValue> {
     c.run(|| {
         common::CM.set(&c.cm, || match result {
-            Ok(module) => Ok(match serde_json::to_string(&module) {
-                Ok(v) => cx.string(v).upcast(),
-                Err(err) => cx.throw_error(format!("failed to serialize module: {}", err))?,
-            }),
+            Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
             Err(err) => cx.throw_error(err.to_string()),
         })
     })
