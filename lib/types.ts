@@ -669,7 +669,8 @@ export type Expression =
   | TsNonNullExpression
   | TsTypeCastExpression
   | TsAsExpression
-  | PrivateName;
+  | PrivateName
+  | Invalid;
 
 interface ExpressionBase extends Node, HasSpan {}
 
@@ -1269,6 +1270,7 @@ export type Pattern =
   | RestElement
   | ObjectPattern
   | AssignmentPattern
+  | Invalid
   | Expression;
 
 export interface ArrayPattern extends Node, HasSpan, PatternBase {
@@ -1370,7 +1372,12 @@ export type PropertyName =
   | Identifier
   | StringLiteral
   | NumericLiteral
-  | Expression;
+  | ComputedPropName;
+
+export interface ComputedPropName extends Node, HasSpan {
+  type: "Computed";
+  expression: Expression;
+}
 
 export interface BlockStatement extends Node, HasSpan {
   type: "BlockStatement";
@@ -1977,3 +1984,7 @@ export interface TsNonNullExpression extends ExpressionBase {
 }
 
 export type Accessibility = "public" | "protected" | "private";
+
+export interface Invalid extends Node, HasSpan {
+  type: "Invalid";
+}
