@@ -195,6 +195,31 @@ where
     Ok(cx.undefined().upcast())
 }
 
+fn exec_transform<F>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
+where
+    F: FnOnce(&Compiler, String, &Options) -> Result<Arc<SourceFile>, Error>,
+{
+    let s = cx.argument::<JsString>(0)?;
+    let options: Options = match cx.argument_opt(1) {
+        Some(v) => neon_serde::from_value(&mut cx, v)?,
+        None => {
+            let obj = cx.empty_object().upcast();
+            neon_serde::from_value(&mut cx, obj)?
+        }
+    };
+
+    let this = cx.this();
+    let output = {
+        let guard = cx.lock();
+        let c = this.borrow(&guard);
+        let fm = op(&c, s.value(), &options).expect("failed to create fm");
+
+        c.process_js_file(fm, &options)
+    };
+
+    complete_output(cx, output)
+}
+
 fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     schedule_transform(cx, |c, src, hook, options| {
         let fm = c.cm.new_source_file(
@@ -215,38 +240,22 @@ fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     })
 }
 
-fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let source = cx.argument::<JsString>(0)?;
-    let options: Options = match cx.argument_opt(1) {
-        Some(v) => neon_serde::from_value(&mut cx, v)?,
-        None => {
-            let obj = cx.empty_object().upcast();
-            neon_serde::from_value(&mut cx, obj)?
-        }
-    };
-
-    let this = cx.this();
-    let output = {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
-        let fm = c.cm.new_source_file(
+fn transform_sync(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    exec_transform(cx, |c, src, options| {
+        Ok(c.cm.new_source_file(
             if options.filename.is_empty() {
                 FileName::Anon
             } else {
                 FileName::Real(options.filename.clone().into())
             },
-            source.value(),
-        );
-
-        c.process_js_file(fm, &options)
-    };
-
-    complete_output(cx, output)
+            src,
+        ))
+    })
 }
 
 fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     schedule_transform(cx, |c, path, hook, options| {
-        let path = Path::new(&path);
+        let path = clean(&path);
 
         TransformFileTask {
             c: c.clone(),
@@ -257,29 +266,12 @@ fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     })
 }
 
-fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let path = cx.argument::<JsString>(0)?;
-    let opts: Options = match cx.argument_opt(1) {
-        Some(v) => neon_serde::from_value(&mut cx, v)?,
-        None => {
-            let obj = cx.empty_object().upcast();
-            neon_serde::from_value(&mut cx, obj)?
-        }
-    };
-
-    let path_value = path.value();
-    let path_value = clean(&path_value);
-    let path = Path::new(&path_value);
-
-    let this = cx.this();
-    let output = {
-        let guard = cx.lock();
-        let c = this.borrow(&guard);
-        let fm = c.cm.load_file(path).expect("failed to load file");
-        c.process_js_file(fm, &opts)
-    };
-
-    complete_output(cx, output)
+fn transform_file_sync(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
+    exec_transform(cx, |c, path, _| {
+        Ok(c.cm
+            .load_file(Path::new(&path))
+            .expect("failed to load file"))
+    })
 }
 
 // ----- Parsing -----
