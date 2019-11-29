@@ -8,3 +8,4 @@ native/artifacts.json
 yarn.lock
 package-lock.json
 *.log
+.idea/

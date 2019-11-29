@@ -24,7 +24,7 @@ failure = "0.1"
 path-clean = "0.1"
 lazy_static = "1"
 hashbrown = "0.5"
-swc = { git = "https://github.com/swc-project/swc.git" }
+swc = { git = "https://github.com/kdy1/swc.git", branch = "plugin" }
 serde = { version = "1", features = ["derive"] }
 
 [profile.bench]

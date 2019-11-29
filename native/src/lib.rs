@@ -15,7 +15,6 @@ extern crate swc;
 
 use neon::prelude::*;
 use path_clean::clean;
-use serde::Deserialize;
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
@@ -73,8 +72,7 @@ impl Task for TransformTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        self.c
-            .process_js_file(self.fm.clone(), self.options.clone())
+        self.c.process_js_file(self.fm.clone(), &self.options)
     }
 
     fn complete(
@@ -98,7 +96,7 @@ impl Task for TransformFileTask {
             .load_file(&self.path)
             .map_err(|err| Error::FailedToReadModule { err })?;
 
-        self.c.process_js_file(fm, self.options.clone())
+        self.c.process_js_file(fm, &self.options)
     }
 
     fn complete(
@@ -125,10 +123,16 @@ where
 
     let s = cx.argument::<JsString>(0)?.value();
     let options_arg = cx.argument::<JsValue>(1)?;
-    let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
-    let callback = cx.argument::<JsFunction>(2)?;
 
-    let task = op(&c, s, "", options);
+    let hook = match cx.argument::<JsUndefined>(2) {
+        Ok(..   ) => None,
+        Err(..) => Some(EventHandler::bind(this, cx.argument::<JsFunction>(2)?)),
+    };
+
+    let options: Options = neon_serde::from_value(&mut cx, options_arg)?;
+    let callback = cx.argument::<JsFunction>(3)?;
+
+    let task = op(&c, s, hook, options);
     task.schedule(callback);
 
     Ok(cx.undefined().upcast())
@@ -177,7 +181,7 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             source.value(),
         );
 
-        c.process_js_file(fm, options)
+        c.process_js_file(fm, &options)
             .expect("failed to process js file")
     };
 
@@ -216,7 +220,7 @@ fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         let guard = cx.lock();
         let c = this.borrow(&guard);
         let fm = c.cm.load_file(path).expect("failed to load file");
-        c.process_js_file(fm, opts)
+        c.process_js_file(fm, &opts)
             .expect("failed to process js file")
     };
 

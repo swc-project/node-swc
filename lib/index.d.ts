@@ -211,6 +211,9 @@ declare module "@swc/core" {
          * The sourceRoot fields to set in the generated source map, if one is desired.
          */
         sourceRoot?: string;
+
+
+        plugin: (m: Module) => Module;
     }
 
     export interface CallerOptions {
