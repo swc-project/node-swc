@@ -87,7 +87,6 @@ impl Fold<Module> for Hook<'_> {
                     let result = callback.call(cx, this, args);
 
                     // TODO: parse module
-                    
                     // let cmd = match result {
                     //     Ok(v) => {
                     //         if let Ok(number) = v.downcast::<JsNumber>() {
@@ -305,7 +304,9 @@ fn complete_parse<'a>(
 ) -> JsResult<'a, JsValue> {
     c.run(|| {
         common::CM.set(&c.cm, || match result {
-            Ok(module) => Ok(neon_serde::to_value(&mut cx, &module)?),
+            Ok(module) => Ok(cx
+                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
+                .upcast()),
             Err(err) => cx.throw_error(err.to_string()),
         })
     })
@@ -428,7 +429,9 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                 Err(err) => return cx.throw_error(err.to_string()),
             };
 
-            Ok(neon_serde::to_value(&mut cx, &module)?)
+            Ok(cx
+                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
+                .upcast())
         })
     })
 }
@@ -468,7 +471,9 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                 Err(err) => return cx.throw_error(err.to_string()),
             };
 
-            Ok(neon_serde::to_value(&mut cx, &module)?)
+            Ok(cx
+                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
+                .upcast())
         })
     })
 }
