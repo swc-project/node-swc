@@ -58,12 +58,14 @@ struct TransformFileTask {
     hook: Option<EventHandler>,
 }
 
-fn complete_output(
-    mut cx: TaskContext,
+fn complete_output<'a>(
+    mut cx: impl Context<'a>,
     result: Result<TransformOutput, Error>,
-) -> JsResult<JsValue> {
+) -> JsResult<'a, JsValue> {
     match result {
-        Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
+        Ok(output) => Ok(cx
+            .string(serde_json::to_string(&output).expect("failed to serialize TransformOutput"))
+            .upcast()),
         Err(err) => cx.throw_error(err.to_string()),
     }
 }
@@ -101,7 +103,8 @@ impl Fold<Module> for Hook<'_> {
                     //     }
                     //     Err(e) => format!("threw {}", e),
                     // };
-                    // let args: Vec<Handle<JsValue>> = vec![cx.string(cmd).upcast()];
+                    // let args: Vec<Handle<JsValue>> =
+                    // vec![cx.string(cmd).upcast()];
                     // let _result = callback.call(cx, this, args);
                 })
             })
@@ -238,10 +241,9 @@ fn transform_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         );
 
         c.process_js_file(fm, &options)
-            .expect("failed to process js file")
     };
 
-    Ok(neon_serde::to_value(&mut cx, &output)?)
+    complete_output(cx, output)
 }
 
 fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
@@ -277,10 +279,9 @@ fn transform_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         let c = this.borrow(&guard);
         let fm = c.cm.load_file(path).expect("failed to load file");
         c.process_js_file(fm, &opts)
-            .expect("failed to process js file")
     };
 
-    Ok(neon_serde::to_value(&mut cx, &output)?)
+    complete_output(cx, output)
 }
 
 // ----- Parsing -----
@@ -298,7 +299,7 @@ struct ParseFileTask {
 }
 
 fn complete_parse<'a>(
-    mut cx: TaskContext<'a>,
+    mut cx: impl Context<'a>,
     result: Result<Module, Error>,
     c: &Compiler,
 ) -> JsResult<'a, JsValue> {
@@ -424,14 +425,8 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                     },
                 )
             };
-            let module = match module {
-                Ok(v) => v,
-                Err(err) => return cx.throw_error(err.to_string()),
-            };
 
-            Ok(cx
-                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
-                .upcast())
+            complete_parse(cx, module, &c)
         })
     })
 }
@@ -466,14 +461,8 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                     },
                 )
             };
-            let module = match module {
-                Ok(v) => v,
-                Err(err) => return cx.throw_error(err.to_string()),
-            };
 
-            Ok(cx
-                .string(serde_json::to_string(&module).expect("failed to serialize Module"))
-                .upcast())
+            complete_parse(cx, module, &c)
         })
     })
 }
@@ -595,11 +584,7 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                     options.config.unwrap_or_default().minify.unwrap_or(false),
                 )
             };
-            let result = match result {
-                Ok(v) => v,
-                Err(err) => return cx.throw_error(err.to_string()),
-            };
-            Ok(neon_serde::to_value(&mut cx, &result)?)
+            complete_output(cx, result)
         })
     })
 }
