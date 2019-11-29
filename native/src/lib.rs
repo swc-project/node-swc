@@ -63,9 +63,7 @@ fn complete_output<'a>(
     result: Result<TransformOutput, Error>,
 ) -> JsResult<'a, JsValue> {
     match result {
-        Ok(output) => Ok(cx
-            .string(serde_json::to_string(&output).expect("failed to serialize TransformOutput"))
-            .upcast()),
+        Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
         Err(err) => cx.throw_error(err.to_string()),
     }
 }
