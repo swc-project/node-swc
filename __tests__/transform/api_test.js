@@ -67,3 +67,19 @@ it("(async) should handle module input", async () => {
 
   expect(out.code.replace(/\n/g, "")).toBe("class Foo{}");
 });
+
+it("(sync) should handle plugin", () => {
+  const out = swc.transformSync("class Foo {}", {
+    plugin: m => ({ ...m, body: [] })
+  });
+
+  expect(out.code).toBe("");
+});
+
+it("(async) should handle plugin", async () => {
+  const out = await swc.transform("class Foo {}", {
+    plugin: m => ({ ...m, body: [] })
+  });
+
+  expect(out.code).toBe("");
+});
