@@ -24,7 +24,7 @@ failure = "0.1"
 path-clean = "0.1"
 lazy_static = "1"
 hashbrown = "0.5"
-swc = { git = "https://github.com/kdy1/swc.git", branch = "plugin" }
+swc = { git = "https://github.com/swc-project/swc.git" }
 serde = { version = "1", features = ["derive"] }
 
 [profile.bench]
@@ -33,8 +33,3 @@ lto = true
 [profile.release]
 # lto = true
 codegen-units = 1
-
-[patch.crates-io]
-neon = { git = "https://github.com/kdy1/neon.git", branch = "threadsafe_callback"}
-neon-runtime = { git = "https://github.com/kdy1/neon.git", branch = "threadsafe_callback", features = ["neon-sys"] }
-neon-build = { git = "https://github.com/kdy1/neon.git", branch = "threadsafe_callback" }

@@ -53,3 +53,33 @@ it("should handle jsc.target = es5", () => {
   });
   expect(out.code.trim()).toBe(`foo.default;`);
 });
+
+it("(sync) should handle module input", () => {
+  const m = swc.parseSync("class Foo {}");
+  const out = swc.transformSync(m);
+
+  expect(out.code.replace(/\n/g, "")).toBe("class Foo{}");
+});
+
+it("(async) should handle module input", async () => {
+  const m = await swc.parse("class Foo {}");
+  const out = await swc.transform(m);
+
+  expect(out.code.replace(/\n/g, "")).toBe("class Foo{}");
+});
+
+it("(sync) should handle plugin", () => {
+  const out = swc.transformSync("class Foo {}", {
+    plugin: m => ({ ...m, body: [] })
+  });
+
+  expect(out.code).toBe("");
+});
+
+it("(async) should handle plugin", async () => {
+  const out = await swc.transform("class Foo {}", {
+    plugin: m => ({ ...m, body: [] })
+  });
+
+  expect(out.code).toBe("");
+});

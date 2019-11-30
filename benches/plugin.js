@@ -103,19 +103,25 @@ module.exports = {
 };
 `;
 
+const swc = require("../lib");
+const Visitor = require("../lib/Visitor").default;
+
 const TESTS = [
-  ['parse', '../', (module) => module.parseSync(SOURCE)],
-  ['parse + print', '../', (module) => module.printSync(module.parseSync(SOURCE))],
+  ["parse", () => swc.parseSync(SOURCE)],
+  ["parse + print", () => swc.printSync(swc.parseSync(SOURCE))],
+  ["parse + transform", () => swc.transformSync(swc.parseSync(SOURCE))],
+  [
+    "plugin",
+    () =>
+      swc.transformSync(SOURCE, {
+        plugin: m => new Visitor().visitModule(m)
+      })
+  ]
 ];
 
-suite('parse', () => {
-  TESTS.map((args) => {
-    const [name, requirePath, fn] = args;
-    try {
-      const func = fn.bind(null, require(requirePath));
-      bench(name, func);
-    } catch (e) {
-      console.log(`Cannot load ${requirePath}: ${e.message}`);
-    }
+suite("plugin", () => {
+  TESTS.map(args => {
+    const [name, fn] = args;
+    bench(name, fn);
   });
 });
