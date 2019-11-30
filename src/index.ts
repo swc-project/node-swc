@@ -2,12 +2,12 @@ import { Plugin, ParseOptions, Module, Output, Options } from "./types";
 export * from "./types";
 import { wrapNativeSuper } from "./util";
 
-const native = require("../native");
+const native = require("./native");
 
 /**
  * Version of the swc binding.
  */
-export const version = require("../package.json").version;
+export const version = require("./package.json").version;
 
 export function plugins(ps: Plugin[]): Plugin {
   return mod => {

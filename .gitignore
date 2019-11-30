@@ -11,4 +11,5 @@ package-lock.json
 .idea/
 
 # Built files
-lib
+/*.js
+/*.d.ts
