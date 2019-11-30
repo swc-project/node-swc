@@ -2,7 +2,7 @@
   "name": "@swc/core",
   "version": "1.1.0",
   "description": "Super-fast alternative for babel",
-  "main": "lib/index.js",
+  "main": "./index.js",
   "author": "강동윤 <kdy1@outlook.kr>",
   "license": "MIT",
   "engines": {
@@ -19,7 +19,7 @@
     "request": "^2.88.0",
     "true-case-path": "^1.0.3"
   },
-  "types": "./lib/index.d.ts",
+  "types": "./index.d.ts",
   "scripts": {
     "install": "node scripts/install.js || neon build --release",
     "build": "tsc -d && neon build --release"
@@ -37,7 +37,8 @@
     "jest": "^23.6.0",
     "lodash": "^4.17.11",
     "source-map": "^0.7.3",
-    "sourcemap-validator": "^1.1.0"
+    "sourcemap-validator": "^1.1.0",
+    "typescript": "^3.7.2"
   },
   "funding": {
     "type": "opencollective",

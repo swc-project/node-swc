@@ -9,6 +9,3 @@ yarn.lock
 package-lock.json
 *.log
 .idea/
-# Built files
-/*.d.ts
-/*.js
