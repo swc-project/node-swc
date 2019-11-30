@@ -67,7 +67,24 @@ const Visitor = require("../../lib/Visitor").default;
   {
       return parseInt( hex.substring( 1 ), 16 );
   }
+
+
+  // Verify that visitor can handle class declaration.
+  class Prent {}
+  class Child extends Parent {}
   
+
+  // Verify that visitor can handle new expression.
+  new Child(foo);
+  new Child(...foo);
+
+
+  // Verify that visitor can handle call expressions.
+  call(...foo);
+  call(foo);
+
+  let arr = [elem, , ...foo];
+
   module.exports = {
       red,
       green,
@@ -84,30 +101,10 @@ const Visitor = require("../../lib/Visitor").default;
   });
 
   it("works with visitor", () => {
-    const src = `'use strict';
-  
-class Bar extends Foo {
-  foo() {
-    super.foo();
-  }
-}
-
-
-
-
-`;
-
     swc.transformSync(src, {
       plugin: m => {
         let v = new Visitor();
-        console.log(
-          JSON.stringify(m.body[1].body[0].function.body.stmts[0].callee)
-        );
-        const mod = v.visitModule(m);
-        console.log(
-          JSON.stringify(mod.body[1].body[0].function.body.stmts[0].callee)
-        );
-        return mod;
+        return v.visitModule(m);
       }
     });
   });

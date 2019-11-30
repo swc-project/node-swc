@@ -690,6 +690,11 @@ export interface ObjectExpression extends ExpressionBase {
   properties?: (Property | SpreadElement)[];
 }
 
+export interface Arugment {
+  spread?: Span;
+  expression: Expression;
+}
+
 export type PropertOrSpread = Property | SpreadElement;
 
 export interface SpreadElement extends Node {
@@ -779,7 +784,7 @@ export interface CallExpression extends ExpressionBase {
 
   callee: Expression | Super;
 
-  arguments?: (Expression | SpreadElement)[];
+  arguments?: Arugment[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }
@@ -789,7 +794,7 @@ export interface NewExpression extends ExpressionBase {
 
   callee: Expression;
 
-  arguments?: (Expression | SpreadElement)[];
+  arguments?: Arugment[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }

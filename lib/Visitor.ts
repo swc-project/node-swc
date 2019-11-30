@@ -150,7 +150,8 @@ import {
   KeyValueProperty,
   GetterProperty,
   AssignmentProperty,
-  ComputedPropName
+  ComputedPropName,
+  Arugment
 } from "./types";
 
 export default class Visitor {
@@ -1255,19 +1256,13 @@ export default class Visitor {
     return n;
   }
 
-  visitArguments(
-    nodes: (SpreadElement | Expression)[]
-  ): (SpreadElement | Expression)[] {
+  visitArguments(nodes: Arugment[]): Arugment[] {
     return nodes.map(this.visitArgument.bind(this));
   }
 
-  visitArgument(n: SpreadElement | Expression): SpreadElement | Expression {
-    switch (n.type) {
-      case "SpreadElement":
-        return this.visitSpreadElement(n);
-      default:
-        return this.visitExpression(n);
-    }
+  visitArgument(n: Arugment): Arugment {
+    n.expression = this.visitExpression(n.expression);
+    return n;
   }
 
   visitMetaProperty(n: MetaProperty): Expression {
@@ -1441,6 +1436,7 @@ export default class Visitor {
     if (n.arguments) {
       n.arguments = this.visitArguments(n.arguments);
     }
+
     return n;
   }
 
