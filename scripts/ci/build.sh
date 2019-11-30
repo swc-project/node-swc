@@ -21,7 +21,6 @@ nvm install $1 || true
 echo "nvm use $1"
 nvm use --delete-prefix $1
 
-
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
@@ -49,6 +48,7 @@ which npm
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
+npx tsc -d
 
 # Build it
 echo 'Building...'
