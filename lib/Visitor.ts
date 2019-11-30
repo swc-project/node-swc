@@ -1283,7 +1283,7 @@ export default class Visitor {
   }
 
   visitExpressionOrSuper(n: Expression | Super): Expression | Super {
-    if ((n as Span).start && (n as Span).end && (n as Span).ctxt) {
+    if (n.type === "Super") {
       return n;
     }
     return this.visitExpression(n as Expression);

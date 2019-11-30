@@ -770,7 +770,9 @@ export interface ConditionalExpression extends ExpressionBase {
   alternate: Expression;
 }
 
-export type Super = Span;
+export interface Super extends Node, HasSpan {
+  type: "Super";
+}
 
 export interface CallExpression extends ExpressionBase {
   type: "CallExpression";
