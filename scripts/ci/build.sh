@@ -48,7 +48,7 @@ which npm
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
-npx tsc -d .
+npx tsc -d
 
 # Build it
 echo 'Building...'
