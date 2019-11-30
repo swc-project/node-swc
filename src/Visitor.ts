@@ -738,11 +738,9 @@ export default class Visitor {
   }
 
   visitClassBody(
-    members: ClassMember[] | undefined
-  ): ClassMember[] | undefined {
-    if (members) {
-      return members.map(this.visitClassMember.bind(this));
-    }
+    members: ClassMember[]
+  ): ClassMember[] {
+    return members.map(this.visitClassMember.bind(this));
   }
 
   visitClassMember(member: ClassMember): ClassMember {

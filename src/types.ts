@@ -460,7 +460,7 @@ export interface Output {
   map?: string;
 }
 
-export interface MatchPattern {}
+export interface MatchPattern { }
 
 // -------------------------------
 // ---------- Ast nodes ----------
@@ -477,7 +477,7 @@ export interface Node {
 }
 
 export interface HasSpan {
-  span?: Span;
+  span: Span;
 }
 
 export interface HasDecorator {
@@ -485,17 +485,17 @@ export interface HasDecorator {
 }
 
 export interface Class extends HasSpan, HasDecorator {
-  body?: ClassMember[];
+  body: ClassMember[];
 
   superClass?: Expression;
 
-  is_abstract?: boolean;
+  is_abstract: boolean;
 
-  typeParams?: TsTypeParameterDeclaration;
+  typeParams: TsTypeParameterDeclaration;
 
   superTypeParams?: TsTypeParameterInstantiation;
 
-  implements?: TsExpressionWithTypeArguments[];
+  implements: TsExpressionWithTypeArguments[];
 }
 
 export type ClassMember =
@@ -511,20 +511,20 @@ export interface ClassPropertyBase extends Node, HasSpan, HasDecorator {
 
   typeAnnotation?: TsTypeAnnotation;
 
-  is_static?: boolean;
+  is_static: boolean;
 
-  computed?: boolean;
+  computed: boolean;
 
   accessibility?: Accessibility;
 
   /// Typescript extension.
-  is_abstract?: boolean;
+  is_abstract: boolean;
 
-  is_optional?: boolean;
+  is_optional: boolean;
 
-  readonly?: boolean;
+  readonly: boolean;
 
-  definite?: boolean;
+  definite: boolean;
 }
 
 export interface ClassProperty extends ClassPropertyBase {
@@ -546,11 +546,11 @@ export interface Constructor extends Node, HasSpan {
 
   params: (Pattern | TsParameterProperty)[];
 
-  body?: BlockStatement;
+  body: BlockStatement;
 
   accessibility?: Accessibility;
 
-  is_optional?: boolean;
+  is_optional: boolean;
 }
 
 export interface ClassMethodBase extends Node, HasSpan {
@@ -558,13 +558,13 @@ export interface ClassMethodBase extends Node, HasSpan {
 
   kind: MethodKind;
 
-  is_static?: boolean;
+  is_static: boolean;
 
   accessibility?: Accessibility;
 
-  is_abstract?: boolean;
+  is_abstract: boolean;
 
-  is_optional?: boolean;
+  is_optional: boolean;
 }
 
 export interface ClassMethod extends ClassMethodBase {
@@ -601,7 +601,7 @@ export interface FunctionDeclaration extends Fn {
 
   ident: Identifier;
 
-  declare?: boolean;
+  declare: boolean;
 }
 
 export interface ClassDeclaration extends Class, Node {
@@ -609,7 +609,7 @@ export interface ClassDeclaration extends Class, Node {
 
   identifier: Identifier;
 
-  declare?: boolean;
+  declare: boolean;
 }
 
 export interface VariableDeclaration extends Node, HasSpan {
@@ -617,7 +617,7 @@ export interface VariableDeclaration extends Node, HasSpan {
 
   kind: VariableDeclarationKind;
 
-  declare?: boolean;
+  declare: boolean;
 
   declarations: VariableDeclarator[];
 }
@@ -633,7 +633,7 @@ export interface VariableDeclarator extends Node, HasSpan {
   init?: Expression;
 
   /// Typescript only
-  definite?: boolean;
+  definite: boolean;
 }
 
 export type Expression =
@@ -672,7 +672,7 @@ export type Expression =
   | PrivateName
   | Invalid;
 
-interface ExpressionBase extends Node, HasSpan {}
+interface ExpressionBase extends Node, HasSpan { }
 
 export interface ThisExpression extends ExpressionBase {
   type: "ThisExpression";
@@ -681,17 +681,17 @@ export interface ThisExpression extends ExpressionBase {
 export interface ArrayExpression extends ExpressionBase {
   type: "ArrayExpression";
 
-  elements?: (Expression | SpreadElement | undefined)[];
+  elements: (Expression | SpreadElement | undefined)[];
 }
 
 export interface ObjectExpression extends ExpressionBase {
   type: "ObjectExpression";
 
-  properties?: (Property | SpreadElement)[];
+  properties: (Property | SpreadElement)[];
 }
 
 export interface Arugment {
-  spread?: Span;
+  spread: Span;
   expression: Expression;
 }
 
@@ -736,13 +736,13 @@ export interface BinaryExpression extends ExpressionBase {
 export interface FunctionExpression extends Fn, ExpressionBase {
   type: "FunctionExpression";
 
-  identifier?: Identifier;
+  identifier: Identifier;
 }
 
 export interface ClassExpression extends Class, ExpressionBase {
   type: "ClassExpression";
 
-  identifier?: Identifier;
+  identifier: Identifier;
 }
 
 export interface AssignmentExpression extends ExpressionBase {
@@ -784,7 +784,7 @@ export interface CallExpression extends ExpressionBase {
 
   callee: Expression | Super;
 
-  arguments?: Arugment[];
+  arguments: Arugment[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }
@@ -794,7 +794,7 @@ export interface NewExpression extends ExpressionBase {
 
   callee: Expression;
 
-  arguments?: Arugment[];
+  arguments: Arugment[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }
@@ -812,9 +812,9 @@ export interface ArrowFunctionExpression extends ExpressionBase {
 
   body: BlockStatement | Expression;
 
-  async?: boolean;
+  async: boolean;
 
-  generator?: boolean;
+  generator: boolean;
 
   typeParameters?: TsTypeParameterDeclaration;
 
@@ -826,7 +826,7 @@ export interface YieldExpression extends ExpressionBase {
 
   argument?: Expression;
 
-  delegate?: boolean;
+  delegate: boolean;
 }
 
 export interface MetaProperty extends Node {
@@ -858,14 +858,14 @@ export interface TaggedTemplateExpression extends ExpressionBase, TplBase {
 
   tag: Expression;
 
-  typeParameters?: TsTypeParameterInstantiation;
+  typeParameters: TsTypeParameterInstantiation;
 }
 
 export interface TemplateElement extends ExpressionBase {
   type: "TemplateElement";
 
   tail: boolean;
-  cooked?: StringLiteral;
+  cooked: StringLiteral;
   raw: StringLiteral;
 }
 
@@ -878,11 +878,11 @@ export interface ParenthesisExpression extends ExpressionBase {
 export interface Fn extends HasSpan, HasDecorator {
   params: Pattern[];
 
-  body?: BlockStatement;
+  body: BlockStatement;
 
-  generator?: boolean;
+  generator: boolean;
 
-  async?: boolean;
+  async: boolean;
 
   typeParameters?: TsTypeParameterDeclaration;
 
@@ -899,7 +899,7 @@ export interface Identifier extends HasSpan, PatternBase {
   value: string;
 
   /// TypeScript only. Used in case of an optional parameter.
-  optional?: boolean;
+  optional: boolean;
 }
 
 export interface PrivateName extends ExpressionBase {
@@ -1013,7 +1013,7 @@ export interface JSXFragment extends Node, HasSpan {
 
   opening: JSXOpeningFragment;
 
-  children?: JSXElementChild[];
+  children: JSXElementChild[];
 
   closing: JSXClosingFragment;
 }
@@ -1038,7 +1038,7 @@ export interface StringLiteral extends Node, HasSpan {
   type: "StringLiteral";
 
   value: string;
-  has_escape?: boolean;
+  has_escape: boolean;
 }
 
 export interface BooleanLiteral extends Node, HasSpan {
@@ -1055,7 +1055,7 @@ export interface RegExpLiteral extends Node, HasSpan {
   type: "RegExpLiteral";
 
   pattern: StringLiteral;
-  flags?: RegexFlags;
+  flags: RegexFlags;
 }
 
 export type RegexFlags = StringLiteral;
@@ -1092,7 +1092,7 @@ export interface ExportDeclaration extends Node, HasSpan {
 export interface ImportDeclaration extends Node, HasSpan {
   type: "ImportDeclaration";
 
-  specifiers?: ImporSpecifier[];
+  specifiers: ImporSpecifier[];
 
   source: StringLiteral;
 }
@@ -1165,7 +1165,7 @@ export interface ImportNamespaceSpecifier extends Node, HasSpan {
 export interface NamedImportSpecifier extends Node, HasSpan {
   type: "ImportSpecifier";
   local: Identifier;
-  imported?: Identifier;
+  imported: Identifier;
 }
 
 export type ExportSpecifier =
@@ -1195,14 +1195,14 @@ export interface NamedExportSpecifier extends Node, HasSpan {
   /**
    * `Some(bar)` in `export { foo as bar }`
    */
-  exported?: Identifier;
+  exported: Identifier;
 }
 
 interface HasInterpreter {
   /**
    * e.g. `/usr/bin/node` for `#!/usr/bin/node`
    */
-  interpreter?: string;
+  interpreter: string;
 }
 
 export interface Module extends Node, HasSpan, HasInterpreter {
@@ -1361,14 +1361,14 @@ export interface AssignmentProperty extends Node {
 export interface GetterProperty extends PropBase, HasSpan {
   type: "GetterProperty";
 
-  body?: BlockStatement;
+  body: BlockStatement;
 }
 
 export interface SetterProperty extends PropBase, HasSpan {
   type: "SetterProperty";
 
   param: Pattern;
-  body?: BlockStatement;
+  body: BlockStatement;
 }
 
 export interface MethodProperty extends PropBase, Fn {
@@ -1431,7 +1431,7 @@ export interface WithStatement extends Node, HasSpan {
 export interface ReturnStatement extends Node, HasSpan {
   type: "ReturnStatement";
 
-  argument?: Expression;
+  argument: Expression;
 }
 
 export interface LabeledStatement extends Node, HasSpan {
@@ -1444,13 +1444,13 @@ export interface LabeledStatement extends Node, HasSpan {
 export interface BreakStatement extends Node, HasSpan {
   type: "BreakStatement";
 
-  label?: Identifier;
+  label: Identifier;
 }
 
 export interface ContinueStatement extends Node, HasSpan {
   type: "ContinueStatement";
 
-  label?: Identifier;
+  label: Identifier;
 }
 
 export interface IfStatement extends Node, HasSpan {
@@ -1479,7 +1479,7 @@ export interface TryStatement extends Node, HasSpan {
 
   block: BlockStatement;
   handler?: CatchClause;
-  finalizer?: BlockStatement;
+  finalizer: BlockStatement;
 }
 
 export interface WhileStatement extends Node, HasSpan {
@@ -1521,7 +1521,7 @@ export interface ForOfStatement extends Node, HasSpan {
    *
    *  es2018 for-await-of statements, e.g., `for await (const x of xs) {`
    */
-  await?: Span;
+  await: Span;
   left: VariableDeclaration | Pattern;
   right: Expression;
   body: Statement;
@@ -1543,7 +1543,7 @@ export interface CatchClause extends Node, HasSpan {
   /**
    * The param is `undefined` if the catch binding is omitted. E.g., `try { foo() } catch {}`
    */
-  param?: Pattern;
+  param: Pattern;
   body: BlockStatement;
 }
 
@@ -1563,8 +1563,8 @@ export interface TsTypeParameter extends Node, HasSpan {
   type: "TsTypeParameter";
 
   name: Identifier;
-  constraint?: TsType;
-  default?: TsType;
+  constraint: TsType;
+  default: TsType;
 }
 
 export interface TsTypeParameterInstantiation extends Node, HasSpan {
@@ -1617,16 +1617,16 @@ export interface TsCallSignatureDeclaration extends Node, HasSpan {
   type: "TsCallSignatureDeclaration";
 
   params: TsFnParameter[];
-  typeAnnotation?: TsTypeAnnotation;
-  typeParams?: TsTypeParameterDeclaration;
+  typeAnnotation: TsTypeAnnotation;
+  typeParams: TsTypeParameterDeclaration;
 }
 
 export interface TsConstructSignatureDeclaration extends Node, HasSpan {
   type: "TsConstructSignatureDeclaration";
 
   params: TsFnParameter[];
-  typeAnnotation?: TsTypeAnnotation;
-  typeParams?: TsTypeParameterDeclaration;
+  typeAnnotation: TsTypeAnnotation;
+  typeParams: TsTypeParameterDeclaration;
 }
 
 export interface TsPropertySignature extends Node, HasSpan {
@@ -1637,11 +1637,11 @@ export interface TsPropertySignature extends Node, HasSpan {
   computed: boolean;
   optional: boolean;
 
-  init?: Expression;
+  init: Expression;
   params: TsFnParameter[];
 
   typeAnnotation?: TsTypeAnnotation;
-  typeParams?: TsTypeParameterDeclaration;
+  typeParams: TsTypeParameterDeclaration;
 }
 
 export interface TsMethodSignature extends Node, HasSpan {
@@ -1653,8 +1653,8 @@ export interface TsMethodSignature extends Node, HasSpan {
   optional: boolean;
   params: TsFnParameter[];
 
-  typeAnnotation?: TsTypeAnnotation;
-  typeParams?: TsTypeParameterDeclaration;
+  typeAnnotation: TsTypeAnnotation;
+  typeParams: TsTypeParameterDeclaration;
 }
 
 export interface TsIndexSignature extends Node, HasSpan {
@@ -1718,7 +1718,7 @@ export type TsFnParameter = Identifier | RestElement | ObjectPattern;
 export interface TsFunctionType extends Node, HasSpan {
   type: "TsFunctionType";
 
-  typeParams?: TsTypeParameterDeclaration;
+  typeParams: TsTypeParameterDeclaration;
   typeAnnotation: TsTypeAnnotation;
 }
 
@@ -1727,7 +1727,7 @@ export interface TsConstructorType extends Node, HasSpan {
 
   params: TsFnParameter[];
 
-  typeParams?: TsTypeParameterDeclaration;
+  typeParams: TsTypeParameterDeclaration;
   typeAnnotation: TsTypeAnnotation;
 }
 
@@ -1735,7 +1735,7 @@ export interface TsTypeReference extends Node, HasSpan {
   type: "TsTypeReference";
 
   typeName: TsEntityName;
-  typeParams?: TsTypeParameterInstantiation;
+  typeParams: TsTypeParameterInstantiation;
 }
 
 export interface TsTypePredicate extends Node, HasSpan {
@@ -1842,10 +1842,10 @@ export type TruePlusMinus = true | "+" | "-";
 export interface TsMappedType extends Node, HasSpan {
   type: "TsMappedType";
 
-  readonly?: TruePlusMinus;
+  readonly: TruePlusMinus;
   typeParam: TsTypeParameter;
-  optional?: TruePlusMinus;
-  typeAnnotation?: TsType;
+  optional: TruePlusMinus;
+  typeAnnotation: TsType;
 }
 
 export interface TsLiteralType extends Node, HasSpan {
