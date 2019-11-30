@@ -1,4 +1,4 @@
-const swc = require("../../lib/");
+const swc = require("../../lib");
 const Visitor = require("../../lib/Visitor").default;
 
 {
