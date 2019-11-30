@@ -1,4 +1,4 @@
-const swc = require("../lib/index");
+const swc = require("../");
 
 it("should emit _interopRequireDefault", () => {
   const out = swc.transformSync('import foo from "foo"', {

@@ -1,4 +1,4 @@
-const swc = require("../../lib/index");
+const swc = require("../../");
 
 it("should work asynchronously", async () => {
   const m = await swc.parse(`class Foo {}`);

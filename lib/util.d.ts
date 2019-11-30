@@ -1,1 +1,1 @@
-export function wrapNativeSuper(cls: any): any;
+export declare function wrapNativeSuper(Class: any): any;

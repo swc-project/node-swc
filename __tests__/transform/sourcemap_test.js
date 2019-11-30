@@ -1,4 +1,4 @@
-const swc = require('../../lib/index'),
+const swc = require('../../'),
     validate = require('sourcemap-validator'),
     sourceMap = require('source-map');
 
