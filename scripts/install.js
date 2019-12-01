@@ -119,6 +119,11 @@ function checkAndDownloadBinary() {
     console.log("Skipping downloading binaries on CI builds");
     return;
   }
+  if (process.env.npm_config_build_from_source) {
+    console.info("Building swc from source code");
+    exit(1);
+    return;
+  }
 
   var cachedBinary = swc.getCachedBinary(),
     cachePath = swc.getBinaryCachePath(),
