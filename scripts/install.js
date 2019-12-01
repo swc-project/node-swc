@@ -121,7 +121,7 @@ function checkAndDownloadBinary() {
   }
   if (process.env.npm_config_build_from_source) {
     console.info("Building swc from source code");
-    exit(1);
+    process.exit(1);
     return;
   }
 
