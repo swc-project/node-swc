@@ -24,10 +24,10 @@ dependencies = [
 [[package]]
 name = "ast_node"
 version = "0.5.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "darling 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc_macros_common 0.3.0 (git+https://github.com/swc-project/swc.git)",
@@ -184,9 +184,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "enum_kind"
 version = "0.2.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc_macros_common 0.3.0 (git+https://github.com/swc-project/swc.git)",
  "syn 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -563,7 +563,7 @@ dependencies = [
 
 [[package]]
 name = "pmutil"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -918,9 +918,9 @@ dependencies = [
 [[package]]
 name = "string_enum"
 version = "0.3.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc_macros_common 0.3.0 (git+https://github.com/swc-project/swc.git)",
@@ -935,7 +935,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "swc"
 version = "0.1.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "chashmap 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -954,7 +954,7 @@ dependencies = [
 [[package]]
 name = "swc_atoms"
 version = "0.2.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "string_cache 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "string_cache_codegen 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -963,7 +963,7 @@ dependencies = [
 [[package]]
 name = "swc_common"
 version = "0.4.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "ast_node 0.5.0 (git+https://github.com/swc-project/swc.git)",
  "atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -983,7 +983,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_ast"
 version = "0.10.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "enum_kind 0.2.0 (git+https://github.com/swc-project/swc.git)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -995,7 +995,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_codegen"
 version = "0.8.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hashbrown 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1009,9 +1009,9 @@ dependencies = [
 [[package]]
 name = "swc_ecma_codegen_macros"
 version = "0.4.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc_macros_common 0.3.0 (git+https://github.com/swc-project/swc.git)",
@@ -1021,7 +1021,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_parser"
 version = "0.12.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "either 1.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum_kind 0.2.0 (git+https://github.com/swc-project/swc.git)",
@@ -1040,9 +1040,9 @@ dependencies = [
 [[package]]
 name = "swc_ecma_parser_macros"
 version = "0.4.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "swc_macros_common 0.3.0 (git+https://github.com/swc-project/swc.git)",
@@ -1052,7 +1052,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_transforms"
 version = "0.2.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "Inflector 0.11.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "chashmap 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1075,7 +1075,7 @@ dependencies = [
 [[package]]
 name = "swc_ecmascript"
 version = "0.1.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
  "swc_ecma_ast 0.10.0 (git+https://github.com/swc-project/swc.git)",
  "swc_ecma_codegen 0.8.0 (git+https://github.com/swc-project/swc.git)",
@@ -1086,9 +1086,9 @@ dependencies = [
 [[package]]
 name = "swc_macros_common"
 version = "0.3.0"
-source = "git+https://github.com/swc-project/swc.git#776e014a111b0c154d18fde7d9580cb9bbed0efd"
+source = "git+https://github.com/swc-project/swc.git#b3a2ee8e9b7a108724df03a95383c587bdf0a161"
 dependencies = [
- "pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1282,7 +1282,7 @@ dependencies = [
 "checksum percent-encoding 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
 "checksum phf_generator 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "17367f0cc86f2d25802b2c26ee58a7b23faeccf78a396094c13dced0d0182526"
 "checksum phf_shared 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c00cf8b9eafe68dde5e9eaa2cef8ee84a9336a47d566ec55ca16589633b65af7"
-"checksum pmutil 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "5f4ddd45cd63903584eb36ccefc6d1ecc21f0fe030c237cb24e80479a52d2803"
+"checksum pmutil 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "34bb7e08403bca42ed3f89540b2bafa887c6a616f9515833f360487050b458af"
 "checksum ppv-lite86 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "74490b50b9fbe561ac330df47c08f3f33073d2d00c150f719147d7c54522fa1b"
 "checksum precomputed-hash 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 "checksum proc-macro-hack 0.5.11 (registry+https://github.com/rust-lang/crates.io-index)" = "ecd45702f76d6d3c75a80564378ae228a85f0b59d2f3ed43c91b4a69eb2ebfc5"
