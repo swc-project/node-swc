@@ -23,6 +23,11 @@ environment:
       NODE_ABI: "57"
       NODE_VERSION: "8.15.0"
 
+    - platform: x64
+      SWC_NAME: win32-x64
+      NODE_ABI: "79"
+      NODE_VERSION: "13.3.0"
+
 install:
   - curl -sSf -o rustup-init.exe https://win.rustup.rs
   - rustup-init.exe -y --default-toolchain none
