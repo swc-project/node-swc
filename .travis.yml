@@ -56,6 +56,7 @@ cache:
 #   - rm -rf /home/travis/.cargo/registry
 
 script:
+  - travis_wait 30 bash ./scripts/ci/build.sh 13.3.0 79
   - travis_wait 30 bash ./scripts/ci/build.sh 12.11.0 72
   - travis_wait 30 bash ./scripts/ci/build.sh 11.6.0 67
   - travis_wait 30 bash ./scripts/ci/build.sh 10.15.0 64
@@ -70,6 +71,7 @@ deploy:
     - $SWC_NAME-64.node
     - $SWC_NAME-67.node
     - $SWC_NAME-72.node
+    - $SWC_NAME-79.node
   skip_cleanup: true
   on:
     tags: true
@@ -82,6 +84,15 @@ matrix:
 
     # - os: windows
     #   env: SWC_NAME=win32-x64
+
+    - os: linux
+      env:
+        - SWC_NAME=linux-x64
+        - NODE_ABI=79
+      install:
+        - ./scripts/ci/linux/start-docker.sh 13.3.0 79 13.x
+      script:
+        - travis_wait 30 docker exec target-79 sh ./scripts/ci/linux/build.sh 79
 
     - os: linux
       env:
