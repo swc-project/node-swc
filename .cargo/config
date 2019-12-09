@@ -12,19 +12,19 @@ rustflags = [
 rustflags = [
     "--cfg", "procmacro2_semver_exempt",
     "-Z", "thinlto=no",
-    "-Clinker-plugin-lto"
+    "-Clto"
 ]
 
 [target.x86_64-pc-windows-gnu]
 rustflags = [
     "--cfg", "procmacro2_semver_exempt",
     "-Z", "thinlto=no",
-    "-Clinker-plugin-lto"
+    "-Clto"
 ]
 
 [target.x86_64-pc-windows-msvc]
 rustflags = [
     "--cfg", "procmacro2_semver_exempt",
     "-Z", "thinlto=no",
-    "-Clinker-plugin-lto"
+    "-Clto"
 ]
