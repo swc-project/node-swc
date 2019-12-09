@@ -31,5 +31,5 @@ serde = { version = "1", features = ["derive"] }
 lto = true
 
 [profile.release]
-# lto = true
+lto = true
 codegen-units = 1
