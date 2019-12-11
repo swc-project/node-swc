@@ -49,5 +49,5 @@ it("should work with amd and expternal helpers", () => {
     `define('a', ['@swc/helpers'], function(swcHelpers) {`
   );
   expect(out.code).toContain(`swcHelpers.classCallCheck(this, Foo);`);
-  expect(out.code).toContain(`swcHelpers.inherits(Bar, _Foo);`);
+  expect(out.code).toContain(`swcHelpers.inherits(Bar, Foo);`);
 });

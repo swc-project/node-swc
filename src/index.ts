@@ -1,4 +1,12 @@
-import { Plugin, ParseOptions, Module, Output, Options } from "./types";
+import {
+  Plugin,
+  ParseOptions,
+  Module,
+  Output,
+  Options,
+  Script,
+  Program
+} from "./types";
 export * from "./types";
 import { wrapNativeSuper } from "./util";
 
@@ -24,7 +32,12 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
     super();
   }
 
-  parse(src: string, options?: ParseOptions): Promise<Module> {
+  parse(
+    src: string,
+    options: ParseOptions & { isModule: false }
+  ): Promise<Script>;
+  parse(src: string, options?: ParseOptions): Promise<Module>;
+  parse(src: string, options?: ParseOptions): Promise<Program> {
     options = options || { syntax: "ecmascript" };
     options.syntax = options.syntax || "ecmascript";
 
@@ -36,13 +49,20 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
     });
   }
 
-  parseSync(src: string, options?: ParseOptions): Module {
+  parseSync(src: string, options: ParseOptions & { isModule: false }): Script;
+  parseSync(src: string, options?: ParseOptions): Module;
+  parseSync(src: string, options?: ParseOptions): Program {
     options = options || { syntax: "ecmascript" };
     options.syntax = options.syntax || "ecmascript";
     return JSON.parse(super.parseSync(src, options));
   }
 
-  parseFile(path: string, options?: ParseOptions): Promise<Module> {
+  parseFile(
+    path: string,
+    options: ParseOptions & { isModule: false }
+  ): Promise<Script>;
+  parseFile(path: string, options?: ParseOptions): Promise<Module>;
+  parseFile(path: string, options?: ParseOptions): Promise<Program> {
     options = options || { syntax: "ecmascript" };
     options.syntax = options.syntax || "ecmascript";
 
@@ -54,7 +74,12 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
     });
   }
 
-  parseFileSync(path: string, options?: ParseOptions): Module {
+  parseFileSync(
+    path: string,
+    options: ParseOptions & { isModule: false }
+  ): Script;
+  parseFileSync(path: string, options?: ParseOptions): Module;
+  parseFileSync(path: string, options?: ParseOptions): Program {
     options = options || { syntax: "ecmascript" };
     options.syntax = options.syntax || "ecmascript";
     return JSON.parse(super.parseFileSync(path, options));
@@ -64,7 +89,7 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
    * Note: this method should be invoked on the compiler instance used
    *  for `parse()` / `parseSync()`.
    */
-  print(m: Module, options?: Options): Promise<Output> {
+  print(m: Program, options?: Options): Promise<Output> {
     options = options || {};
 
     return new Promise((resolve, reject) => {
@@ -79,13 +104,13 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
    * Note: this method should be invoked on the compiler instance used
    *  for `parse()` / `parseSync()`.
    */
-  printSync(m: Module, options?: Options): Output {
+  printSync(m: Program, options?: Options): Output {
     options = options || {};
 
     return super.printSync(JSON.stringify(m), options);
   }
 
-  async transform(src: string | Module, options?: Options): Promise<Output> {
+  async transform(src: string | Program, options?: Options): Promise<Output> {
     const isModule = typeof src !== "string";
     options = options || {};
     options.jsc = options.jsc || {};
@@ -113,7 +138,7 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
     });
   }
 
-  transformSync(src: string | Module, options?: Options): Output {
+  transformSync(src: string | Program, options?: Options): Output {
     const isModule = typeof src !== "string";
     options = options || {};
     options.jsc = options.jsc || {};
@@ -174,41 +199,67 @@ export class Compiler extends wrapNativeSuper(native.Compiler) {
 
 const compiler = new Compiler();
 
-export function parse(src: string, options?: ParseOptions): Promise<Module> {
+export function parse(
+  src: string,
+  options: ParseOptions & { isModule: false }
+): Promise<Script>;
+export function parse(src: string, options?: ParseOptions): Promise<Module>;
+export function parse(src: string, options?: ParseOptions): Promise<Program> {
   return compiler.parse(src, options);
 }
 
-export function parseSync(src: string, options?: ParseOptions): Module {
+export function parseSync(
+  src: string,
+  options: ParseOptions & { isModule: false }
+): Script;
+export function parseSync(src: string, options?: ParseOptions): Module;
+export function parseSync(src: string, options?: ParseOptions): Program {
   return compiler.parseSync(src, options);
 }
 
 export function parseFile(
   path: string,
+  options: ParseOptions & { isModule: false }
+): Promise<Script>;
+export function parseFile(
+  path: string,
   options?: ParseOptions
-): Promise<Module> {
+): Promise<Module>;
+export function parseFile(
+  path: string,
+  options?: ParseOptions
+): Promise<Program> {
   return compiler.parseFile(path, options);
 }
 
-export function parseFileSync(path: string, options?: ParseOptions): Module {
+export function parseFileSync(
+  path: string,
+  options: ParseOptions & { isModule: false }
+): Script;
+export function parseFileSync(path: string, options?: ParseOptions): Module;
+export function parseFileSync(path: string, options?: ParseOptions): Program {
   return compiler.parseFileSync(path, options);
 }
 
-export function print(m: Module, options?: Options): Promise<Output> {
+export function print(m: Program, options?: Options): Promise<Output> {
   return compiler.print(m, options);
 }
 
-export function printSync(m: Module, options?: Options): Output {
+export function printSync(m: Program, options?: Options): Output {
   return compiler.printSync(m, options);
 }
 
 export function transform(
-  src: string | Module,
+  src: string | Program,
   options?: Options
 ): Promise<Output> {
   return compiler.transform(src, options);
 }
 
-export function transformSync(src: string | Module, options?: Options): Output {
+export function transformSync(
+  src: string | Program,
+  options?: Options
+): Output {
   return compiler.transformSync(src, options);
 }
 

@@ -1,15 +1,21 @@
 export interface Plugin {
-  (module: Module): Module;
+  (module: Program): Program;
 }
 
 export type ParseOptions = ParserConfig & {
   comments?: boolean;
+  script?: boolean;
 };
 
 /**
  * Programmatic options.
  */
 export interface Options extends Config {
+  /**
+   * If true, a file is parsed as a script instead of module.
+   */
+  script?: boolean;
+
   /**
    * The working directory that all paths in the programmatic
    * options will be resolved relative to.
@@ -194,6 +200,8 @@ export interface Config {
 }
 
 export interface JscConfig {
+  loose?: boolean;
+
   /**
    * Defaults to EsParserConfig
    */
@@ -460,7 +468,7 @@ export interface Output {
   map?: string;
 }
 
-export interface MatchPattern { }
+export interface MatchPattern {}
 
 // -------------------------------
 // ---------- Ast nodes ----------
@@ -672,7 +680,7 @@ export type Expression =
   | PrivateName
   | Invalid;
 
-interface ExpressionBase extends Node, HasSpan { }
+interface ExpressionBase extends Node, HasSpan {}
 
 export interface ThisExpression extends ExpressionBase {
   type: "ThisExpression";
@@ -1204,6 +1212,8 @@ interface HasInterpreter {
    */
   interpreter: string;
 }
+
+export type Program = Module | Script;
 
 export interface Module extends Node, HasSpan, HasInterpreter {
   type: "Module";

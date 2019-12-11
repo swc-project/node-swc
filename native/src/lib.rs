@@ -25,7 +25,7 @@ use swc::{
         SourceMap, Spanned,
     },
     config::{Options, ParseOptions},
-    ecmascript::ast::Module,
+    ecmascript::ast::Program,
     error::Error,
     Compiler, TransformOutput,
 };
@@ -49,7 +49,7 @@ fn init(_cx: MethodContext<JsUndefined>) -> NeonResult<ArcCompiler> {
 #[derive(Debug)]
 enum Input {
     /// json string
-    Module(String),
+    Program(String),
     /// Raw source code.
     Source(Arc<SourceFile>),
 }
@@ -93,8 +93,8 @@ impl Task for TransformTask {
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         match self.input {
-            Input::Module(ref s) => {
-                let m: Module = serde_json::from_str(&s).expect("failed to deserialize Module");
+            Input::Program(ref s) => {
+                let m: Program = serde_json::from_str(&s).expect("failed to deserialize Program");
                 let loc = self.c.cm.lookup_char_pos(m.span().lo());
                 let fm = loc.file;
                 print_js(&self.c, &Default::default(), &m, fm, false, false)
@@ -181,7 +181,8 @@ where
         let guard = cx.lock();
         let c = this.borrow(&guard);
         if is_module.value() {
-            let m: Module = serde_json::from_str(&s.value()).expect("failed to deserialize Module");
+            let m: Program =
+                serde_json::from_str(&s.value()).expect("failed to deserialize Program");
             let loc = c.cm.lookup_char_pos(m.span().lo());
             let fm = loc.file;
             print_js(&c, &Default::default(), &m, fm, false, false)
@@ -197,7 +198,7 @@ where
 fn transform(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     schedule_transform(cx, |c, src, is_module, options| {
         let input = if is_module {
-            Input::Module(src)
+            Input::Program(src)
         } else {
             Input::Source(c.cm.new_source_file(
                 if options.filename.is_empty() {
@@ -266,19 +267,19 @@ struct ParseFileTask {
 
 fn complete_parse<'a>(
     mut cx: impl Context<'a>,
-    result: Result<Module, Error>,
+    result: Result<Program, Error>,
     c: &Compiler,
 ) -> JsResult<'a, JsValue> {
     c.run(|| match result {
-        Ok(module) => Ok(cx
-            .string(serde_json::to_string(&module).expect("failed to serialize Module"))
+        Ok(program) => Ok(cx
+            .string(serde_json::to_string(&program).expect("failed to serialize Program"))
             .upcast()),
         Err(err) => cx.throw_error(err.to_string()),
     })
 }
 
 impl Task for ParseTask {
-    type Output = Module;
+    type Output = Program;
     type Error = Error;
     type JsEvent = JsValue;
 
@@ -288,6 +289,7 @@ impl Task for ParseTask {
         self.c.parse_js(
             self.fm.clone(),
             self.options.syntax,
+            self.options.is_module,
             if self.options.comments {
                 Some(&comments)
             } else {
@@ -306,7 +308,7 @@ impl Task for ParseTask {
 }
 
 impl Task for ParseFileTask {
-    type Output = Module;
+    type Output = Program;
     type Error = Error;
     type JsEvent = JsValue;
 
@@ -321,6 +323,7 @@ impl Task for ParseFileTask {
         self.c.parse_js(
             fm,
             self.options.syntax,
+            self.options.is_module,
             if self.options.comments {
                 Some(&comments)
             } else {
@@ -375,12 +378,13 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         let options_arg = cx.argument::<JsValue>(1)?;
         let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-        let module = {
+        let program = {
             let fm = c.cm.new_source_file(FileName::Anon, src.value());
             let comments = Default::default();
             c.parse_js(
                 fm,
                 options.syntax,
+                options.is_module,
                 if options.comments {
                     Some(&comments)
                 } else {
@@ -389,7 +393,7 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             )
         };
 
-        complete_parse(cx, module, &c)
+        complete_parse(cx, program, &c)
     })
 }
 
@@ -406,15 +410,16 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         let options_arg = cx.argument::<JsValue>(1)?;
         let options: ParseOptions = neon_serde::from_value(&mut cx, options_arg)?;
 
-        let module = {
+        let program = {
             let fm =
                 c.cm.load_file(Path::new(&path.value()))
-                    .expect("failed to read module file");
+                    .expect("failed to read program file");
             let comments = Default::default();
 
             c.parse_js(
                 fm,
                 options.syntax,
+                options.is_module,
                 if options.comments {
                     Some(&comments)
                 } else {
@@ -423,7 +428,7 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             )
         };
 
-        complete_parse(cx, module, &c)
+        complete_parse(cx, program, &c)
     })
 }
 
@@ -453,7 +458,7 @@ fn parse_file(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
 struct PrintTask {
     c: Arc<Compiler>,
-    module: Module,
+    program: Program,
     options: Options,
 }
 
@@ -462,12 +467,12 @@ impl Task for PrintTask {
     type Error = Error;
     type JsEvent = JsValue;
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let loc = self.c.cm.lookup_char_pos(self.module.span().lo());
+        let loc = self.c.cm.lookup_char_pos(self.program.span().lo());
         let fm = loc.file;
         let comments = Default::default();
 
         self.c.print(
-            &self.module,
+            &self.program,
             fm,
             &comments,
             self.options.source_maps.is_some(),
@@ -490,9 +495,9 @@ impl Task for PrintTask {
 }
 
 fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
-    let module = cx.argument::<JsString>(0)?;
-    let module: Module =
-        serde_json::from_str(&module.value()).expect("failed to deserialize Module");
+    let program = cx.argument::<JsString>(0)?;
+    let program: Program =
+        serde_json::from_str(&program.value()).expect("failed to deserialize Program");
 
     let options = cx.argument::<JsValue>(1)?;
     let options: Options = neon_serde::from_value(&mut cx, options)?;
@@ -506,7 +511,7 @@ fn print(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
         PrintTask {
             c: c.clone(),
-            module,
+            program,
             options,
         }
         .schedule(callback)
@@ -524,19 +529,19 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         c = compiler.clone();
     }
     c.run(|| {
-        let module = cx.argument::<JsString>(0)?;
-        let module: Module =
-            serde_json::from_str(&module.value()).expect("failed to deserialize Module");
+        let program = cx.argument::<JsString>(0)?;
+        let program: Program =
+            serde_json::from_str(&program.value()).expect("failed to deserialize Program");
 
         let options = cx.argument::<JsValue>(1)?;
         let options: Options = neon_serde::from_value(&mut cx, options)?;
 
         let result = {
-            let loc = c.cm.lookup_char_pos(module.span().lo());
+            let loc = c.cm.lookup_char_pos(program.span().lo());
             let fm = loc.file;
             let comments = Default::default();
             c.print(
-                &module,
+                &program,
                 fm,
                 &comments,
                 options.source_maps.is_some(),
@@ -550,12 +555,12 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 fn print_js(
     c: &Compiler,
     comments: &Comments,
-    module: &Module,
+    program: &Program,
     fm: Arc<SourceFile>,
     source_map: bool,
     minify: bool,
 ) -> Result<TransformOutput, Error> {
-    c.print(&module, fm, comments, source_map, minify)
+    c.print(&program, fm, comments, source_map, minify)
 }
 
 pub type ArcCompiler = Arc<Compiler>;

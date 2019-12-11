@@ -151,12 +151,28 @@ import {
   GetterProperty,
   AssignmentProperty,
   ComputedPropName,
-  Arugment
+  Arugment,
+  Program,
+  Script
 } from "./types";
 
 export default class Visitor {
+  visitProgram(n: Program): Program {
+    switch (n.type) {
+      case "Module":
+        return this.visitModule(n);
+      case "Script":
+        return this.visitScript(n);
+    }
+  }
+
   visitModule(m: Module): Module {
     m.body = this.visitModuleItems(m.body);
+    return m;
+  }
+
+  visitScript(m: Script): Script {
+    m.body = this.visitStatements(m.body);
     return m;
   }
 
@@ -737,9 +753,7 @@ export default class Visitor {
     return decl;
   }
 
-  visitClassBody(
-    members: ClassMember[]
-  ): ClassMember[] {
+  visitClassBody(members: ClassMember[]): ClassMember[] {
     return members.map(this.visitClassMember.bind(this));
   }
 
