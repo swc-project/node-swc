@@ -1695,6 +1695,7 @@ export type TsType =
   | TsIndexedAccessType
   | TsMappedType
   | TsLiteralType
+  | TsImportType
   | TsTypePredicate;
 
 export type TsFnOrConstructorType = TsFunctionType | TsConstructorType;
