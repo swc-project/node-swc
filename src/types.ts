@@ -1757,14 +1757,22 @@ export interface TsTypePredicate extends Node, HasSpan {
 
 export type TsThisTypeOrIdent = TsThisType | Identifier;
 
+export interface TsImportType extends Node, HasSpan {
+  argument: StringLiteral;
+  qualifier?: TsEntityName;
+  typeParameters?: TsTypeParameterInstantiation;
+}
+
 /**
  * `typeof` operator
  */
 export interface TsTypeQuery extends Node, HasSpan {
   type: "TsTypeQuery";
 
-  exprName: TsEntityName;
+  exprName: TsTypeQueryExpr;
 }
+
+export type TsTypeQueryExpr = TsEntityName | TsImportType;
 
 export interface TsTypeLiteral extends Node, HasSpan {
   type: "TsTypeLiteral";
