@@ -183,6 +183,8 @@ export interface Options extends Config {
   sourceRoot?: string;
 
   plugin?: Plugin;
+
+  isModule?: boolean;
 }
 
 export interface CallerOptions {
