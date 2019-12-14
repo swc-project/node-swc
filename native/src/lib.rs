@@ -288,6 +288,7 @@ impl Task for ParseTask {
 
         self.c.parse_js(
             self.fm.clone(),
+            self.options.target,
             self.options.syntax,
             self.options.is_module,
             if self.options.comments {
@@ -322,6 +323,7 @@ impl Task for ParseFileTask {
 
         self.c.parse_js(
             fm,
+            self.options.target,
             self.options.syntax,
             self.options.is_module,
             if self.options.comments {
@@ -383,6 +385,7 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             let comments = Default::default();
             c.parse_js(
                 fm,
+                options.target,
                 options.syntax,
                 options.is_module,
                 if options.comments {
@@ -418,6 +421,7 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
             c.parse_js(
                 fm,
+                options.target,
                 options.syntax,
                 options.is_module,
                 if options.comments {

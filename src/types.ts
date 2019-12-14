@@ -5,6 +5,10 @@ export interface Plugin {
 export type ParseOptions = ParserConfig & {
   comments?: boolean;
   script?: boolean;
+  /**
+   * Defaults to es3.
+   */
+  target?: JscTarget;
 };
 
 /**
