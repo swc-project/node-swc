@@ -1408,8 +1408,13 @@ export interface BlockStatement extends Node, HasSpan {
   stmts: Statement[];
 }
 
+export interface ExpressionStatement extends Node, HasSpan {
+  type: "ExpressionStatement";
+  expression: Expression;
+}
+
 export type Statement =
-  | Expression
+  | ExpressionStatement
   | BlockStatement
   | EmptyStatement
   | DebuggerStatement

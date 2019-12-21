@@ -153,7 +153,8 @@ import {
   ComputedPropName,
   Arugment,
   Program,
-  Script
+  Script,
+  ExpressionStatement
 } from "./types";
 
 export default class Visitor {
@@ -456,9 +457,11 @@ export default class Visitor {
         return this.visitWhileStatement(stmt);
       case "WithStatement":
         return this.visitWithStatement(stmt);
+      case "ExpressionStatement":
+        return this.visitExpressionStatement(stmt);
 
       default:
-        return this.visitExpressionStatement(stmt);
+        throw new Error(`Unknown statement type: ` + (stmt as any).type);
     }
   }
 
@@ -982,8 +985,9 @@ export default class Visitor {
     return n;
   }
 
-  visitExpressionStatement(expr: Expression): Statement {
-    return this.visitExpression(expr);
+  visitExpressionStatement(stmt: ExpressionStatement): Statement {
+    stmt.expression = this.visitExpression(stmt.expression);
+    return stmt;
   }
 
   visitContinueStatement(stmt: ContinueStatement): Statement {
