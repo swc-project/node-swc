@@ -1158,10 +1158,6 @@ export default class Visitor {
   }
 
   visitRegExpLiteral(n: RegExpLiteral): Expression {
-    n.pattern = this.visitStringLiteral(n.pattern);
-    if (n.flags) {
-      n.flags = this.visitStringLiteral(n.flags);
-    }
     return n;
   }
 
