@@ -1068,11 +1068,9 @@ export interface NullLiteral extends Node, HasSpan {
 export interface RegExpLiteral extends Node, HasSpan {
   type: "RegExpLiteral";
 
-  pattern: StringLiteral;
-  flags: RegexFlags;
+  pattern: string;
+  flags: string;
 }
-
-export type RegexFlags = StringLiteral;
 
 export interface NumericLiteral extends Node, HasSpan {
   type: "NumericLiteral";
