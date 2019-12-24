@@ -97,3 +97,16 @@ it("(async) should handel dynmic import", async () => {
 
   expect(out.code).toBe(`import('foo');`);
 });
+
+it("should handle nullish coalescing", async () => {
+  const out = await swc.transform("a ?? 'foo'", {
+    jsc: {
+      parser: {
+        syntax: "ecmascript",
+        nullishCoalescing: true
+      }
+    }
+  });
+
+  expect(out.code).toBe(`a !== null && a !== void 0 ? a : 'foo'`);
+});

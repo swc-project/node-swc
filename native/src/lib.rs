@@ -284,18 +284,12 @@ impl Task for ParseTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let comments = Default::default();
-
         self.c.parse_js(
             self.fm.clone(),
             self.options.target,
             self.options.syntax,
             self.options.is_module,
-            if self.options.comments {
-                Some(&comments)
-            } else {
-                None
-            },
+            self.options.comments,
         )
     }
 
@@ -314,7 +308,6 @@ impl Task for ParseFileTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let comments = Default::default();
         let fm = self
             .c
             .cm
@@ -326,11 +319,7 @@ impl Task for ParseFileTask {
             self.options.target,
             self.options.syntax,
             self.options.is_module,
-            if self.options.comments {
-                Some(&comments)
-            } else {
-                None
-            },
+            self.options.comments,
         )
     }
 
@@ -382,17 +371,12 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
 
         let program = {
             let fm = c.cm.new_source_file(FileName::Anon, src.value());
-            let comments = Default::default();
             c.parse_js(
                 fm,
                 options.target,
                 options.syntax,
                 options.is_module,
-                if options.comments {
-                    Some(&comments)
-                } else {
-                    None
-                },
+                options.comments,
             )
         };
 
@@ -417,18 +401,13 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             let fm =
                 c.cm.load_file(Path::new(&path.value()))
                     .expect("failed to read program file");
-            let comments = Default::default();
 
             c.parse_js(
                 fm,
                 options.target,
                 options.syntax,
                 options.is_module,
-                if options.comments {
-                    Some(&comments)
-                } else {
-                    None
-                },
+                options.comments,
             )
         };
 

@@ -288,6 +288,10 @@ export interface EsParserConfig {
    * Defaults to `false`
    */
   dynamicImport?: boolean;
+  /**
+   * Defaults to `false`
+   */
+  nullishCoalescing?: boolean;
 }
 
 /**
@@ -474,7 +478,7 @@ export interface Output {
   map?: string;
 }
 
-export interface MatchPattern {}
+export interface MatchPattern { }
 
 // -------------------------------
 // ---------- Ast nodes ----------
@@ -684,9 +688,18 @@ export type Expression =
   | TsTypeCastExpression
   | TsAsExpression
   | PrivateName
+  | OptionalChainingExpression
   | Invalid;
 
-interface ExpressionBase extends Node, HasSpan {}
+interface ExpressionBase extends Node, HasSpan { }
+
+export interface OptionalChainingExpression extends ExpressionBase {
+  type: "OptionalChainingExpression";
+  /**
+   * Call expression or member expression.
+   */
+  expr: Expression
+}
 
 export interface ThisExpression extends ExpressionBase {
   type: "ThisExpression";
@@ -1257,7 +1270,8 @@ export type BinaryOperator =
   | "||"
   | "&&"
   | "in"
-  | "instanceof";
+  | "instanceof"
+  | "??";
 
 export type AssignmentOperator =
   | "="

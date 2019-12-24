@@ -154,7 +154,8 @@ import {
   Arugment,
   Program,
   Script,
-  ExpressionStatement
+  ExpressionStatement,
+  OptionalChainingExpression
 } from "./types";
 
 export default class Visitor {
@@ -1075,9 +1076,15 @@ export default class Visitor {
         return this.visitUpdateExpression(n);
       case "YieldExpression":
         return this.visitYieldExpression(n);
+      case "OptionalChainingExpression":
+        return this.visitOptionalChainingExpression(n);
       case "Invalid":
         return n;
     }
+  }
+  visitOptionalChainingExpression(n: OptionalChainingExpression): Expression {
+    n.expr = this.visitExpression(n.expr);
+    return n
   }
 
   visitAssignmentExpression(n: AssignmentExpression): Expression {
