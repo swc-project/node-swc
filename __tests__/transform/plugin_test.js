@@ -104,7 +104,7 @@ const Visitor = require("../../Visitor").default;
     swc.transformSync(src, {
       plugin: m => {
         let v = new Visitor();
-        return v.visitModule(m);
+        return v.visitProgram(m);
       }
     });
   });
