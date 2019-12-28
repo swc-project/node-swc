@@ -210,7 +210,7 @@ export interface Config {
  * Configuration ported from babel-preset-env
  */
 export interface EnvConfig {
-  mode?: "usage" | "mode";
+  mode?: "usage" | "entry";
   debug?: boolean;
   dynamicImport?: boolean;
 
