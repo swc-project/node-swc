@@ -95,7 +95,7 @@ it("(async) should handel dynmic import", async () => {
     }
   });
 
-  expect(out.code).toBe(`import('foo');`);
+  expect(out.code.replace(/;/g, "").trim()).toBe(`import('foo')`);
 });
 
 it("should handle nullish coalescing", async () => {
