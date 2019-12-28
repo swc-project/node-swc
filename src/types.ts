@@ -200,9 +200,46 @@ export interface CallerOptions {
  * .swcrc
  */
 export interface Config {
+  env?: EnvConfig;
   jsc?: JscConfig;
   module?: ModuleConfig;
   minify?: boolean;
+}
+
+/**
+ * Configuration ported from babel-preset-env
+ */
+export interface EnvConfig {
+  mode?: "usage" | "mode";
+  debug?: boolean;
+  dynamicImport?: boolean;
+
+  loose?: boolean;
+
+  /// Skipped es features.
+  ///
+  /// e.g.)
+  ///  - `core-js/modules/foo`
+  skip?: string[];
+
+  include?: string[];
+
+  exclude?: string[];
+
+  /**
+   * The version of the used core js.
+   *
+   */
+  coreJs?: string;
+
+  targets?: any;
+
+  shippedProposals?: boolean;
+
+  /**
+   * Enable all trnasforms
+   */
+  forceAllTransforms?: boolean;
 }
 
 export interface JscConfig {
@@ -478,7 +515,7 @@ export interface Output {
   map?: string;
 }
 
-export interface MatchPattern { }
+export interface MatchPattern {}
 
 // -------------------------------
 // ---------- Ast nodes ----------
@@ -691,14 +728,14 @@ export type Expression =
   | OptionalChainingExpression
   | Invalid;
 
-interface ExpressionBase extends Node, HasSpan { }
+interface ExpressionBase extends Node, HasSpan {}
 
 export interface OptionalChainingExpression extends ExpressionBase {
   type: "OptionalChainingExpression";
   /**
    * Call expression or member expression.
    */
-  expr: Expression
+  expr: Expression;
 }
 
 export interface ThisExpression extends ExpressionBase {
