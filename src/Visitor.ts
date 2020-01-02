@@ -942,7 +942,7 @@ export default class Visitor {
     n: TsExpressionWithTypeArguments
   ): TsExpressionWithTypeArguments {
     n.expression = this.visitTsEntityName(n.expression);
-    n.typeParams = this.visitTsTypeParameterInstantiation(n.typeParams);
+    n.typeArguments = this.visitTsTypeParameterInstantiation(n.typeArguments);
     return n;
   }
 
@@ -1084,7 +1084,7 @@ export default class Visitor {
   }
   visitOptionalChainingExpression(n: OptionalChainingExpression): Expression {
     n.expr = this.visitExpression(n.expr);
-    return n
+    return n;
   }
 
   visitAssignmentExpression(n: AssignmentExpression): Expression {

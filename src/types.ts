@@ -1959,7 +1959,7 @@ export interface TsExpressionWithTypeArguments extends Node, HasSpan {
   type: "TsExpressionWithTypeArguments";
 
   expression: TsEntityName;
-  typeParams?: TsTypeParameterInstantiation;
+  typeArguments?: TsTypeParameterInstantiation;
 }
 
 export interface TsTypeAliasDeclaration extends Node, HasSpan {
