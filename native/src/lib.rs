@@ -52,17 +52,13 @@ enum Input {
     Program(String),
     /// Raw source code.
     Source(Arc<SourceFile>),
+    /// File
+    File(PathBuf),
 }
 
 struct TransformTask {
     c: Arc<Compiler>,
     input: Input,
-    options: Options,
-}
-
-struct TransformFileTask {
-    c: Arc<Compiler>,
-    path: PathBuf,
     options: Options,
 }
 
@@ -99,6 +95,17 @@ impl Task for TransformTask {
                 let fm = loc.file;
                 print_js(&self.c, &Default::default(), &m, fm, false, false)
             }
+
+            Input::File(ref path) => {
+                let fm = self
+                    .c
+                    .cm
+                    .load_file(path)
+                    .map_err(|err| Error::FailedToReadModule { err })?;
+
+                process_js(&self.c, fm, &self.options)
+            }
+
             Input::Source(ref s) => process_js(&self.c, s.clone(), &self.options),
         }
     }
@@ -112,35 +119,10 @@ impl Task for TransformTask {
     }
 }
 
-impl Task for TransformFileTask {
-    type Output = TransformOutput;
-    type Error = Error;
-    type JsEvent = JsValue;
-
-    fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let fm = self
-            .c
-            .cm
-            .load_file(&self.path)
-            .map_err(|err| Error::FailedToReadModule { err })?;
-
-        process_js(&self.c, fm, &self.options)
-    }
-
-    fn complete(
-        self,
-        cx: TaskContext,
-        result: Result<Self::Output, Self::Error>,
-    ) -> JsResult<Self::JsEvent> {
-        complete_output(cx, result)
-    }
-}
-
 /// returns `compiler, (src / path), options, plugin, callback`
-fn schedule_transform<F, T>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
+fn schedule_transform<F>(mut cx: MethodContext<JsCompiler>, op: F) -> JsResult<JsValue>
 where
-    F: FnOnce(&Arc<Compiler>, String, bool, Options) -> T,
-    T: Task,
+    F: FnOnce(&Arc<Compiler>, String, bool, Options) -> TransformTask,
 {
     let c;
     let this = cx.this();
@@ -235,9 +217,9 @@ fn transform_file(cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
     schedule_transform(cx, |c, path, _, options| {
         let path = clean(&path);
 
-        TransformFileTask {
+        TransformTask {
             c: c.clone(),
-            path: path.into(),
+            input: Input::File(path.into()),
             options,
         }
     })
