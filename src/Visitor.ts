@@ -1244,6 +1244,7 @@ export default class Visitor {
     if (n.body) {
       n.body = this.visitBlockStatement(n.body);
     }
+    n.typeAnnotation = this.visitTsTypeAnnotation(n.typeAnnotation);
     return n;
   }
 

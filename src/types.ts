@@ -1426,6 +1426,8 @@ export interface AssignmentProperty extends Node {
 export interface GetterProperty extends PropBase, HasSpan {
   type: "GetterProperty";
 
+  typeAnnotation?: TsTypeAnnotation;
+
   body: BlockStatement;
 }
 
@@ -1821,7 +1823,7 @@ export type TsThisTypeOrIdent = TsThisType | Identifier;
 export interface TsImportType extends Node, HasSpan {
   argument: StringLiteral;
   qualifier?: TsEntityName;
-  typeParameters?: TsTypeParameterInstantiation;
+  typeArguments?: TsTypeParameterInstantiation;
 }
 
 /**
