@@ -1039,7 +1039,7 @@ export interface JSXAttribute extends Node, HasSpan {
 
   name: JSXAttributeName;
 
-  value?: Expression;
+  value?: JSXAttrValue;
 }
 
 export type JSXAttributeName = Identifier | JSXNamespacedName;
@@ -1813,6 +1813,8 @@ export interface TsTypeReference extends Node, HasSpan {
 
 export interface TsTypePredicate extends Node, HasSpan {
   type: "TsTypePredicate";
+
+  asserts: boolean;
 
   paramName: TsThisTypeOrIdent;
   typeAnnotation: TsTypeAnnotation;
