@@ -1,6 +1,6 @@
 language: shell
 sudo: false
-
+osx_image: xcode11.3
 services:
   - docker
 
