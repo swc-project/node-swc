@@ -111,3 +111,15 @@ it("should handle nullish coalescing", async () => {
   expect(out.code).toBe(`a !== null && a !== void 0 ? a : 'foo';
 `);
 });
+
+it("should handle for of statement in an async function", async () => {
+  const out = swc.transformSync(
+    `async function foo() {
+    for (let a of b) {
+    }
+  }`
+  );
+
+  expect(out.code).toBe(`a !== null && a !== void 0 ? a : 'foo';
+`);
+});
