@@ -23,6 +23,7 @@ npx neon build --release
 echo 'Verifying binding with jest...'
 npx jest __tests__/import_test.js
 
+strip -s native/index.node
 
 mv native/index.node linux-x64-$1.node
 ls -al .
