@@ -9,6 +9,8 @@
 ####################
 set -e
 
+sed "s/# lto/lto/" native/Cargo.toml -i
+
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
