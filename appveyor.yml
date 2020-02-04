@@ -3,30 +3,28 @@ environment:
   CARGO_INCREMENTAL: "0"
   RUSTFLAGS: --cfg procmacro2_semver_exempt --cfg parallel_queries
   matrix:
-    - platform: x64
-      SWC_NAME: win32-x64
+    - SWC_NAME: win32-x64
       NODE_ABI: "72"
       NODE_VERSION: "12.11.0"
 
-    - platform: x64
-      SWC_NAME: win32-x64
+    - SWC_NAME: win32-x64
       NODE_ABI: "67"
       NODE_VERSION: "11.6.0"
 
-    - platform: x64
-      SWC_NAME: win32-x64
+    - SWC_NAME: win32-x64
       NODE_ABI: "64"
       NODE_VERSION: "10.15.0"
 
-    - platform: x64
-      SWC_NAME: win32-x64
+    - SWC_NAME: win32-x64
       NODE_ABI: "57"
       NODE_VERSION: "8.15.0"
 
-    - platform: x64
-      SWC_NAME: win32-x64
+    - SWC_NAME: win32-x64
       NODE_ABI: "79"
       NODE_VERSION: "13.3.0"
+
+platform:
+  - x64
 
 install:
   - curl -sSf -o rustup-init.exe https://win.rustup.rs
