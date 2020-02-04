@@ -1,5 +1,6 @@
 os: Visual Studio 2015
 environment:
+  CARGO_BUILD_TARGET: x86_64-pc-windows-msvc
   CARGO_INCREMENTAL: "0"
   RUSTFLAGS: --cfg procmacro2_semver_exempt --cfg parallel_queries
   matrix:
