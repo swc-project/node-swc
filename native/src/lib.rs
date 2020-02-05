@@ -73,8 +73,6 @@ fn process_js(
     fm: Arc<SourceFile>,
     opts: &Options,
 ) -> Result<TransformOutput, Error> {
-    // let config = c.run(|| c.config_for_file(opts, &*fm))?;
-
     c.process_js_file(fm, opts)
 }
 

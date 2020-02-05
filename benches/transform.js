@@ -190,6 +190,11 @@ const PARSERS = [
 ];
 
 suite("transform", () => {
+  const wasm = require("../wasm/pkg/swc_wasm");
+  bench("wasm", () => {
+    wasm.transform(SOURCE);
+  });
+
   PARSERS.map(args => {
     const [name, requirePath, fn] = args;
     try {
