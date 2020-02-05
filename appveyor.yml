@@ -35,6 +35,7 @@ install:
   # - rustup default nightly
   # - rustup target add x86_64-pc-windows-msvc
   - rustup show
+  - rustup component list
   - rustc -V
   - cargo -V
   # Install nvm4w
