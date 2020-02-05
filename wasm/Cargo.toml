@@ -1,19 +1,12 @@
-[workspace]
-
 [package]
-name = "ffi"
+name = "swc-wasm"
 version = "0.1.0"
-authors = ["강동윤 <kdy1@outlook.kr>"]
-license = "MIT"
-build = "build.rs"
-exclude = ["artifacts.json", "index.node"]
+authors = ["강동윤 <kdy1997.dev@gmail.com>"]
+edition = "2018"
 
 [lib]
-name = "ffi"
 crate-type = ["cdylib"]
 
-[build-dependencies]
-neon-build = "0.3.3"
 
 [dependencies]
 serde_json = "1"

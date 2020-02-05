@@ -3,10 +3,6 @@
 #![feature(specialization)]
 #![recursion_limit = "2048"]
 
-extern crate failure;
-extern crate fxhash;
-extern crate hashbrown;
-extern crate lazy_static;
 extern crate neon;
 extern crate neon_serde;
 extern crate path_clean;

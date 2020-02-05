@@ -1,9 +1,11 @@
-native/target
+target/
 native/index.node
 native/artifacts.json
 **/*~
 **/node_modules
 **/.DS_Store
+
+pkg/
 
 yarn.lock
 package-lock.json
