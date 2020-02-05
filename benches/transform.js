@@ -117,6 +117,15 @@ module.exports = {
 
 const PARSERS = [
   [
+    "swc (wasm, es3)",
+    "../wasm/pkg/swc_wasm.js",
+    module =>
+      module.transform(SOURCE, {
+        jsc: { target: "es3" }
+      })
+  ],
+  ,
+  [
     "swc (es3)",
     "../",
     module =>
@@ -190,11 +199,6 @@ const PARSERS = [
 ];
 
 suite("transform", () => {
-  const wasm = require("../wasm/pkg/swc_wasm");
-  bench("wasm", () => {
-    wasm.transform(SOURCE);
-  });
-
   PARSERS.map(args => {
     const [name, requirePath, fn] = args;
     try {
