@@ -179,8 +179,7 @@ function checkAndDownloadBinary() {
 var BANNER =
   "\u001B[96mThank you for using swc (\u001B[94m https://github.com/swc-project/swc \u001B[96m): super-fast javascript and typescript compiler \u001B[0m\n\n" +
   "\u001B[96mThe project needs your help! Please consider supporting swc on Open Collective: \u001B[0m\n" +
-  "\u001B[96m>\u001B[94m https://opencollective.com/swc \u001B[0m\n" +
-  "\u001B[96mAlso, the author of swc (\u001B[94m https://github.com/kdy1 \u001B[96m) is looking for a good job -)\u001B[0m\n";
+  "\u001B[96m>\u001B[94m https://opencollective.com/swc \u001B[0m\n";
 
 var ADBLOCK = is(env.ADBLOCK);
 var COLOR = is(env.npm_config_color);
