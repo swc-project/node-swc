@@ -37,14 +37,16 @@ install:
   # - npm --version
 
   # Install nightly rust
-  - curl https://sh.rustup.rs -sSf > /tmp/rustup.sh
-  - sh /tmp/rustup.sh --default-toolchain none -y
-  - export PATH="$HOME/.cargo/bin:$PATH"
-  - rustup toolchain install nightly
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup toolchain install nightly-x86_64-pc-windows-msvc ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup toolchain install nightly-x86_64-pc-windows-gnu ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup component add std --toolchain nightly-x86_64-pc-windows-gnu ; fi
-  # - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup default nightly-x86_64-pc-windows-msvc ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then curl https://sh.rustup.rs -sSf > /tmp/rustup.sh fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then sh /tmp/rustup.sh --default-toolchain none -y fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then export PATH="$HOME/.cargo/bin:$PATH" fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rustup toolchain install nightly fi
+
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -sSf -o rustup-init.exe https://win.rustup.rs fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup-init.exe -y --default-toolchain nightly-x86_64-pc-windows-msvc fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then set PATH=%PATH%;C:\Users\appveyor\.cargo\bin;C:\\nvm-root;C:\nodejs fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then  fi
+
   - ls -al ~/.rustup/toolchains
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
