@@ -10,6 +10,7 @@ on: push
 jobs:
   build-windows:
     env:
+      SKIP_SWC_BINARY_DOWNLOAD_FOR_CI: 1
       CI: 1
       SWC_NAME: win32-x64
       CARGO_INCREMENTAL: 0
