@@ -6,11 +6,21 @@ on:
       - "*.*.*"
 
 jobs:
-  build-windows:
+  build:
+    strategy:
+      matrix:
+        - platform: macos-latest
+          env:
+            SWC_NAME: darwin-x64
+
+        - platform: windows-latest
+          env:
+            SWC_NAME: win32-x64
+
+    runs-on: ${{ matrix.platform }}
     env:
       SKIP_SWC_BINARY_DOWNLOAD_FOR_CI: 1
       CI: 1
-      SWC_NAME: win32-x64
       CARGO_INCREMENTAL: 0
       DISABLE_OPENCOLLECTIVE: 1
     runs-on: windows-latest

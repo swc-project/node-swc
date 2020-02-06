@@ -81,9 +81,9 @@ deploy:
 
 matrix:
   include:
-    - os: osx
-      osx_image: xcode11.3
-      env: SWC_NAME=darwin-x64
+    # - os: osx
+    #   osx_image: xcode11.3
+    #   env: SWC_NAME=darwin-x64
 
     # - os: windows
     #   env: SWC_NAME=win32-x64
