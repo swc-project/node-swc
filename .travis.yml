@@ -43,7 +43,7 @@ install:
   - rustup toolchain install nightly
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup toolchain install nightly-x86_64-pc-windows-msvc ; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup toolchain install nightly-x86_64-pc-windows-gnu ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup component add std --toolchain nightly-x86_64-windows-gnu ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup component add std --toolchain nightly-x86_64-pc-windows-gnu ; fi
   # - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup default nightly-x86_64-pc-windows-msvc ; fi
   - ls -al ~/.rustup/toolchains
 
