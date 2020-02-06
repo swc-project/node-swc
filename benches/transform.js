@@ -119,10 +119,7 @@ const PARSERS = [
   [
     "swc (wasm, es3)",
     "../wasm/pkg/swc_wasm.js",
-    module =>
-      module.transform(SOURCE, {
-        jsc: { target: "es3" }
-      })
+    module => module.transformSync(SOURCE, {})
   ],
   ,
   [
