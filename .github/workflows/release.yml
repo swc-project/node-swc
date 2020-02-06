@@ -16,7 +16,6 @@ jobs:
       CI: 1
       CARGO_INCREMENTAL: 0
       DISABLE_OPENCOLLECTIVE: 1
-    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
