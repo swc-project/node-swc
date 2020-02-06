@@ -10,7 +10,7 @@ on: push
 jobs:
   build-windows:
     env:
-      - SWC_NAME: win32-x64
+      SWC_NAME: win32-x64
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
