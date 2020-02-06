@@ -1,0 +1,60 @@
+name: Release
+
+on: push
+
+# on:
+#   push:
+#     tags:
+#       - "*.*.*"
+
+jobs:
+  build-windows:
+    env:
+      - SWC_NAME: win32-x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          version: 8
+      - name: Install npm dependencies
+        run: |
+          npm install
+      - name: Build for nodejs 8
+        run: |
+          bash ./scrtips/ci/build.sh 8.15.0 57
+
+      - uses: actions/setup-node@v1
+        with:
+          version: 10
+      - name: Build for nodejs 10
+        run: |
+          bash ./scrtips/ci/build.sh 10.15.0 64
+
+      - uses: actions/setup-node@v1
+        with:
+          version: 11
+      - name: Build for nodejs 11
+        run: |
+          bash ./scrtips/ci/build.sh 11.6.0 67
+
+      - uses: actions/setup-node@v1
+        with:
+          version: 12
+      - name: Build for nodejs 12
+        run: |
+          bash ./scrtips/ci/build.sh 12.11.0 72
+
+      - uses: actions/setup-node@v1
+        with:
+          version: 13
+      - name: Build for nodejs 13
+        run: |
+          bash ./scrtips/ci/build.sh 13.3.0 79
+
+      - name: publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*.node"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
