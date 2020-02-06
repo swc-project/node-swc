@@ -27,5 +27,5 @@ serde = { version = "1", features = ["derive"] }
 lto = true
 
 [profile.release]
-# lto = true
+lto = "thin"
 codegen-units = 1
