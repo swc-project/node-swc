@@ -12,6 +12,16 @@ set -e
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     SWC_NAME=linux-x64;;
+    Darwin*)    SWC_NAME=darwin-x64;;
+    CYGWIN*)    SWC_NAME=win32-x64;;
+    MINGW*)     SWC_NAME=win32-x64;;
+    *)          SWC_NAME="UNKNOWN:${unameOut}"
+esac
+echo $SWC_NAME
+
 rm -rf ./native/index.node \
     ./native/target/release/libffi.d* \
     ./native/target/release/ffi.d* \
