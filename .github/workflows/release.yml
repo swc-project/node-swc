@@ -11,6 +11,7 @@ jobs:
   build-windows:
     env:
       SWC_NAME: win32-x64
+      DISABLE_OPENCOLLECTIVE: 1
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
