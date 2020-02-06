@@ -1,9 +1,11 @@
 #![feature(box_syntax)]
 
 use once_cell::sync::Lazy;
-use std::sync::{Arc, RwLock};
+use std::{
+    path::PathBuf,
+    sync::{Arc, RwLock},
+};
 use swc::{
-    common,
     common::{
         errors::{Diagnostic, DiagnosticBuilder, Emitter, Handler, HandlerFlags, SourceMapperDyn},
         FileName, FilePathMapping, SourceMap,
@@ -12,7 +14,6 @@ use swc::{
     Compiler,
 };
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
 
 fn compiler() -> Compiler {
     let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
@@ -63,7 +64,9 @@ pub fn transform_sync(s: &str, opts: JsValue) -> JsValue {
 
     let c = compiler();
 
-    let opts: Options = opts.into_serde().unwrap();
+    let mut opts: Options = Default::default();
+    opts.root = Some(PathBuf::from("/swc"));
+
     let fm = c.cm.new_source_file(FileName::Anon, s.into());
     let out = c.process_js_file(fm, &opts).expect("failed to process");
 
