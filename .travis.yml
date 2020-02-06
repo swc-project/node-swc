@@ -37,7 +37,7 @@ install:
   # - npm --version
 
   # Install nightly rust
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then curl https://sh.rustup.rs -sSf > /tmp/rustup.sh fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (curl https://sh.rustup.rs -sSf > /tmp/rustup.sh) fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then sh /tmp/rustup.sh --default-toolchain none -y fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then export PATH="$HOME/.cargo/bin:$PATH" fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rustup toolchain install nightly fi
