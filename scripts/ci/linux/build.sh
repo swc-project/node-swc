@@ -9,7 +9,7 @@
 ####################
 set -e
 
-sed "s/# lto/lto/" native/Cargo.toml -i
+sed 's|lto = "thin"|lto = true|' native/Cargo.toml -i
 
 # (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
