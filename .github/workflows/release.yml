@@ -10,7 +10,9 @@ on: push
 jobs:
   build-windows:
     env:
+      CI: 1
       SWC_NAME: win32-x64
+      CARGO_INCREMENTAL: 0
       DISABLE_OPENCOLLECTIVE: 1
     runs-on: windows-latest
     steps:
