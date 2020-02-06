@@ -60,9 +60,12 @@ ls -al ./native/target/release/deps
 
 ls -al ./native/target/release/build
 
-# Verify abi
-echo 'Verifying binding with jest...'
-npx jest __tests__/import_test.js
+
+if [[ -z "$APPVEYOR" ]] ; then
+    # Verify abi
+    echo 'Verifying binding with jest...'
+    npx jest __tests__/import_test.js
+fi
 
 
 mv native/index.node $SWC_NAME-$2.node
