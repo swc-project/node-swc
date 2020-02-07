@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-(cd native && cargo udpate)
-(cd wasm && cargo udpate)
+(cd native && cargo update)
+(cd wasm && cargo update)
