@@ -17,6 +17,7 @@ case "${unameOut}" in
     Linux*)     SWC_NAME=linux-x64;;
     Darwin*)    SWC_NAME=darwin-x64;;
     CYGWIN*)    SWC_NAME=win32-x64;;
+    MSYS*)      SWC_NAME=win32-x64;;
     MINGW*)     SWC_NAME=win32-x64;;
     *)          SWC_NAME="UNKNOWN:${unameOut}"
 esac
