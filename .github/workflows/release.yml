@@ -36,12 +36,12 @@ jobs:
         run: |
           bash ./scripts/ci/build-github.sh 10.15.0 64
 
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 11
-      - name: Build for nodejs 11
-        run: |
-          bash ./scripts/ci/build-github.sh 11.6.0 67
+      # - uses: actions/setup-node@v1
+      #   with:
+      #     node-version: 11
+      # - name: Build for nodejs 11
+      #   run: |
+      #     bash ./scripts/ci/build-github.sh 11.6.0 67
 
       - uses: actions/setup-node@v1
         with:
