@@ -754,7 +754,7 @@ export interface ObjectExpression extends ExpressionBase {
   properties: (Property | SpreadElement)[];
 }
 
-export interface Arugment {
+export interface Argument {
   spread: Span;
   expression: Expression;
 }
@@ -848,7 +848,7 @@ export interface CallExpression extends ExpressionBase {
 
   callee: Expression | Super;
 
-  arguments: Arugment[];
+  arguments: Argument[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }
@@ -858,7 +858,7 @@ export interface NewExpression extends ExpressionBase {
 
   callee: Expression;
 
-  arguments: Arugment[];
+  arguments: Argument[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }

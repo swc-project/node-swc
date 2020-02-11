@@ -3,7 +3,7 @@ import {
   ArrayExpression,
   ArrayPattern,
   ArrowFunctionExpression,
-  Arugment,
+  Argument,
   AssignmentExpression,
   AssignmentPattern,
   AssignmentPatternProperty,
@@ -1276,11 +1276,11 @@ export default class Visitor {
     return n;
   }
 
-  visitArguments(nodes: Arugment[]): Arugment[] {
+  visitArguments(nodes: Argument[]): Argument[] {
     return nodes.map(this.visitArgument.bind(this));
   }
 
-  visitArgument(n: Arugment): Arugment {
+  visitArgument(n: Argument): Argument {
     n.expression = this.visitExpression(n.expression);
     return n;
   }
