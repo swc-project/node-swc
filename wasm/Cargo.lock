@@ -42,7 +42,7 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 [[package]]
 name = "ast_node"
 version = "0.6.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "darling",
  "pmutil",
@@ -77,9 +77,9 @@ checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 
 [[package]]
 name = "backtrace"
-version = "0.3.43"
+version = "0.3.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f80256bc78f67e7df7e36d77366f636ed976895d91fe2ab9efa3973e8fe8c4f"
+checksum = "e4036b9bf40f3cf16aba72a3d65e8a520fc4bafcdc7079aea8f848c58c5b5536"
 dependencies = [
  "backtrace-sys",
  "cfg-if",
@@ -230,7 +230,7 @@ checksum = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
 [[package]]
 name = "enum_kind"
 version = "0.2.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
@@ -279,7 +279,7 @@ checksum = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 [[package]]
 name = "from_variant"
 version = "0.1.2"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
@@ -429,9 +429,9 @@ checksum = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
 
 [[package]]
 name = "memchr"
-version = "2.3.0"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3197e20c7edb283f87c071ddfc7a2cca8f8e0b888c242959846a6fce03c72223"
+checksum = "1406817d4e80bb8acc9f0219187396db83252515b51314771f26975e515b9e30"
 
 [[package]]
 name = "neon"
@@ -1082,7 +1082,7 @@ dependencies = [
 [[package]]
 name = "string_enum"
 version = "0.3.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
@@ -1100,7 +1100,7 @@ checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
 [[package]]
 name = "swc"
 version = "0.1.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "dashmap",
  "either",
@@ -1132,7 +1132,7 @@ dependencies = [
 [[package]]
 name = "swc_atoms"
 version = "0.2.2"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "string_cache",
  "string_cache_codegen",
@@ -1141,7 +1141,7 @@ dependencies = [
 [[package]]
 name = "swc_common"
 version = "0.5.2"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "ast_node",
  "atty",
@@ -1162,8 +1162,8 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_ast"
-version = "0.16.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+version = "0.17.0"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "enum_kind",
  "num-bigint",
@@ -1175,8 +1175,8 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_codegen"
-version = "0.15.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+version = "0.16.0"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "bitflags",
  "hashbrown",
@@ -1191,7 +1191,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_codegen_macros"
 version = "0.4.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
@@ -1202,8 +1202,8 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_parser"
-version = "0.18.1"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+version = "0.19.0"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "either",
  "enum_kind",
@@ -1223,7 +1223,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_parser_macros"
 version = "0.4.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
@@ -1235,7 +1235,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_preset_env"
 version = "0.1.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "dashmap",
  "fxhash",
@@ -1256,7 +1256,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_transforms"
 version = "0.7.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "Inflector",
  "arrayvec",
@@ -1284,7 +1284,7 @@ dependencies = [
 [[package]]
 name = "swc_ecma_utils"
 version = "0.3.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "once_cell",
  "scoped-tls",
@@ -1298,7 +1298,7 @@ dependencies = [
 [[package]]
 name = "swc_ecmascript"
 version = "0.1.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "swc_ecma_ast",
  "swc_ecma_codegen",
@@ -1311,7 +1311,7 @@ dependencies = [
 [[package]]
 name = "swc_macros_common"
 version = "0.3.0"
-source = "git+https://github.com/swc-project/swc.git#64f6e51b426b5ff5f0f77b3e1d306b33eb9b1bd8"
+source = "git+https://github.com/swc-project/swc.git#82e73b112178420b4d200d0d4c0b9683fa8f3584"
 dependencies = [
  "pmutil",
  "proc-macro2",
