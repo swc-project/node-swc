@@ -14,15 +14,17 @@
   },
   "dependencies": {
     "mkdirp": "^0.5.1",
-    "neon-cli": "^0.3.3",
     "npmlog": "^4.1.2",
     "request": "^2.88.0",
     "true-case-path": "^1.0.3"
   },
+  "optionalDependencies": {
+    "neon-cli": "^0.3.3"
+  },
   "types": "./lib/index.d.ts",
   "scripts": {
     "prepublish": "tsc -d",
-    "install": "node scripts/install.js || neon build --release",
+    "install": "node scripts/install.js || (npm install neon-cli && neon build --release)",
     "build": "tsc -d && neon build --release"
   },
   "devDependencies": {
