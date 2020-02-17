@@ -2,15 +2,15 @@
  * Copied from node-sass: scripts/install.js
  */
 
+const fetch = require("node-fetch");
+
 var fs = require("fs"),
   os = require("os"),
   eol = require("os").EOL,
   mkdir = require("mkdirp"),
   path = require("path"),
   swc = require("../src/extensions"),
-  request = require("request"),
-  log = require("npmlog"),
-  downloadOptions = require("./util/downloadoptions"),
+  ProgressBar = require("progress"),
   env = process.env;
 
 /**
@@ -63,48 +63,39 @@ function download(url, dest, cb) {
     process.exit(1);
   };
 
-  var successful = function(response) {
-    return response.statusCode >= 200 && response.statusCode < 300;
-  };
-
   console.log("Downloading binary from", url);
 
   try {
-    request(url, downloadOptions(), function(err, response, buffer) {
-      if (err) {
-        reportError(err);
-      } else if (!successful(response)) {
-        reportError(
-          ["HTTP error", response.statusCode, response.statusMessage].join(" ")
+    fetch(url).then(function(resp) {
+      if (200 <= resp.status && resp.status < 300) {
+        const length = +resp.headers.get("Content-Length");
+        var progress = new ProgressBar(":bar", { total: length });
+        progress.render();
+        // The `progress` is true by default. However if it has not
+        // been explicitly set it's `undefined` which is considered
+        // as far as npm is concerned.
+        if (true) {
+          resp.body
+            .on("data", function(chunk) {
+              progress.tick(chunk.length);
+            })
+            .on("end", function() {
+              progress.terminate();
+            });
+        }
+
+        resp.body.on("error", cb);
+        resp.body.pipe(
+          fs.createWriteStream(dest).on("finsih", function() {
+            console.log("Download complete");
+          })
         );
       } else {
-        console.log("Download complete");
-
-        if (successful(response)) {
-          fs.createWriteStream(dest)
-            .on("error", cb)
-            .end(buffer, cb);
-        } else {
-          cb();
-        }
+        reportError(
+          ["HTTP error", resp.statusCode, resp.statusMessage].join(" ")
+        );
       }
-    }).on("response", function(response) {
-      var length = parseInt(response.headers["content-length"], 10);
-      var progress = log.newItem("", length);
-
-      // The `progress` is true by default. However if it has not
-      // been explicitly set it's `undefined` which is considered
-      // as far as npm is concerned.
-      if (process.env.npm_config_progress === "true") {
-        log.enableProgress();
-
-        response
-          .on("data", function(chunk) {
-            progress.completeWork(chunk.length);
-          })
-          .on("end", progress.finish);
-      }
-    });
+    }, reportError);
   } catch (err) {
     cb(err);
   }
