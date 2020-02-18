@@ -163,7 +163,7 @@ where
                 serde_json::from_str(&s.value()).expect("failed to deserialize Program");
             let loc = c.cm.lookup_char_pos(m.span().lo());
             let fm = loc.file;
-            print_js(&c, &Default::default(), &m, fm, false, false)
+            process_js(&c, fm, &options)
         } else {
             let fm = op(&c, s.value(), &options).expect("failed to create fm");
             process_js(&c, fm, &options)
