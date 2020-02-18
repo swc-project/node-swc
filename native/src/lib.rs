@@ -89,7 +89,7 @@ impl Task for TransformTask {
                 let m: Program = serde_json::from_str(&s).expect("failed to deserialize Program");
                 let loc = self.c.cm.lookup_char_pos(m.span().lo());
                 let fm = loc.file;
-                print_js(&self.c, &Default::default(), &m, fm, false, false)
+                process_js(&self.c, fm, &self.options)
             }
 
             Input::File(ref path) => {
