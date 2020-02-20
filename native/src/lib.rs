@@ -308,7 +308,7 @@ impl Task for ParseFileTask {
 
     fn complete(
         self,
-        cx: fTaskContext,
+        cx: TaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
         complete_parse(cx, result, &self.c)
