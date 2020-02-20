@@ -74,8 +74,7 @@ fn process_js(
     opts: &Options,
 ) -> Result<TransformOutput, Error> {
     // let config = c.run(|| c.config_for_file(opts, &*fm))?;
-
-    c.process_js_file(fm, opts)
+    c.run(|| c.process_js_file(fm, opts))
 }
 
 impl Task for TransformTask {
@@ -84,7 +83,7 @@ impl Task for TransformTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        match self.input {
+        self.c.run(|| match self.input {
             Input::Program(ref s) => {
                 let m: Program = serde_json::from_str(&s).expect("failed to deserialize Program");
                 let loc = self.c.cm.lookup_char_pos(m.span().lo());
@@ -103,7 +102,7 @@ impl Task for TransformTask {
             }
 
             Input::Source(ref s) => process_js(&self.c, s.clone(), &self.options),
-        }
+        })
     }
 
     fn complete(
@@ -158,16 +157,18 @@ where
     let output = {
         let guard = cx.lock();
         let c = this.borrow(&guard);
-        if is_module.value() {
-            let m: Program =
-                serde_json::from_str(&s.value()).expect("failed to deserialize Program");
-            let loc = c.cm.lookup_char_pos(m.span().lo());
-            let fm = loc.file;
-            process_js(&c, fm, &options)
-        } else {
-            let fm = op(&c, s.value(), &options).expect("failed to create fm");
-            process_js(&c, fm, &options)
-        }
+        c.run(|| {
+            if is_module.value() {
+                let m: Program =
+                    serde_json::from_str(&s.value()).expect("failed to deserialize Program");
+                let loc = c.cm.lookup_char_pos(m.span().lo());
+                let fm = loc.file;
+                process_js(&c, fm, &options)
+            } else {
+                let fm = op(&c, s.value(), &options).expect("failed to create fm");
+                process_js(&c, fm, &options)
+            }
+        })
     };
 
     complete_output(cx, output)
@@ -262,13 +263,15 @@ impl Task for ParseTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        self.c.parse_js(
-            self.fm.clone(),
-            self.options.target,
-            self.options.syntax,
-            self.options.is_module,
-            self.options.comments,
-        )
+        self.c.run(|| {
+            self.c.parse_js(
+                self.fm.clone(),
+                self.options.target,
+                self.options.syntax,
+                self.options.is_module,
+                self.options.comments,
+            )
+        })
     }
 
     fn complete(
@@ -286,24 +289,26 @@ impl Task for ParseFileTask {
     type JsEvent = JsValue;
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let fm = self
-            .c
-            .cm
-            .load_file(&self.path)
-            .map_err(|err| Error::FailedToReadModule { err })?;
+        self.c.run(|| {
+            let fm = self
+                .c
+                .cm
+                .load_file(&self.path)
+                .map_err(|err| Error::FailedToReadModule { err })?;
 
-        self.c.parse_js(
-            fm,
-            self.options.target,
-            self.options.syntax,
-            self.options.is_module,
-            self.options.comments,
-        )
+            self.c.parse_js(
+                fm,
+                self.options.target,
+                self.options.syntax,
+                self.options.is_module,
+                self.options.comments,
+            )
+        })
     }
 
     fn complete(
         self,
-        cx: TaskContext,
+        cx: fTaskContext,
         result: Result<Self::Output, Self::Error>,
     ) -> JsResult<Self::JsEvent> {
         complete_parse(cx, result, &self.c)
@@ -428,22 +433,24 @@ impl Task for PrintTask {
     type Error = Error;
     type JsEvent = JsValue;
     fn perform(&self) -> Result<Self::Output, Self::Error> {
-        let loc = self.c.cm.lookup_char_pos(self.program.span().lo());
-        let fm = loc.file;
-        let comments = Default::default();
+        self.c.run(|| {
+            let loc = self.c.cm.lookup_char_pos(self.program.span().lo());
+            let fm = loc.file;
+            let comments = Default::default();
 
-        self.c.print(
-            &self.program,
-            fm,
-            &comments,
-            self.options.source_maps.is_some(),
-            self.options
-                .config
-                .clone()
-                .unwrap_or_default()
-                .minify
-                .unwrap_or(false),
-        )
+            self.c.print(
+                &self.program,
+                fm,
+                &comments,
+                self.options.source_maps.is_some(),
+                self.options
+                    .config
+                    .clone()
+                    .unwrap_or_default()
+                    .minify
+                    .unwrap_or(false),
+            )
+        })
     }
 
     fn complete(
