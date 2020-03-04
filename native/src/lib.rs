@@ -16,10 +16,7 @@ use std::{
     sync::Arc,
 };
 use swc::{
-    common::{
-        self, comments::Comments, errors::Handler, FileName, FilePathMapping, SourceFile,
-        SourceMap, Spanned,
-    },
+    common::{self, errors::Handler, FileName, FilePathMapping, SourceFile, SourceMap, Spanned},
     config::{Options, ParseOptions},
     ecmascript::ast::Program,
     error::Error,
@@ -434,13 +431,10 @@ impl Task for PrintTask {
     type JsEvent = JsValue;
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         self.c.run(|| {
-            let loc = self.c.cm.lookup_char_pos(self.program.span().lo());
-            let fm = loc.file;
             let comments = Default::default();
 
             self.c.print(
                 &self.program,
-                fm,
                 &comments,
                 self.options.source_maps.is_some(),
                 self.options
@@ -505,12 +499,9 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         let options: Options = neon_serde::from_value(&mut cx, options)?;
 
         let result = {
-            let loc = c.cm.lookup_char_pos(program.span().lo());
-            let fm = loc.file;
             let comments = Default::default();
             c.print(
                 &program,
-                fm,
                 &comments,
                 options.source_maps.is_some(),
                 options.config.unwrap_or_default().minify.unwrap_or(false),
@@ -518,17 +509,6 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
         };
         complete_output(cx, result)
     })
-}
-
-fn print_js(
-    c: &Compiler,
-    comments: &Comments,
-    program: &Program,
-    fm: Arc<SourceFile>,
-    source_map: bool,
-    minify: bool,
-) -> Result<TransformOutput, Error> {
-    c.print(&program, fm, comments, source_map, minify)
 }
 
 pub type ArcCompiler = Arc<Compiler>;
