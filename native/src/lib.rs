@@ -17,7 +17,7 @@ use std::{
 };
 use swc::{
     common::{self, errors::Handler, FileName, FilePathMapping, SourceFile, SourceMap, Spanned},
-    config::{Options, ParseOptions},
+    config::{Options, ParseOptions, SourceMapsConfig},
     ecmascript::ast::Program,
     error::Error,
     Compiler, TransformOutput,
@@ -436,7 +436,10 @@ impl Task for PrintTask {
             self.c.print(
                 &self.program,
                 &comments,
-                self.options.source_maps.is_some(),
+                self.options
+                    .source_maps
+                    .clone()
+                    .unwrap_or(SourceMapsConfig::Bool(false)),
                 self.options
                     .config
                     .clone()
@@ -503,7 +506,10 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
             c.print(
                 &program,
                 &comments,
-                options.source_maps.is_some(),
+                options
+                    .source_maps
+                    .clone()
+                    .unwrap_or(SourceMapsConfig::Bool(false)),
                 options.config.unwrap_or_default().minify.unwrap_or(false),
             )
         };
