@@ -9,6 +9,7 @@ extern crate path_clean;
 extern crate serde;
 extern crate swc;
 
+use anyhow::{Context as _, Error};
 use neon::prelude::*;
 use path_clean::clean;
 use std::{
@@ -19,7 +20,6 @@ use swc::{
     common::{self, errors::Handler, FileName, FilePathMapping, SourceFile, SourceMap, Spanned},
     config::{Options, ParseOptions, SourceMapsConfig},
     ecmascript::ast::Program,
-    error::Error,
     Compiler, TransformOutput,
 };
 
@@ -89,11 +89,7 @@ impl Task for TransformTask {
             }
 
             Input::File(ref path) => {
-                let fm = self
-                    .c
-                    .cm
-                    .load_file(path)
-                    .map_err(|err| Error::FailedToReadModule { err })?;
+                let fm = self.c.cm.load_file(path).context("failed to read module")?;
 
                 process_js(&self.c, fm, &self.options)
             }
@@ -261,13 +257,16 @@ impl Task for ParseTask {
 
     fn perform(&self) -> Result<Self::Output, Self::Error> {
         self.c.run(|| {
-            self.c.parse_js(
-                self.fm.clone(),
-                self.options.target,
-                self.options.syntax,
-                self.options.is_module,
-                self.options.comments,
-            )
+            self.c
+                .parse_js(
+                    self.fm.clone(),
+                    self.options.target,
+                    self.options.syntax,
+                    self.options.is_module,
+                    self.options.comments,
+                    &Default::default(),
+                )
+                .map(|v| v.0)
         })
     }
 
@@ -291,15 +290,18 @@ impl Task for ParseFileTask {
                 .c
                 .cm
                 .load_file(&self.path)
-                .map_err(|err| Error::FailedToReadModule { err })?;
+                .context("failed to read module")?;
 
-            self.c.parse_js(
-                fm,
-                self.options.target,
-                self.options.syntax,
-                self.options.is_module,
-                self.options.comments,
-            )
+            self.c
+                .parse_js(
+                    fm,
+                    self.options.target,
+                    self.options.syntax,
+                    self.options.is_module,
+                    self.options.comments,
+                    &Default::default(),
+                )
+                .map(|v| v.0)
         })
     }
 
@@ -357,7 +359,9 @@ fn parse_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                 options.syntax,
                 options.is_module,
                 options.comments,
+                &Default::default(),
             )
+            .map(|v| v.0)
         };
 
         complete_parse(cx, program, &c)
@@ -388,7 +392,9 @@ fn parse_file_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                 options.syntax,
                 options.is_module,
                 options.comments,
+                &Default::default(),
             )
+            .map(|v| v.0)
         };
 
         complete_parse(cx, program, &c)
@@ -440,6 +446,7 @@ impl Task for PrintTask {
                     .source_maps
                     .clone()
                     .unwrap_or(SourceMapsConfig::Bool(false)),
+                None,
                 self.options
                     .config
                     .clone()
@@ -510,6 +517,7 @@ fn print_sync(mut cx: MethodContext<JsCompiler>) -> JsResult<JsValue> {
                     .source_maps
                     .clone()
                     .unwrap_or(SourceMapsConfig::Bool(false)),
+                None,
                 options.config.unwrap_or_default().minify.unwrap_or(false),
             )
         };
