@@ -596,12 +596,16 @@ export interface PrivateProperty extends ClassPropertyBase {
   key: PrivateName;
 }
 
+export interface Param extends Node, HasSpan, HasDecorator {
+  pat: Pattern
+}
+
 export interface Constructor extends Node, HasSpan {
   type: "Constructor";
 
   key: PropertyName;
 
-  params: (Pattern | TsParameterProperty)[];
+  params: (Param | TsParameterProperty)[];
 
   body: BlockStatement;
 
@@ -942,7 +946,7 @@ export interface ParenthesisExpression extends ExpressionBase {
 }
 
 export interface Fn extends HasSpan, HasDecorator {
-  params: Pattern[];
+  params: Param[];
 
   body: BlockStatement;
 
@@ -1939,7 +1943,7 @@ export interface TsLiteralType extends Node, HasSpan {
   literal: TsLiteral;
 }
 
-export type TsLiteral = NumericLiteral | StringLiteral | BooleanLiteral;
+export type TsLiteral = NumericLiteral | StringLiteral | BooleanLiteral | TemplateLiteral;
 
 // // ================
 // // TypeScript declarations
