@@ -156,6 +156,7 @@ import {
   WhileStatement,
   WithStatement,
   YieldExpression,
+  Param,
 } from "./types";
 
 export default class Visitor {
@@ -823,25 +824,25 @@ export default class Visitor {
   }
 
   visitConstructorParameters(
-    nodes: (Pattern | TsParameterProperty)[]
-  ): (Pattern | TsParameterProperty)[] {
+    nodes: (Param | TsParameterProperty)[]
+  ): (Param | TsParameterProperty)[] {
     return nodes.map(this.visitConstructorParameter.bind(this));
   }
 
   visitConstructorParameter(
-    n: Pattern | TsParameterProperty
-  ): Pattern | TsParameterProperty {
+    n: Param | TsParameterProperty
+  ): Param | TsParameterProperty {
     switch (n.type) {
       case "TsParameterProperty":
         return this.visitTsParameterProperty(n);
       default:
-        return this.visitPattern(n);
+        return this.visitParameter(n);
     }
   }
 
   visitTsParameterProperty(
     n: TsParameterProperty
-  ): TsParameterProperty | Pattern {
+  ): TsParameterProperty | Param {
     n.accessibility = this.visitAccessibility(n.accessibility);
     n.decorators = this.visitDecorators(n.decorators);
     n.param = this.visitTsParameterPropertyParameter(n.param);
@@ -923,7 +924,7 @@ export default class Visitor {
 
   visitFunction<T extends Fn>(n: T): T {
     n.decorators = this.visitDecorators(n.decorators);
-    n.params = this.visitPatterns(n.params);
+    n.params = this.visitParameters(n.params);
     if (n.body) {
       n.body = this.visitBlockStatement(n.body);
     }
@@ -1153,6 +1154,15 @@ export default class Visitor {
     return n;
   }
 
+  visitParameters(n: Param[]): Param[] {
+    return n.map(this.visitParameter.bind(this))
+  }
+
+  visitParameter(n: Param): Param {
+    n.pat = this.visitPattern(n.pat);
+    return n;
+  }
+
   visitTaggedTemplateExpression(n: TaggedTemplateExpression): Expression {
     n.tag = this.visitExpression(n.tag);
     n.expressions = n.expressions.map(this.visitExpression.bind(this));
@@ -1227,7 +1237,7 @@ export default class Visitor {
       n.body = this.visitBlockStatement(n.body);
     }
     n.decorators = this.visitDecorators(n.decorators);
-    n.params = this.visitPatterns(n.params);
+    n.params = this.visitParameters(n.params);
     n.returnType = this.visitTsTypeAnnotation(n.returnType);
     n.typeParameters = this.visitTsTypeParameterDeclaration(n.typeParameters);
     return n;

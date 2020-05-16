@@ -597,6 +597,7 @@ export interface PrivateProperty extends ClassPropertyBase {
 }
 
 export interface Param extends Node, HasSpan, HasDecorator {
+  type: 'Parameter'
   pat: Pattern
 }
 
