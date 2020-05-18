@@ -59,6 +59,7 @@ cache:
 #   - rm -rf /home/travis/.cargo/registry
 
 script:
+  - travis_wait 30 bash ./scripts/ci/build.sh 14.2.0 83
   - travis_wait 30 bash ./scripts/ci/build.sh 13.3.0 79
   - travis_wait 30 bash ./scripts/ci/build.sh 12.11.0 72
   - travis_wait 30 bash ./scripts/ci/build.sh 11.6.0 67

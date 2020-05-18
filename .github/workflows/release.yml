@@ -57,6 +57,13 @@ jobs:
         run: |
           bash ./scripts/ci/build-github.sh 13.3.0 79
 
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Build for nodejs 13
+        run: |
+          bash ./scripts/ci/build-github.sh 14.2.0 83
+
       - name: publish release
         uses: softprops/action-gh-release@v1
         with:
