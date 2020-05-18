@@ -14,13 +14,13 @@ name = "ffi"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-neon-build = "0.3.3"
+neon-build = "0.4.0"
 
 [dependencies]
 anyhow = "1"
 serde_json = "1"
-neon = "0.3.3"
-neon-serde = "0.3.0"
+neon = "0.4.0"
+neon-serde = "0.4.0"
 path-clean = "0.1"
 swc = { git = "https://github.com/swc-project/swc.git" }
 serde = { version = "1", features = ["derive"] }
