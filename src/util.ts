@@ -54,6 +54,7 @@ function _construct(Parent, args, Class) {
             a.push.apply(a, args);
             //@ts-ignore
             var Constructor = Function.bind.apply(Parent, a);
+            //@ts-ignore
             var instance = new Constructor();
             if (Class) _setPrototypeOf(instance, Class.prototype);
             return instance;
