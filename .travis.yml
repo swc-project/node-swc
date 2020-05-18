@@ -76,6 +76,7 @@ deploy:
     - $SWC_NAME-67.node
     - $SWC_NAME-72.node
     - $SWC_NAME-79.node
+    - $SWC_NAME-83.node
   skip_cleanup: true
   on:
     tags: true
