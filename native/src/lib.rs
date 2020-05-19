@@ -61,7 +61,7 @@ fn complete_output<'a>(
 ) -> JsResult<'a, JsValue> {
     match result {
         Ok(output) => Ok(neon_serde::to_value(&mut cx, &output)?),
-        Err(err) => cx.throw_error(err.to_string()),
+        Err(err) => cx.throw_error(format!("{:?}", err)),
     }
 }
 
@@ -246,7 +246,7 @@ fn complete_parse<'a>(
         Ok(program) => Ok(cx
             .string(serde_json::to_string(&program).expect("failed to serialize Program"))
             .upcast()),
-        Err(err) => cx.throw_error(err.to_string()),
+        Err(err) => cx.throw_error(format!("{:?}", err)),
     })
 }
 
