@@ -71,6 +71,6 @@ jobs:
       - name: publish release
         uses: softprops/action-gh-release@v1
         with:
-          files: "*.node"
+          files: "swc/*.node"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
