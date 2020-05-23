@@ -68,7 +68,7 @@ jobs:
         run: |
           bash ./scripts/ci/build-github.sh 14.2.0 83
 
-      - name: publish release
+      - name: Publish prebuilt binaries
         uses: softprops/action-gh-release@v1
         with:
           files: "swc/*.node"
