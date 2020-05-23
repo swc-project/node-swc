@@ -63,12 +63,12 @@ deploy:
   api_key: $GH_TOKEN
   file:
     # - $SWC_NAME-48.node
-    - $SWC_NAME-57.node
-    - $SWC_NAME-64.node
-    - $SWC_NAME-67.node
-    - $SWC_NAME-72.node
-    - $SWC_NAME-79.node
-    - $SWC_NAME-83.node
+    - swc/$SWC_NAME-57.node
+    - swc/$SWC_NAME-64.node
+    - swc/$SWC_NAME-67.node
+    - swc/$SWC_NAME-72.node
+    - swc/$SWC_NAME-79.node
+    - swc/$SWC_NAME-83.node
   skip_cleanup: true
   on:
     tags: true
