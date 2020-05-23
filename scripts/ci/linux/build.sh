@@ -9,9 +9,8 @@
 ####################
 set -e
 
-sed 's|lto = "thin"|lto = true|' native/Cargo.toml -i
+cd swc
 
-# (cd native && cargo build --release --verbose)
 echo 'Installing deps...'
 npm install --ignore-scripts
 npx tsc -d
@@ -21,7 +20,7 @@ npx neon build --release
 
 # Verify abi
 echo 'Verifying binding with jest...'
-npx jest __tests__/import_test.js
+npx jest node-swc/__tests__/import_test.js
 
 strip -s native/index.node
 
