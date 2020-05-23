@@ -24,7 +24,8 @@ jobs:
           node-version: 8
       - name: Install npm dependencies
         run: |
-          npm install
+          (cd swc && npm install)
+
       - name: Build for nodejs 8
         run: |
           bash ./scripts/ci/build-github.sh 8.15.0 57
@@ -60,7 +61,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14
-      - name: Build for nodejs 13
+      - name: Build for nodejs 14
         run: |
           bash ./scripts/ci/build-github.sh 14.2.0 83
 

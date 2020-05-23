@@ -9,6 +9,8 @@
 ####################
 set -e
 
+cd ./swc
+
 # Bypasses https://github.com/neon-bindings/neon/issues/384
 echo 'Removing old files'
 
@@ -24,14 +26,14 @@ esac
 echo $SWC_NAME
 
 rm -rf ./native/index.node \
-    ./native/target/release/libffi.d* \
-    ./native/target/release/ffi.d* \
-    ./native/target/release/build/ffi* \
-    ./native/target/release/.fingerprint/neon* \
-    ./native/target/release/deps/ffi* \
-    ./native/target/release/deps/libffi* \
-    ./native/target/release/deps/neon* \
-    ./native/target/release/deps/libneon*
+    ./target/release/libffi.d* \
+    ./target/release/ffi.d* \
+    ./target/release/build/ffi* \
+    ./target/release/.fingerprint/neon* \
+    ./target/release/deps/ffi* \
+    ./target/release/deps/libffi* \
+    ./target/release/deps/neon* \
+    ./target/release/deps/libneon*
 echo 'Removed old files'
 
 # if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
@@ -47,13 +49,13 @@ npx tsc -d
 
 # Build it
 echo 'Building...'
-npx neon build --release 
+npx neon build --release
 
-ls -al ./native/target/release
+ls -al ./target/release
 
 # Verify abi
 echo 'Verifying binding with jest...'
-npx jest __tests__/import_test.js
+npx jest node-swc/__tests__/import_test.js
 
 
 mv native/index.node $SWC_NAME-$2.node
