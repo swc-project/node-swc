@@ -12,7 +12,7 @@ echo "@swc/core: ${LAST_VER} => ${VER}"
 
 # Prevent me from tagging without comitting first.
 git add -A || true
-git commit
+git commit || true
 
 git push
 
