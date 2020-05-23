@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-(cd native && cargo update)
+git submodule init --update
