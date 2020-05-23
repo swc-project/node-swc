@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-git submodule init --update
+git submodule update --init --remote
