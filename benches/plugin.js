@@ -103,8 +103,8 @@ module.exports = {
 };
 `;
 
-const swc = require("../");
-const Visitor = require("../Visitor").default;
+const swc = require("../swc/");
+const Visitor = require("../swc/Visitor").default;
 
 const TESTS = [
   ["parse", () => swc.parseSync(SOURCE)],
