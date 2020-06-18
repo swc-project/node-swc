@@ -75,12 +75,6 @@ deploy:
 
 matrix:
   include:
-    # - os: osx
-    #   osx_image: xcode11.3
-    #   env: SWC_NAME=darwin-x64
-
-    # - os: windows
-    #   env: SWC_NAME=win32-x64
 
     - os: linux
       env:
@@ -108,15 +102,6 @@ matrix:
         - ./scripts/ci/linux/start-docker.sh 12.12 72 12.x
       script:
         - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux/build.sh 72
-
-    # - os: linux
-    #   env:
-    #     - SWC_NAME=linux-x64
-    #     - NODE_ABI=67
-    #   install:
-    #     - ./scripts/ci/linux/start-docker.sh 11.12 67 11.x
-    #   script:
-    #     - travis_wait 30 docker exec target-67 sh ./scripts/ci/linux/build.sh 67
 
     - os: linux
       env:
