@@ -102,50 +102,50 @@ matrix:
       script:
         - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh 57
 
-    - os: linux
-      env:
-        - SWC_NAME=linux_musl-x64
-        - NODE_ABI=83
-      install:
-        - ./scripts/ci/linux-musl/start-docker.sh 14.2.0 83 14
-      script:
-        - travis_wait 30 docker exec target-83 sh ./scripts/ci/linux-musl/build.sh 83
+    # - os: linux
+    #   env:
+    #     - SWC_NAME=linux_musl-x64
+    #     - NODE_ABI=83
+    #   install:
+    #     - ./scripts/ci/linux-musl/start-docker.sh 14.2.0 83 14
+    #   script:
+    #     - travis_wait 30 docker exec target-83 sh ./scripts/ci/linux-musl/build.sh 83
 
-    - os: linux
-      env:
-        - SWC_NAME=linux_musl-x64
-        - NODE_ABI=79
-      install:
-        - ./scripts/ci/linux-musl/start-docker.sh 13.3.0 79 13
-      script:
-        - travis_wait 30 docker exec target-79 sh ./scripts/ci/linux-muslbuild.sh 79
+    # - os: linux
+    #   env:
+    #     - SWC_NAME=linux_musl-x64
+    #     - NODE_ABI=79
+    #   install:
+    #     - ./scripts/ci/linux-musl/start-docker.sh 13.3.0 79 13
+    #   script:
+    #     - travis_wait 30 docker exec target-79 sh ./scripts/ci/linux-muslbuild.sh 79
 
-    - os: linux
-      env:
-        - SWC_NAME=linux_musl-x64
-        - NODE_ABI=72
-      install:
-        - ./scripts/ci/linux-musl/start-docker.sh 12.12 72 12
-      script:
-        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux-muslbuild.sh 72
+    # - os: linux
+    #   env:
+    #     - SWC_NAME=linux_musl-x64
+    #     - NODE_ABI=72
+    #   install:
+    #     - ./scripts/ci/linux-musl/start-docker.sh 12.12 72 12
+    #   script:
+    #     - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux-muslbuild.sh 72
 
-    - os: linux
-      env:
-        - SWC_NAME=linux_musl-x64
-        - NODE_ABI=64
-      install:
-        - ./scripts/ci/linux-musl/start-docker.sh 10 64 10
-      script:
-        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux-muslbuild.sh 64
+    # - os: linux
+    #   env:
+    #     - SWC_NAME=linux_musl-x64
+    #     - NODE_ABI=64
+    #   install:
+    #     - ./scripts/ci/linux-musl/start-docker.sh 10 64 10
+    #   script:
+    #     - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux-muslbuild.sh 64
 
-    - os: linux
-      env:
-        - SWC_NAME=linux_musl-x64
-        - NODE_ABI=57
-      install:
-        - ./scripts/ci/linux-musl/start-docker.sh 8 57 8
-      script:
-        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux-muslbuild.sh 57
+    # - os: linux
+    #   env:
+    #     - SWC_NAME=linux_musl-x64
+    #     - NODE_ABI=57
+    #   install:
+    #     - ./scripts/ci/linux-musl/start-docker.sh 8 57 8
+    #   script:
+    #     - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux-muslbuild.sh 57
   
 env:
   - CARGO_INCREMENTAL=0
