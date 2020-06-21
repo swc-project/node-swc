@@ -9,6 +9,8 @@
 ####################
 set -e
 
+export PATH=$HOME/.cargo/bin/*:$PATH
+
 cd swc
 
 echo 'Installing deps...'
