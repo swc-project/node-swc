@@ -9,16 +9,6 @@ branches:
     - master
 
 install:
-  # Install lastest nvm
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -o /tmp/nvm.zip -L https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cp ./scripts/ci/settings.txt C:\\ ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then mkdir C:\\nvm-root ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then unzip /tmp/nvm.zip -d C:\\nvm-root ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then cp ./scripts/ci/settings.txt C:\\nvm-root\\ ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH="/c/nvm-root:/c/nodejs:$PATH" ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export NVM_SYMLINK='C:\\nodejs' ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm root C:\\nvm-root ; fi
-
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then git clone https://github.com/creationix/nvm.git ~/.nvm ; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then source ~/.nvm/nvm.sh ; fi
@@ -27,10 +17,6 @@ install:
   - nvm install 11.6.0
   - nvm install 10.15.0
   - nvm install 8.15.0
-  # - nvm install 6.16.0
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then nvm on ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -al '/c/nodejs' ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ls -alL '/c/nodejs' ; fi
   - which node
   - node --version
   - which npm
@@ -41,11 +27,6 @@ install:
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then sh /tmp/rustup.sh --default-toolchain none -y; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then export PATH="$HOME/.cargo/bin:$PATH"; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rustup toolchain install nightly; fi
-
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -sSf -o rustup-init.exe https://win.rustup.rs; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then rustup-init.exe -y --default-toolchain nightly-x86_64-pc-windows-msvc; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then set PATH=%PATH%;C:\Users\appveyor\.cargo\bin;C:\\nvm-root;C:\nodejs; fi
-
   - ls -al ~/.rustup/toolchains
 
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
@@ -121,6 +102,51 @@ matrix:
       script:
         - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux/build.sh 57
 
+    - os: linux
+      env:
+        - SWC_NAME=linux_musl-x64
+        - NODE_ABI=83
+      install:
+        - ./scripts/ci/linux-musl/start-docker.sh 14.2.0 83 14.x
+      script:
+        - travis_wait 30 docker exec target-83 sh ./scripts/ci/linux-musl/build.sh 83
+
+    - os: linux
+      env:
+        - SWC_NAME=linux_musl-x64
+        - NODE_ABI=79
+      install:
+        - ./scripts/ci/linux-muslstart-docker.sh 13.3.0 79 13.x
+      script:
+        - travis_wait 30 docker exec target-79 sh ./scripts/ci/linux-muslbuild.sh 79
+
+    - os: linux
+      env:
+        - SWC_NAME=linux_musl-x64
+        - NODE_ABI=72
+      install:
+        - ./scripts/ci/linux-muslstart-docker.sh 12.12 72 12.x
+      script:
+        - travis_wait 30 docker exec target-72 sh ./scripts/ci/linux-muslbuild.sh 72
+
+    - os: linux
+      env:
+        - SWC_NAME=linux_musl-x64
+        - NODE_ABI=64
+      install:
+        - ./scripts/ci/linux-muslstart-docker.sh 10 64 10.x
+      script:
+        - travis_wait 30 docker exec target-64 sh ./scripts/ci/linux-muslbuild.sh 64
+
+    - os: linux
+      env:
+        - SWC_NAME=linux_musl-x64
+        - NODE_ABI=57
+      install:
+        - ./scripts/ci/linux-muslstart-docker.sh 8 57 8.x
+      script:
+        - travis_wait 30 docker exec target-57 sh ./scripts/ci/linux-muslbuild.sh 57
+  
 env:
   - CARGO_INCREMENTAL=0
 
